@@ -1,0 +1,24 @@
+@(form: Form[AuthenticationController.Login])(implicit assetsFinder: AssetsFinder)
+
+<html>
+    <head>
+        <title>Zentasks</title>
+        <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
+        <link rel="stylesheet" type="text/css" media="screen" href="@routes.Assets.versioned("stylesheets/login.css")">
+    </head>
+    <body>
+        @helper.form(routes.AuthenticationController.authenticate) {
+            <h1>Sign in</h1>
+
+            <p>
+                <input type="text" name="user" placeholder="Username" value="@form("user").value">
+            </p>
+            <p>
+                <input type="password" name="password" placeholder="Password">
+            </p>
+            <p>
+                <button type="submit">Login</button>
+            </p>
+        }
+    </body>
+</html>

@@ -8,8 +8,6 @@
         <title>Stuff</title>
         <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
-@*        <script crossorigin src="https://unpkg.com/react@@17/umd/react.development.js"></script>*@
-@*        <script crossorigin src="https://unpkg.com/react-dom@@17/umd/react-dom.development.js"></script>*@
         @scalajs.html.scripts("client", routes.Assets.versioned(_).toString, name => getClass.getResource(s"/public/$name") != null)
     </head>
     <body onload="test('@StringEscapeUtils.escapeEcmaScript(username)')">

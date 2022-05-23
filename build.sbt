@@ -24,26 +24,19 @@ lazy val server = project
 
 lazy val client = project
   .settings(
-      libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.2.0",
-      libraryDependencies += "me.shadaj" %%% "slinky-core" % "0.7.2",
-      libraryDependencies += "me.shadaj" %%% "slinky-web" % "0.7.2",
-//      libraryDependencies += "com.lambdaminute" %%% "slinky-wrappers-material-ui" % "0.4.1",
-      scalacOptions += "-Ymacro-annotations",
-      /*    stFlavour := Flavour.Slinky,
-          useYarn := true,
-          Compile / npmDependencies ++= Seq(
-            "@material-ui/core" -> "3.9.4", // note: version 4 is not supported yet
-            "@material-ui/styles" -> "3.0.0-alpha.10", // note: version 4 is not supported yet
-            "@material-ui/icons" -> "3.0.2",
-          )*/
-      Compile / npmDependencies  ++= Seq(
-        "react" -> "latest",
-        "react-dom" -> "latest",
-        "@mui/material" -> "latest",
-        "@emotion/react" -> "latest",
-        "@emotion/styled" -> "latest",
-      ),
-      webpackBundlingMode := BundlingMode.LibraryAndApplication(),
+    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.2.0",
+    libraryDependencies += "me.shadaj" %%% "slinky-core" % "0.7.2",
+    libraryDependencies += "me.shadaj" %%% "slinky-web" % "0.7.2",
+    scalacOptions += "-Ymacro-annotations",
+    Compile / npmDependencies  ++= Seq(
+      "react" -> "latest",
+      "react-dom" -> "latest",
+      "@mui/material" -> "latest",
+      "@emotion/react" -> "latest",
+      "@emotion/styled" -> "latest",
+      "@mui/icons-material" -> "latest",
+    ),
+    webpackBundlingMode := BundlingMode.LibraryAndApplication(),
   )
   .enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin)
   .dependsOn(shared.js)

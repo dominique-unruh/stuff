@@ -6,7 +6,7 @@
         <link rel="stylesheet" type="text/css" media="screen" href="@routes.Assets.versioned("stylesheets/login.css")">
     </head>
     <body>
-        @helper.form(routes.AuthenticationController.authenticate) {
+        @helper.form(routes.AuthenticationController.authenticate()) {
             <h1>Sign in</h1>
 
             <p>

@@ -31,7 +31,7 @@ class AuthenticationController @Inject()(val controllerComponents: ControllerCom
 
 object AuthenticationController {
   case class Login(user: String, password: String)
-  val loginForm: Form[Login] = Form(mapping("user" -> text, "password" -> text)(Login.apply _)(Login.unapply _))
+  val loginForm: Form[Login] = Form(mapping("user" -> text, "password" -> text)(Login.apply)(Login.unapply))
 }
 
 trait Authenticated extends BaseController {

@@ -4,6 +4,8 @@ ThisBuild / organization := "de.unruh"
 ThisBuild / scalaVersion := "2.13.8"
 ThisBuild / version      := "0.1.0-SNAPSHOT"
 
+Global / onChangedBuildSource := ReloadOnSourceChanges
+
 lazy val root = (project in file("."))
   .aggregate(server, client, shared.jvm, shared.js)
 
@@ -22,8 +24,11 @@ lazy val server = project
 
 lazy val client = project
   .settings(
-    scalaJSUseMainModuleInitializer := true,
-    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "1.1.0"
+      libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.2.0",
+      libraryDependencies += "me.shadaj" %%% "slinky-core" % "0.7.2",
+      libraryDependencies += "me.shadaj" %%% "slinky-web" % "0.7.2",
+//      scalacOptions += "-Ymacro-debug-lite",
+      scalacOptions += "-Ymacro-annotations",
   )
   .enablePlugins(ScalaJSPlugin, ScalaJSWeb)
   .dependsOn(shared.js)

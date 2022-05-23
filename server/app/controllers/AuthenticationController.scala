@@ -26,7 +26,7 @@ class AuthenticationController @Inject()(val controllerComponents: ControllerCom
     val login = form.value.get
     assert(login.user == "unruh")
     assert(login.password == "secret")
-    Redirect(routes.Application.index).withSession("user" -> login.user)
+    Redirect(routes.Application.app).withSession("user" -> login.user)
   }
 }
 

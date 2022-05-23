@@ -11,4 +11,8 @@ class Application @Inject()(cc: ControllerComponents) extends AbstractController
   def index = Action { implicit request =>
     Ok(views.html.index(SharedMessages.itWorks))
   }
+
+  def app = isAuthenticated { implicit request =>
+    Ok(views.html.app(username))
+  }
 }

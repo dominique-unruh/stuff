@@ -31,3 +31,4 @@ shared/.jvm
 .target
 bin/
 /.bsp/sbt.json
+/dumps

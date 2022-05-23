@@ -35,5 +35,8 @@ lazy val client = project
 
 lazy val shared = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
+  .settings(
+    libraryDependencies += "org.apache.commons" % "commons-text" % "1.9",
+  )
   .in(file("shared"))
   .jsConfigure(_.enablePlugins(ScalaJSWeb))

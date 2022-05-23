@@ -3,7 +3,7 @@ package de.unruh.stuff
 import de.unruh.stuff.shared.SharedMessages
 import org.scalajs.dom
 import org.scalajs.dom.{console, document}
-import slinky.core.Component
+import slinky.core.{Component, WithAttrs}
 import slinky.core.annotations.react
 import slinky.core.facade.ReactElement
 import slinky.web.ReactDOM
@@ -16,6 +16,8 @@ import scala.scalajs.js.annotation.JSExportTopLevel
   case class State(text: String)
 
   override def initialState: State = State("")
+
+  val test: WithAttrs[div.tag.type] = div()
 
   override def render(): ReactElement = div (
     h1(props.message + " " + state.text),

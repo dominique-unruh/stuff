@@ -1,6 +1,7 @@
 package controllers
 
-import controllers.AuthenticationController.loginForm
+import AuthenticationController.loginForm
+import controllers.AssetsFinder
 import play.api.data.Form
 import play.api.data.Forms.{mapping, text}
 import play.api.mvc.Security.Authenticated
@@ -11,7 +12,7 @@ import javax.inject._
 @Singleton
 class AuthenticationController @Inject()(val controllerComponents: ControllerComponents,
                                          implicit val assetsFinder: AssetsFinder) extends BaseController {
-  def login(): Action[AnyContent] = Action {
+  def login(): Action[AnyContent] = Action { implicit request =>
     Ok(views.html.login(loginForm))
   }
 
@@ -25,7 +26,7 @@ class AuthenticationController @Inject()(val controllerComponents: ControllerCom
     val login = form.value.get
     assert(login.user == "unruh")
     assert(login.password == "secret")
-    Redirect(routes.HomeController.index()).withSession("user" -> login.user)
+    Redirect(routes.Application.index).withSession("user" -> login.user)
   }
 }
 
@@ -34,6 +35,7 @@ object AuthenticationController {
   val loginForm: Form[Login] = Form(mapping("user" -> text, "password" -> text)(Login.apply)(Login.unapply))
 }
 
+/** Provides authentication related functions to controllers that inherit from this trait. */
 trait Authenticated extends BaseController {
   private def usernameOption(request: RequestHeader): Option[String] = request.session.get("user")
   private def onUnauthorized(request: RequestHeader): Result = Results.Redirect(routes.AuthenticationController.login())

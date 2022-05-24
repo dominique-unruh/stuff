@@ -17,7 +17,8 @@ lazy val server = project
     // triggers scalaJSPipeline when using compile or continuous compilation
     Compile / compile := ((Compile / compile) dependsOn scalaJSPipeline).value,
     libraryDependencies += guice,
-    libraryDependencies += "com.vmunier" %% "scalajs-scripts" % "1.2.0"
+    libraryDependencies += "com.vmunier" %% "scalajs-scripts" % "1.2.0",
+    libraryDependencies += "net.jcazevedo" %% "moultingyaml" % "0.4.2",
   )
   .enablePlugins(PlayScala, WebScalaJSBundlerPlugin)
   .dependsOn(shared.jvm)

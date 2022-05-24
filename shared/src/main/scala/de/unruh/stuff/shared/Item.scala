@@ -3,13 +3,16 @@ package de.unruh.stuff.shared
 import de.unruh.stuff.shared.Item.newID
 import org.apache.commons.text.StringEscapeUtils
 
+import java.io.FileInputStream
 import java.net.{URI, URL}
+import java.nio.file.{Files, Path}
 import scala.util.Random
 
 class RichText(html: String) {
   def nonEmpty: Boolean = html.nonEmpty
   def isEmpty: Boolean = html.isEmpty
   def asHtml: String = html
+  override def toString: String = html
 }
 object RichText {
   val empty: RichText = new RichText("")

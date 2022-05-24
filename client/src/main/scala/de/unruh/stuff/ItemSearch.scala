@@ -1,5 +1,6 @@
 package de.unruh.stuff
 
+import de.unruh.stuff.materialui.TextField
 import de.unruh.stuff.shared.Item
 import org.scalajs.dom.{Event, console}
 import slinky.core.{Component, SyntheticEvent}
@@ -19,7 +20,8 @@ import slinky.web.html.div
   }
 
   override def render(): ReactElement = div (
-    TextField(TextField.Props(fullWidth = true, placeholder = "Search", variant = TextField.FILLED,
+    TextField(TextField.Props(
+      fullWidth = true, placeholder = "Search", variant = TextField.FILLED,
       autoFocus = true, onChange = changed _)),
     ItemList(state, props.onClick)
   )

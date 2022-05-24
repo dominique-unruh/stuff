@@ -1,5 +1,6 @@
 package de.unruh.stuff
 
+import de.unruh.stuff.materialui.{Avatar, Icon, IconsMaterial, ListItemAvatar, ListItemButton, ListItemIcon, ListItemText}
 import de.unruh.stuff.shared.Item
 import slinky.core.Component
 import slinky.core.annotations.react
@@ -59,5 +60,5 @@ object ItemListItem {
   val initialState : State = ()
 
   override def render(): ReactElement =
-    List() (props.items.map(ItemListItem(_,props.onClick)))
+    materialui.List() (props.items.map(ItemListItem(_,props.onClick)))
 }

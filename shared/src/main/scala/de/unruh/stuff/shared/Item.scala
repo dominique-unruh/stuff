@@ -31,6 +31,8 @@ case class Item(
                  val description: RichText = RichText.empty,
                  /** Photos of the item. */
                  val photos: Seq[URI] = Nil,
+                 /** Links */
+                 val links: Seq[URI] = Nil,
                ) {
   def matches(searchTerms: String): Boolean = {
     val terms = searchTerms.toLowerCase.split("\\s")

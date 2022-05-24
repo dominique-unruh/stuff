@@ -56,10 +56,12 @@ object AppTest {
   def test(username: String): Unit = {
 //    val call = AjaxApiClient[AjaxApi].search("").call()
 //    call.onComplete(result => console.log(result.toString))
-
+    val root = document.getElementById("react-root")
     ReactDOM.render(
-      ItemSearch(onClick = { item:Item => console.log(item) }),
-      document.getElementById("react-root")
-    )
+      ItemSearch(onClick = {
+        item:Item =>
+          ReactDOM.render(ItemEditor(item), root)
+      }),
+      root)
   }
 }

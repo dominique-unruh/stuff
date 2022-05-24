@@ -45,7 +45,7 @@ The content of the file is YAML with the following supported tags:
   * Binary QR-codes are encoded as base64.
 * `files` (list of strings, optional, not implemented): 
   Additional attached files (e.g., manuals). The same conditions as with `photos` apply.
-* `links` (list of strings, optional, not implemented):
+* `links` (list of strings, optional):
   Links to the web with further information (e.g., product pages)
 * `keywords` (list of strings, optional, not implemented):
   Arbitrary keywords (plaintext strings), particularly for full text search

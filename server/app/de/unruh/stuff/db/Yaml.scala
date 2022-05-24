@@ -38,7 +38,8 @@ object Yaml {
       Item(id=readField[Long](yaml, "id"),
         name=readField[String](yaml, "name"),
         description = readFieldDefault(yaml, "description", RichText.empty),
-        photos = readFieldDefault[Seq[URI]](yaml, "photos", Nil)
+        photos = readFieldDefault[Seq[URI]](yaml, "photos", Nil),
+        links = readFieldDefault[Seq[URI]](yaml, "links", Nil),
       )
   }
 

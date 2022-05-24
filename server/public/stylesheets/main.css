@@ -1,0 +1,43 @@
+
+.item-editor {
+    width: 85vmin;
+    background-color: lightgray;
+    padding: 5vmin;
+    margin: auto;
+    border-radius: 2vh;
+}
+
+.item-name {
+    font-weight: bold;
+    font-size: xxx-large;
+}
+
+.item-description {
+    margin-top: 3vh;
+    font-size: large;
+}
+
+.item-photos {
+    margin-top: 3vh;
+    overflow: auto;
+    white-space: nowrap;
+}
+
+.item-photos > img {
+    height: 30vh;
+    margin-right: 2vh;
+    border-radius: 2vh;
+    display: inline-block;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+}
+
+.item-links {
+    margin-top: 3vh;
+}
+
+.item-links::before {
+    content: "Links:";
+    font-weight: bold;
+}

@@ -1,10 +1,10 @@
 package de.unruh.stuff
 
 import de.unruh.stuff.shared.Item.testItems
-import de.unruh.stuff.shared.SharedMessages
+import de.unruh.stuff.shared.{Item, SharedMessages}
 import org.scalajs.dom
-import org.scalajs.dom.{console, document}
-import slinky.core.{Component, CustomAttribute, CustomTag, ExternalComponent, ExternalComponentNoProps, ExternalComponentWithAttributes, WithAttrs}
+import org.scalajs.dom.{Event, HTMLInputElement, console, document}
+import slinky.core.{Component, CustomAttribute, CustomTag, ExternalComponent, ExternalComponentNoProps, ExternalComponentWithAttributes, ExternalComponentWithRefType, SyntheticEvent, WithAttrs}
 import slinky.core.annotations.react
 import slinky.core.facade.ReactElement
 import slinky.web.ReactDOM
@@ -118,7 +118,7 @@ object MaterialUi extends js.Object {
 //  val TableRow: js.Object                = js.native
 //  val TableSortLabel: js.Object          = js.native
 //  val Tabs: js.Object                    = js.native
-//  val TextField: js.Object               = js.native
+  val TextField: js.Object               = js.native
 //  val Toolbar: js.Object                 = js.native
 //  val Tooltip: js.Object                 = js.native
 //  val Typography: js.Object              = js.native
@@ -156,7 +156,8 @@ object List extends ExternalComponentNoProps {
   override val component: String | js.Object = MaterialUi.List
 }
 
-object ListItemButton extends ExternalComponentNoProps {
+object ListItemButton extends ExternalComponent {
+  case class Props(onClick: UndefOr[SyntheticEvent[ListItemButton.this.type#RefType, Event] => Unit])
   override val component: String | js.Object = MaterialUi.ListItemButton
 }
 
@@ -180,12 +181,26 @@ object ListItemText extends ExternalComponent {
   override val component: String | js.Object = MaterialUi.ListItemText
 }
 
+object TextField extends ExternalComponentWithRefType[dom.HTMLInputElement] {
+  case class Props(fullWidth: UndefOr[Boolean] = js.undefined,
+                   placeholder: UndefOr[String] = js.undefined,
+                   variant: UndefOr[String] = js.undefined,
+                   autoFocus: UndefOr[Boolean] = js.undefined,
+                   onChange: UndefOr[SyntheticEvent[TextField.this.type#RefType, Event] => Unit] = js.undefined)
+
+  val FILLED = "filled"
+  val OUTLINED = "outlined"
+
+  override val component: String | js.Object = MaterialUi.TextField
+}
+
 object ScalaJSExample {
   @JSExportTopLevel("test")
   def test(username: String): Unit = {
-    val itemList = ItemList(testItems)
+    val itemList = ItemSearch(testItems,
+      onClick = { item:Item => console.log(item) })
     ReactDOM.render(
-      div("hello", itemList),
+      itemList,
       document.getElementById("react-root")
     )
   }

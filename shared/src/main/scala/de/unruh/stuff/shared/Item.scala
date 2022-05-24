@@ -26,7 +26,12 @@ case class Item(
                  val description: RichText = RichText.empty,
                  /** Photos of the item. */
                  val photos: Seq[URI] = Nil,
-               )
+               ) {
+  def matches(searchTerms: String): Boolean = {
+    val terms = searchTerms.toLowerCase.split("\\s")
+    terms.forall(term => name.toLowerCase.contains(term) || description.asHtml.toLowerCase.contains(term))
+  }
+}
 
 object Item {
   private def newID() = Random.nextLong()

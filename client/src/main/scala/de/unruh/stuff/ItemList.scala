@@ -15,7 +15,7 @@ object ItemListItem {
   def apply(item: Item, onClick: Item => Unit = { _ => () }): ReactElement = {
     val children = ListBuffer[ReactElement]()
     if (item.photos.nonEmpty)
-      children.append(ListItemAvatar() (Avatar(Avatar.Props(src = item.photos.head.toString, variant = Avatar.SQUARE))) withKey "pic")
+      children.append(ListItemAvatar() (Avatar(Avatar.Props(src = ExtendedURL.resolve(item.photos.head), variant = Avatar.SQUARE))) withKey "pic")
     else
       children.append(ListItemIcon() (Icon(IconsMaterial.IceSkating)()) withKey "pic")
 

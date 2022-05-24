@@ -16,16 +16,16 @@ The `files` directory contain subdirectories named `id`, corresponding to items 
 An item is only allowed to reference files in the subdirectory with the same ID.
 Inside this directory, arbitrary file names are allowed, as long they satisfy the following conditions:
 * At least one character long
-* Do not start with `-`
+* Do not start with `-` or `.`
 * Contain only characters `a-z0-9_@,.-` (these characters have been chosen to be shell-friendly)
 
 Example:
 * `items/`
-  * `1234.yaml` (references an image `test.png`)
+  * `1234.yaml` (references an image `test.jpg`)
   * `5678.yaml`
 * `files/`
   * `1234`
-    * `test.png`
+    * `test.jpg`
 
 ## Item files
 
@@ -38,16 +38,20 @@ The content of the file is YAML with the following supported tags:
 * `photos` (list of strings, optional): The photos of the item (first one is the main photo) (`item.photos`)
   * Each entry is an extended URL (see below).
   * If the URL is local (see below), it must reference to an existing file in the `files/` directory with the right id.
-  * Must be nonempty (if there are no photos, this tag is omitted)
 * `codes` (list of strings, optional, not implemented):
   QR or barcodes associated with this item.
   * Each barcode is represented by a string
   * UTF-8 is used to encode non-ASCII strings (if the barcode format supports this)
   * Binary QR-codes are encoded as base64.
-  * Must be nonempty (if there are no tags, this tag is omitted)
 * `files` (list of strings, optional, not implemented): 
   Additional attached files (e.g., manuals). The same conditions as with `photos` apply.
-* `links` (list of strings, optional, not implemented): Links to the web with further information (e.g., product pages)
+* `links` (list of strings, optional, not implemented):
+  Links to the web with further information (e.g., product pages)
+* `keywords` (list of strings, optional, not implemented):
+  Arbitrary keywords (plaintext strings), particularly for full text search
+
+For all fields that are lists of something (e.g., `photos`, `links`), empty lists are disallowed.
+(But the whole field can be omitted if it is optional.)
 
 ### Extended URLs
 

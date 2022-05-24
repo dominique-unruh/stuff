@@ -56,9 +56,5 @@ object Yaml {
         id -> item
       })
   }
-
-  def main(args: Array[String]): Unit = { // TODO remove
-    println(loadDb(Path.of("example")))
-  }
 }
 

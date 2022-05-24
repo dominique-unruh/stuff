@@ -51,9 +51,9 @@ import scala.util.{Failure, Success}
       if (state.error) {
         // TODO Nicer formatting (e.g., https://mui.com/material-ui/react-alert/)
         h1("Failed to load results")
-      } else if (state.waiting) {
-        // TODO: User overlaid rotating circle, appearing only after 800ms (https://mui.com/material-ui/react-progress/)
-        h1("Waiting for results")
+//      } else if (state.waiting) {
+//        // TODO: User overlaid rotating circle, appearing only after 800ms (https://mui.com/material-ui/react-progress/)
+//        h1("Waiting for results")
       } else if (state.results.isEmpty) {
         // TODO Nicer formatting (https://mui.com/material-ui/react-alert/ ?)
         h1("Nothing found")

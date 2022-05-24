@@ -1,0 +1,7 @@
+id: 1234
+name: Roller skates
+description: A pair of roller skates from my <i>favorite</i> grandparent.
+photos:
+  - localstuff:1234/test.png
+  - https://p2.piqsels.com/preview/569/73/110/roller-skates-rollerblades-roll-skates-roller-skates.jpg
+codes: [419246128734234]

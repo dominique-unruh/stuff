@@ -19,6 +19,7 @@ lazy val server = project
     libraryDependencies += guice,
     libraryDependencies += "com.vmunier" %% "scalajs-scripts" % "1.2.0",
     libraryDependencies += "net.jcazevedo" %% "moultingyaml" % "0.4.2",
+    libraryDependencies += "com.lihaoyi" %% "ujson-play" % "2.0.0"
   )
   .enablePlugins(PlayScala, WebScalaJSBundlerPlugin)
   .dependsOn(shared.jvm)
@@ -46,6 +47,8 @@ lazy val shared = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
   .settings(
     libraryDependencies += "org.apache.commons" % "commons-text" % "1.9",
+    libraryDependencies += "com.lihaoyi" %%% "autowire" % "0.3.3",
+    libraryDependencies += "com.lihaoyi" %%% "upickle" % "2.0.0"
   )
   .in(file("shared"))
 //  .jsConfigure(_.enablePlugins(ScalaJSBundlerPlugin))

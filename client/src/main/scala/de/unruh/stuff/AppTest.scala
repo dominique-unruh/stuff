@@ -1,7 +1,8 @@
 package de.unruh.stuff
 
+import autowire.clientCallable
 import de.unruh.stuff.shared.Item.testItems
-import de.unruh.stuff.shared.{Item, SharedMessages}
+import de.unruh.stuff.shared.{AjaxApi, Item, SharedMessages}
 import org.scalajs.dom
 import org.scalajs.dom.{Event, HTMLInputElement, console, document}
 import slinky.core.{Component, CustomAttribute, CustomTag, ExternalComponent, ExternalComponentNoProps, ExternalComponentWithAttributes, ExternalComponentWithRefType, SyntheticEvent, WithAttrs}
@@ -10,6 +11,7 @@ import slinky.core.facade.ReactElement
 import slinky.web.ReactDOM
 import slinky.web.html.{`type`, div, h1, input, onChange, value}
 
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.scalajs.js
 import scala.scalajs.js.annotation.{JSExportTopLevel, JSImport}
 import scala.scalajs.js.{UndefOr, |}
@@ -52,8 +54,11 @@ import scala.scalajs.js.{UndefOr, |}
 object AppTest {
   @JSExportTopLevel("test")
   def test(username: String): Unit = {
+//    val call = AjaxApiClient[AjaxApi].search("").call()
+//    call.onComplete(result => console.log(result.toString))
+
     ReactDOM.render(
-      ItemSearch(testItems, onClick = { item:Item => console.log(item) }),
+      ItemSearch(onClick = { item:Item => console.log(item) }),
       document.getElementById("react-root")
     )
   }

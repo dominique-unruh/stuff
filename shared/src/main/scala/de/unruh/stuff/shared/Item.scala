@@ -1,6 +1,6 @@
 package de.unruh.stuff.shared
 
-import de.unruh.stuff.shared.Item.newID
+import de.unruh.stuff.shared.Item.{Id, newID}
 import org.apache.commons.text.StringEscapeUtils
 
 import java.io.FileInputStream
@@ -18,11 +18,13 @@ object RichText {
   val empty: RichText = new RichText("")
   def plain(text: String) = new RichText(/*StringEscapeUtils.escapeHtml4*/(text)) // TODO: escape
   def html(html: String): RichText = new RichText(html)
+  implicit val rw: upickle.default.ReadWriter[RichText] =
+    upickle.default.readwriter[String].bimap[RichText](_.asHtml, RichText.html)
 }
 
 case class Item(
                  /** Unique ID */
-                 val id: Long = newID(),
+                 val id: Id = newID(),
                  /** Short name of the item. Plain text. */
                  val name: String,
                  /** Description of the item. HTML rich text */
@@ -44,4 +46,11 @@ object Item {
     Item(name="Kitten", photos=List(new URI("https://api.time.com/wp-content/uploads/2019/03/kitten-report.jpg?quality=85&w=800"))),
     Item(name="Bubble gum", description=RichText.plain("Hardly used"))
   )
+
+  implicit val rwUri: upickle.default.ReadWriter[URI] =
+  upickle.default.readwriter[String].bimap[URI](_.toString, URI.create)
+
+  implicit val rw: upickle.default.ReadWriter[Item] = upickle.default.macroRW
+
+  type Id = Long
 }

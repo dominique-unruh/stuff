@@ -4,6 +4,7 @@ import de.unruh.stuff.ExtendedURL
 
 import javax.inject._
 import de.unruh.stuff.shared.SharedMessages
+import play.api.http.MimeTypes
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc._
 import play.filters.csrf.AddCSRFToken
@@ -15,11 +16,6 @@ import scala.concurrent.duration.Duration
 
 @Singleton
 class Application @Inject()(cc: ControllerComponents) extends AbstractController(cc) with Authenticated {
-
-  def index: Handler = Action { implicit request =>
-    Ok(views.html.index(SharedMessages.itWorks))
-  }
-
   def app: Handler = isAuthenticated { implicit request =>
     Ok(views.html.app(username))
   }
@@ -33,7 +29,7 @@ class Application @Inject()(cc: ControllerComponents) extends AbstractController
     val resultFuture = AjaxApiServer.routes.apply(apiRequest)
     val resultJson = Await.result(resultFuture, Duration.Inf)
     val resultString = Json.stringify(resultJson)
-    Ok(resultString)
+    Ok(resultString).as(MimeTypes.JSON)
   }
 
   def file(user: String, id: Long, filename: String): Handler = isAuthenticated { implicit request =>
@@ -42,6 +38,6 @@ class Application @Inject()(cc: ControllerComponents) extends AbstractController
     val path = Paths.filesPath.resolve(id.toString).resolve(filename)
     println(path)
     assert(Files.isRegularFile(path))
-    Ok(Files.readAllBytes(path))
+    Ok(Files.readAllBytes(path)).withHeaders("Cache-Control" -> "max-age=604800, immutable")
   }
 }

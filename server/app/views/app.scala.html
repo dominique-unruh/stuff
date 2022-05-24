@@ -1,15 +1,16 @@
 @import play.twirl.api.utils.StringEscapeUtils
 @import views.html.helper.CSRF
+@import play.twirl.api.utils.StringEscapeUtils.escapeEcmaScript
 @(username: String)(implicit requestHeader: RequestHeader)
 
 <!DOCTYPE html>
-
 <html lang="en">
     <head>
         <title>Stuff</title>
         <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
-        <script>let csrf_token = "@CSRF.getToken.value"</script>
+        <script>let stuff_csrf_token = "@CSRF.getToken.value";
+                let stuff_username = "@escapeEcmaScript(username)"</script>
         @scalajs.html.scripts("client", routes.Assets.versioned(_).toString, name => getClass.getResource(s"/public/$name") != null)
     </head>
 

@@ -45,6 +45,8 @@ import scala.scalajs.js
       children.append(div(className := "item-codes", key := "codes")(codes))
     }
 
+    children.append(div(className := "item-id", key := "id")(item.id.toString))
+    
     div(className := "item-editor")(children)
   }
 }

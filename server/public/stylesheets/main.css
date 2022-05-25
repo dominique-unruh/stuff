@@ -72,6 +72,12 @@ body {
     margin-left: 1em;
 }
 
+.item-editor .item-id {
+    font-size: xx-small;
+    color: gray;
+    text-align: right;
+}
+
 .item-editor .item-codes::before {
     content: "Codes:";
     font-weight: bold;

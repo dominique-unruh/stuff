@@ -82,3 +82,11 @@ body {
     font-size: 1rem;
     height: 2rem;
 }
+
+.qrcode-scanner {
+    /*background-color: red;*/
+    /*width: 1cm;*/
+    /*height: 1cm;*/
+    width: 100%;
+    aspect-ratio: 1/1;
+}

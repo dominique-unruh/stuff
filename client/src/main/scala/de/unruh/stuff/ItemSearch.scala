@@ -2,11 +2,12 @@ package de.unruh.stuff
 
 import autowire.clientCallable
 import de.unruh.stuff.shared.{AjaxApi, Item}
+import org.scalajs.dom.window.alert
 import org.scalajs.dom.{Event, HTMLInputElement, console}
 import slinky.core.{Component, SyntheticEvent, TagElement}
 import slinky.core.annotations.react
 import slinky.core.facade.{React, ReactElement}
-import slinky.web.html.{autoFocus, className, div, h1, input, onChange, placeholder}
+import slinky.web.html.{autoFocus, className, div, h1, input, onChange, placeholder, value}
 
 import scala.collection.mutable.ListBuffer
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -45,6 +46,17 @@ import scala.util.{Failure, Success}
     doSearch(event.target.value)
   }
 
+  private def qrcode(text: String, format: Option[String]): Unit = {
+    val str = format match {
+      case Some(value) => s"$value:$text"
+      case None => "$text"
+    }
+    alert(str)
+    val searchString = state.searchString + " " + str
+//    setState(state.copy(searchString = searchString))
+    doSearch(searchString)
+  }
+
   override def render(): ReactElement = {
     val results : ReactElement =
       if (state.error) {
@@ -57,9 +69,12 @@ import scala.util.{Failure, Success}
         // TODO Nicer formatting (https://mui.com/material-ui/react-alert/ ?)
         h1("Nothing found")
       } else ItemList(state.results, props.onClick)
+
+
     div (className := "item-search") (
+      QrCode(QrCode.Config(onDetect = qrcode)),
       // TODO: Add an X on the right side to clear the content
-      input(className := "item-search-input", onChange := changed _, placeholder := "Search...", autoFocus := true),
+      input(className := "item-search-input", onChange := changed _, placeholder := "Search...", autoFocus := true, value := state.searchString),
 //      TextField(TextField.Props(
 //        fullWidth = true, placeholder = "Search", variant = TextField.FILLED,
 //        autoFocus = true, onChange = changed _)),

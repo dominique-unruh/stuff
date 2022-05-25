@@ -1,4 +1,4 @@
-package stuff
+package de.unruh.stuff
 
 import java.nio.file.Path
 

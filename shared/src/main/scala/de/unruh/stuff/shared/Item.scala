@@ -24,6 +24,11 @@ object RichText {
 }
 
 case class Code(format: Option[String], content: String) {
+  /** True if the two codes match. The contents must be equal, and the formats must be equal if both are not `None`. */
+  def matches(other: Code): Boolean =
+    (content == other.content) &&
+      (format.isEmpty || other.format.isEmpty || format == other.format)
+
   assert(format.getOrElse("") != "UNKNOWN")
   override def toString: String = s"${format.getOrElse("UNKNOWN")}:$content"
 }
@@ -32,7 +37,6 @@ object Code {
   def apply(string : String): Code = {
     string match {
       case `codeRegex`(format, content) =>
-        println(format,content)
         if (format == "UNKNOWN")
           Code(None, content)
         else
@@ -58,10 +62,6 @@ case class Item(
                  /** QR / barcodes */
                  val codes: Seq[Code] = Nil,
                ) {
-  def matches(searchTerms: String): Boolean = {
-    val terms = searchTerms.toLowerCase.split("\\s")
-    terms.forall(term => name.toLowerCase.contains(term) || description.asHtml.toLowerCase.contains(term))
-  }
 }
 
 object Item {

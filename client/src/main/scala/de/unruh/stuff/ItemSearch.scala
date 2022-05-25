@@ -1,7 +1,7 @@
 package de.unruh.stuff
 
 import autowire.clientCallable
-import de.unruh.stuff.shared.{AjaxApi, Item}
+import de.unruh.stuff.shared.{AjaxApi, Code, Item, Utils}
 import org.scalajs.dom.window.alert
 import org.scalajs.dom.{Event, HTMLInputElement, console}
 import slinky.core.{Component, SyntheticEvent, TagElement}
@@ -47,14 +47,8 @@ import scala.util.{Failure, Success}
   }
 
   private def qrcode(text: String, format: Option[String]): Unit = {
-    val str = format match {
-      case Some(value) => s"$value:$text"
-      case None => "$text"
-    }
-    alert(str)
-    val searchString = state.searchString + " " + str
-//    setState(state.copy(searchString = searchString))
-    doSearch(searchString)
+    val code = Code(format, text)
+    doSearch(s"${Utils.addSpaceIfNeeded(state.searchString)}code:$code ")
   }
 
   override def render(): ReactElement = {

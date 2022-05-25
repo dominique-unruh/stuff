@@ -1,6 +1,6 @@
 package controllers
 
-import de.unruh.stuff.ExtendedURL
+import de.unruh.stuff.{AjaxApiServer, ExtendedURL, Paths}
 
 import javax.inject._
 import de.unruh.stuff.shared.SharedMessages
@@ -8,7 +8,6 @@ import play.api.http.MimeTypes
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc._
 import play.filters.csrf.AddCSRFToken
-import stuff.{AjaxApiServer, Paths}
 
 import java.nio.file.Files
 import scala.concurrent.Await
@@ -22,7 +21,7 @@ class Application @Inject()(cc: ControllerComponents) extends AbstractController
 
   def ajaxApi(method: String): Handler = isAuthenticated { implicit request =>
     val apiRequest = autowire.Core.Request(
-      method.split('/'),
+      method.split('/').toSeq,
       request.body.asJson.get
         .asInstanceOf[JsObject].value.toMap.map{case (k,v) => (k, v)}
     )
@@ -36,7 +35,6 @@ class Application @Inject()(cc: ControllerComponents) extends AbstractController
     assert(user == username)
     assert(ExtendedURL.fileRegex.matches(filename))
     val path = Paths.filesPath.resolve(id.toString).resolve(filename)
-    println(path)
     assert(Files.isRegularFile(path))
     Ok(Files.readAllBytes(path)).withHeaders("Cache-Control" -> "max-age=604800, immutable")
   }

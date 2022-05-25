@@ -1,11 +1,11 @@
-package stuff
+package de.unruh.stuff
 
 import de.unruh.stuff.db.Yaml
 import de.unruh.stuff.shared.{AjaxApi, Item}
 import de.unruh.stuff.shared.Item.Id
 import play.api.libs.json.JsValue
 import play.twirl.api.TemplateMagic.anyToDefault
-import stuff.Paths.dbPath
+import Paths.dbPath
 import ujson.play.PlayJson
 
 import java.nio.file.Path
@@ -18,7 +18,7 @@ object AjaxApiImpl extends AjaxApi {
   override def search(searchString: String): Seq[Item] = {
     // TODO don't reload DB each time
     val db = Yaml.loadDb(dbPath)
-    db.values.filter(_.matches(searchString)).toSeq
+    Search.search(db, searchString)
   }
 }
 

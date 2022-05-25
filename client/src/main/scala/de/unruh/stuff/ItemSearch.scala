@@ -3,11 +3,11 @@ package de.unruh.stuff
 import autowire.clientCallable
 import de.unruh.stuff.materialui.TextField
 import de.unruh.stuff.shared.{AjaxApi, Item}
-import org.scalajs.dom.{Event, console}
-import slinky.core.{Component, SyntheticEvent}
+import org.scalajs.dom.{Event, HTMLInputElement, console}
+import slinky.core.{Component, SyntheticEvent, TagElement}
 import slinky.core.annotations.react
 import slinky.core.facade.{React, ReactElement}
-import slinky.web.html.{div, h1}
+import slinky.web.html.{className, div, h1, input, onChange, placeholder}
 
 import scala.collection.mutable.ListBuffer
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -42,7 +42,7 @@ import scala.util.{Failure, Success}
     }
   }
 
-  private def changed(event: SyntheticEvent[TextField.RefType, Event]) : Unit = {
+  private def changed(event:  SyntheticEvent[input.tagType#RefType, Event]) : Unit = {
     doSearch(event.target.value)
   }
 
@@ -58,11 +58,12 @@ import scala.util.{Failure, Success}
         // TODO Nicer formatting (https://mui.com/material-ui/react-alert/ ?)
         h1("Nothing found")
       } else ItemList(state.results, props.onClick)
-    div (
+    div (className := "item-search") (
       // TODO: Add an X on the right side to clear the content
-      TextField(TextField.Props(
-        fullWidth = true, placeholder = "Search", variant = TextField.FILLED,
-        autoFocus = true, onChange = changed _)),
+      input(className := "item-search-input", onChange := changed _, placeholder := "Search..."),
+//      TextField(TextField.Props(
+//        fullWidth = true, placeholder = "Search", variant = TextField.FILLED,
+//        autoFocus = true, onChange = changed _)),
 //      s"waiting=${state.waiting}, error=${state.error}, searchString=${state.searchString}",
       results
     )

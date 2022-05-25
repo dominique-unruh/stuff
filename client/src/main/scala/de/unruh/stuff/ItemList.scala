@@ -5,7 +5,7 @@ import de.unruh.stuff.shared.Item
 import slinky.core.Component
 import slinky.core.annotations.react
 import slinky.core.facade.ReactElement
-import slinky.web.html.div
+import slinky.web.html.{className, div, img, key, src}
 
 import scala.collection.mutable.ListBuffer
 import scala.scalajs.js
@@ -13,20 +13,22 @@ import scala.scalajs.js.UndefOr
 
 object ItemListItem {
   def apply(item: Item, onClick: Item => Unit = { _ => () }): ReactElement = {
-    val children = ListBuffer[ReactElement]()
-    if (item.photos.nonEmpty)
-      children.append(ListItemAvatar() (Avatar(Avatar.Props(src = ExtendedURL.resolve(JSVariables.username, item.photos.head), variant = Avatar.SQUARE))) withKey "pic")
-    else
-      children.append(ListItemIcon() (Icon(IconsMaterial.IceSkating)()) withKey "pic")
+    div(slinky.web.html.onClick := { _:Any => onClick(item) }, className := "item-list-item")(
+      // Photo (if exists)
+      if (item.photos.nonEmpty)
+        img(src := ExtendedURL.resolve(JSVariables.username, item.photos.head), key := "photo", className := "item-photo")
+      else
+        div(className := "item-photo-none", key := "photo"),
 
-    val secondary : UndefOr[String] = if (item.description.nonEmpty)
-      item.description.asHtml
-    else
-      js.undefined
+        // Name
+        div(className := "item-name", key := "name")(item.name),
 
-    children.append(ListItemText(ListItemText.Props(primary = item.name : ReactElement, secondary = secondary)) withKey "text")
-
-    ListItemButton(ListItemButton.Props(onClick = { _:Any => onClick(item) })) (children) withKey item.id.toString
+        // Description (if exists)
+        if (item.description.nonEmpty)
+          div(className := "item-description", key := "description")(item.description.asHtml)
+        else
+          null,
+    )
   }
 }
 
@@ -60,5 +62,5 @@ object ItemListItem {
   val initialState : State = ()
 
   override def render(): ReactElement =
-    materialui.List() (props.items.map(ItemListItem(_,props.onClick)))
+    div(className := "item-list")(props.items.map(ItemListItem(_,props.onClick)))
 }

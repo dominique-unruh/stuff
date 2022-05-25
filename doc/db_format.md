@@ -17,7 +17,7 @@ An item is only allowed to reference files in the subdirectory with the same ID.
 Inside this directory, arbitrary file names are allowed, as long they satisfy the following conditions:
 * At least one character long
 * Do not start with `-` or `.`
-* Contain only characters `a-z0-9_@,.-` (these characters have been chosen to be shell-friendly)
+* Contain only characters `A-Za-z0-9_@,.-` (these characters have been chosen to be shell-friendly)
 
 Example:
 * `items/`
@@ -35,7 +35,7 @@ The content of the file is YAML with the following supported tags:
 * `id` (integer, mandatory): The id of the item (`item.id`)
 * `name` (string, mandatory): The name of the item as plain text (`item.name`)
 * `description` (string, optional): The description of the item as HTML
-* `photos` (list of strings, optional): The photos of the item (first one is the main photo) (`item.photos`)
+* `photos` (list of URLs, optional): The photos of the item (first one is the main photo) (`item.photos`)
   * Each entry is an extended URL (see below).
   * If the URL is local (see below), it must reference to an existing file in the `files/` directory with the right id.
 * `codes` (list of strings, optional, not implemented):
@@ -43,12 +43,17 @@ The content of the file is YAML with the following supported tags:
   * Each barcode is represented by a string
   * UTF-8 is used to encode non-ASCII strings (if the barcode format supports this)
   * Binary QR-codes are encoded as base64.
-* `files` (list of strings, optional, not implemented): 
-  Additional attached files (e.g., manuals). The same conditions as with `photos` apply.
-* `links` (list of strings, optional):
-  Links to the web with further information (e.g., product pages)
+* `files` (list of URLs, optional, not implemented): 
+  Additional attached files (e.g., manuals).
+  * Each string must be a local URL referencing an existing file in the `files/` directory with the right id.
+* `links` (list of URLs, optional):
+  Links to the web with further information (e.g., product pages) (`item.links`)
+  * No local URLs allowed
 * `keywords` (list of strings, optional, not implemented):
   Arbitrary keywords (plaintext strings), particularly for full text search
+* `lastaccessed` (integer, optional, not implemented): Time of last access (last opened in full screen view), in seconds since epoch
+* `lastmodified` (integer, optional, not implemented): Time of last modification, in seconds since epoch.
+  Does not include automatic modifications such as, e.g., setting `lastaccessed`.
 
 For all fields that are lists of something (e.g., `photos`, `links`), empty lists are disallowed.
 (But the whole field can be omitted if it is optional.)

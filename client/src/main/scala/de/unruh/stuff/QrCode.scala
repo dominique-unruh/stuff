@@ -1,6 +1,7 @@
 package de.unruh.stuff
 
-import de.unruh.stuff.Html5Qrcode.{Html5QrcodeError, Html5QrcodeIdentifier, QrcodeErrorCallback, QrcodeSuccessCallback}
+import de.unruh.stuff.Html5Qrcode.{Html5QrcodeError, Html5QrcodeIdentifier, QrDimensionFunction, QrcodeErrorCallback, QrcodeSuccessCallback}
+import de.unruh.stuff.QrCode.Box
 import org.scalajs.dom
 import org.scalajs.dom.{console, document}
 import slinky.core.Component
@@ -14,16 +15,16 @@ import scala.scalajs.js.annotation.JSImport
 import scala.util.Random
 
 @js.native
-trait CameraDevice extends js.Object {
+private trait CameraDevice extends js.Object {
   val id: CameraDevice.Id
   val label: String
 }
-object CameraDevice {
+private object CameraDevice {
   type Id = String
 }
 
 /** Different states of scanner */
-object Html5QrcodeScannerState extends Enumeration(0) {
+private object Html5QrcodeScannerState extends Enumeration(0) {
   type T = Int
   // Indicates the sanning is not running or user is using file based
   // scanning.
@@ -38,7 +39,7 @@ object Html5QrcodeScannerState extends Enumeration(0) {
 /**
  * Interface for configuring {@class Html5Qrcode} class instance.
  */
-trait Html5QrcodeConfigs extends js.Object {
+private trait Html5QrcodeConfigs extends js.Object {
   /**
    * Array of formats to support of type {@type Html5QrcodeSupportedFormats}.
    */
@@ -46,14 +47,25 @@ trait Html5QrcodeConfigs extends js.Object {
 }
 
 /** Configuration for creating [[Html5Qrcode]]. */
-trait Html5QrcodeFullConfig extends Html5QrcodeConfigs {
+private trait Html5QrcodeFullConfig extends Html5QrcodeConfigs {
   /**
    * If true, all logs would be printed to console. False by default.
    */
   val verbose: UndefOr[Boolean] = js.undefined
 }
 
-trait Html5QrcodeCameraScanConfig {
+private trait QrDimensions extends js.Object {
+  val width: Double
+  val height: Double
+}
+private object QrDimensions {
+  def apply(w: Double, h: Double): QrDimensions = new QrDimensions {
+    override val width: Double = w
+    override val height: Double = h
+  }
+}
+
+private trait Html5QrcodeCameraScanConfig {
 /**
  * Optional, Expected framerate of QR code scanning. example { fps: 2 } means the
  * scanning would be done every 500 ms.
@@ -83,11 +95,8 @@ val fps: UndefOr[Double] = js.undefined
  *
  * If this value is not set, no shaded QR box will be rendered and the scanner
  * will scan the entire area of video stream.
- *
- * Note: The Scala Facade is not fully implemented. Options `QrDimensions` | `QrDimensionFunction` are missing.
  */
-val qrbox: UndefOr[Double] = js.undefined
-//qrbox: number | QrDimensions | QrDimensionFunction | undefined;
+val qrbox: UndefOr[Double | QrDimensions | QrDimensionFunction] = js.undefined
 
 /**
  * Optional, Desired aspect ratio for the video feed. Ideal aspect ratios
@@ -208,7 +217,7 @@ private class Html5Qrcode(val elementId: String, config: UndefOr[Html5QrcodeFull
 /**
  * Code formats supported by this library.
  */
-object Html5QrcodeSupportedFormats extends Enumeration(0) {
+private object Html5QrcodeSupportedFormats extends Enumeration(0) {
   type T = Int
   val QR_CODE, AZTEC, CODABAR, CODE_39, CODE_93, CODE_128, DATA_MATRIX, MAXICODE, ITF, EAN_13, EAN_8, PDF_417,
   RSS_14, RSS_EXPANDED, UPC_A, UPC_E, UPC_EAN_EXTENSION = Value
@@ -216,13 +225,14 @@ object Html5QrcodeSupportedFormats extends Enumeration(0) {
 
 /** Format of detected code. */
 @js.native
-trait QrcodeResultFormat extends js.Object {
+private trait QrcodeResultFormat extends js.Object {
   val format: Html5QrcodeSupportedFormats.T;
   val formatName: String;
 }
 
 /** Detailed scan result. */
-@js.native trait QrcodeResult extends js.Object {
+@js.native
+private trait QrcodeResult extends js.Object {
   /** Decoded text. */
   val text: String;
 
@@ -231,7 +241,7 @@ trait QrcodeResultFormat extends js.Object {
 }
 
 @js.native
-trait Html5QrcodeResult extends js.Object {
+private trait Html5QrcodeResult extends js.Object {
   val decodedText: String
   val result: QrcodeResult
 }
@@ -254,12 +264,14 @@ private object Html5Qrcode extends js.Object {
   type QrcodeErrorCallback = js.Function2[String, Html5QrcodeError, Unit]
 
   type Html5QrcodeIdentifier = CameraDevice.Id | CameraSpec
+
+  type QrDimensionFunction = js.Function2[Double,Double,QrDimensions]
 }
 
-trait CameraSpec extends js.Object {
+private trait CameraSpec extends js.Object {
   val facingMode: UndefOr[String] = js.undefined
 }
-object CameraSpec {
+private object CameraSpec {
   val FACING_USER = "user"
   val FACING_ENVIRONMENT = "environment"
 }
@@ -271,7 +283,15 @@ object CameraSpec {
   private val config : Html5QrcodeFullConfig = new Html5QrcodeFullConfig {
     override val verbose: UndefOr[Boolean] = props.verbose
   }
-  private val scanConfig: Html5QrcodeCameraScanConfig = new Html5QrcodeCameraScanConfig {}
+  private val scanConfig: Html5QrcodeCameraScanConfig = new Html5QrcodeCameraScanConfig {
+    override val aspectRatio: UndefOr[Double] = if (props.aspectRatio == 0) js.undefined else props.aspectRatio
+    override val qrbox: UndefOr[Double | QrDimensions | QrDimensionFunction] = props.qrbox match {
+      case Box.None => js.undefined
+      case Box.Function(function) => { (w:Double,h:Double) => console.log("BLA"); val (w2,h2) = function(w,h); QrDimensions(w2,h2) } : js.Function2[Double,Double,QrDimensions]
+      case Box.Edge(length) => length
+      case Box.Size(width, height) => QrDimensions(width, height)
+    }
+  }
   private val camera: Html5QrcodeIdentifier = new CameraSpec {
     override val facingMode: UndefOr[String] = CameraSpec.FACING_ENVIRONMENT
   }
@@ -307,8 +327,17 @@ object CameraSpec {
 }
 
 object QrCode {
+  sealed trait Box
+  object Box {
+    final case object None extends Box
+    final case class Function(function: (Double,Double) => (Double,Double)) extends Box
+    final case class Edge(length: Double) extends Box
+    final case class Size(width: Double, height: Double) extends Box
+  }
   final case class Config(
                            verbose: Boolean = false,
+                           aspectRatio: Double = 0,
+                           qrbox: Box = Box.None,
                            onDetect: (String, Option[String]) => Unit = { (_, _) => },
                          )
 }

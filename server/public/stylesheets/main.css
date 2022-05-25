@@ -87,6 +87,10 @@ body {
     background-color: #eee;
 }
 
+.item-list-item:hover {
+    background-color: beige;
+}
+
 .item-list-item .item-photo {
     height: 100%;
     aspect-ratio: 1;

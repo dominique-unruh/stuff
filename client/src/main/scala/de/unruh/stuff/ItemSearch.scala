@@ -64,9 +64,13 @@ import scala.util.{Failure, Success}
         h1("Nothing found")
       } else ItemList(state.results, props.onClick)
 
+    val qrbox = QrCode.Box.Function { (width: Double, height: Double) =>
+      val size = width.min(height) * 0.8
+      (size, size)
+    }
 
     div (className := "item-search") (
-      QrCode(QrCode.Config(onDetect = qrcode)),
+      QrCode(QrCode.Config(onDetect = qrcode, qrbox = qrbox)),
       // TODO: Add an X on the right side to clear the content
       input(className := "item-search-input", onChange := changed _, placeholder := "Search...", autoFocus := true, value := state.searchString),
 //      TextField(TextField.Props(

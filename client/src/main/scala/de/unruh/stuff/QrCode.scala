@@ -285,19 +285,17 @@ object CameraSpec {
     console.log(s"Scan success: $decodedText", decodedResult)
   }
 
-  private def error(errorMessage: String, error: Html5QrcodeError) : Unit = {
+/*  private def error(errorMessage: String, error: Html5QrcodeError) : Unit = {
     console.log(s"Scan failure: $errorMessage", error)
-  }
+  }*/
 
   private var scanner : Html5Qrcode = _
 
   override def componentDidMount(): Unit = {
     scanner = new Html5Qrcode(divId, config)
     val success : js.Function2[String, Html5QrcodeResult, Unit] = this.success
-    val error : js.Function2[String, Html5QrcodeError, Unit] = this.error
-    console.log(typeOf(camera))
-    console.log(camera)
-    scanner.start(camera, scanConfig, success, error)
+//    val error : js.Function2[String, Html5QrcodeError, Unit] = this.error
+    scanner.start(camera, scanConfig, success/*, error*/)
   }
   override def componentWillUnmount(): Unit = {
     try {

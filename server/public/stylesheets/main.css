@@ -46,6 +46,37 @@ body {
     font-weight: bold;
 }
 
+.item-editor .item-links li {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.item-editor .item-codes {
+    margin-top: 3vh;
+    font-size: smaller;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+}
+
+.item-editor .item-codes li {
+    display: inline;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 80%;
+    font-family: monospace;
+    background-color: #c0c0c0;
+    border-radius: 1ex;
+    padding: .5ex;
+    margin-left: 1em;
+}
+
+.item-editor .item-codes::before {
+    content: "Codes:";
+    font-weight: bold;
+}
+
 .item-list-item {
     height: 6rem;
     margin-top: .5rem;

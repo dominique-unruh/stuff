@@ -39,6 +39,12 @@ import scala.scalajs.js
       children.append(div(className := "item-links", key := "links")(links))
     }
 
+    if (item.codes.nonEmpty) {
+      val codes = for ((link,i) <- item.codes.zipWithIndex)
+        yield li(link.toString, key := i.toString)
+      children.append(div(className := "item-codes", key := "codes")(codes))
+    }
+
     div(className := "item-editor")(children)
   }
 }

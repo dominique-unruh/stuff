@@ -40,9 +40,12 @@ The content of the file is YAML with the following supported tags:
   * If the URL is local (see below), it must reference to an existing file in the `files/` directory with the right id.
 * `codes` (list of strings, optional, not implemented):
   QR or barcodes associated with this item.
-  * Each barcode is represented by a string
-  * UTF-8 is used to encode non-ASCII strings (if the barcode format supports this)
-  * Binary QR-codes are encoded as base64.
+  * Each barcode is represented by a string of the form `type:content`.
+  * `type` represents the type of barcode (e.g., `QR_CODE`). For a full list of types see [here](https://github.com/mebjas/html5-qrcode/#supported-code-formats).
+  * `type` can be `UNKNOWN` to represent an unknown format
+  * `content` is the actual content of the QR/barcode
+  * UTF-8 is used to encode non-ASCII `content` (if the barcode format supports this)
+  * Binary `content` is encoded as base64.
 * `files` (list of URLs, optional, not implemented): 
   Additional attached files (e.g., manuals).
   * Each string must be a local URL referencing an existing file in the `files/` directory with the right id.

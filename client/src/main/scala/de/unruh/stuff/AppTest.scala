@@ -1,7 +1,6 @@
 package de.unruh.stuff
 
 import autowire.clientCallable
-import de.unruh.stuff.shared.Item.testItems
 import de.unruh.stuff.shared.{AjaxApi, Item, SharedMessages}
 import org.scalajs.dom
 import org.scalajs.dom.{Event, HTMLInputElement, console, document}

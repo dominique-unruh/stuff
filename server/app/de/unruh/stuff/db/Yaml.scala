@@ -1,6 +1,6 @@
 package de.unruh.stuff.db
 
-import de.unruh.stuff.shared.{Item, RichText}
+import de.unruh.stuff.shared.{Code, Item, RichText}
 import net.jcazevedo.moultingyaml.{DefaultYamlProtocol, PimpedString, YamlFormat, YamlObject, YamlReader, YamlString, YamlValue, YamlWriter}
 
 import scala.jdk.StreamConverters._
@@ -19,6 +19,10 @@ object Yaml {
   implicit object uriFormat extends YamlFormat[URI] {
     override def write(obj: URI): YamlValue = ???
     override def read(yaml: YamlValue): URI = URI.create(yaml.convertTo[String])
+  }
+  implicit object codeFormat extends YamlFormat[Code] {
+    override def write(obj: Code): YamlValue = ???
+    override def read(yaml: YamlValue): Code = Code(yaml.convertTo[String])
   }
   private def readField[A: YamlReader](yaml: YamlValue, name: String) : A =
     readFieldOption[A](yaml, name).getOrElse {
@@ -40,6 +44,7 @@ object Yaml {
         description = readFieldDefault(yaml, "description", RichText.empty),
         photos = readFieldDefault[Seq[URI]](yaml, "photos", Nil),
         links = readFieldDefault[Seq[URI]](yaml, "links", Nil),
+        codes = readFieldDefault[Seq[Code]](yaml, "codes", Nil),
       )
   }
 
@@ -48,8 +53,11 @@ object Yaml {
 
   def loadDb(path: Path) : Map[Long, Item] = {
     Map.from(
-      for (file <- Files.list(path.resolve("items")).iterator.asScala) yield {
-        val filename = file.getFileName.toString
+      for (file <- Files.list(path.resolve("items")).iterator.asScala;
+           filename = file.getFileName.toString;
+           if !filename.startsWith(".")
+           if !filename.endsWith("~")
+           ) yield {
         assert(filename.endsWith(".yaml"))
         val id = filename.stripSuffix(".yaml").toLong
         val item = parse(file)

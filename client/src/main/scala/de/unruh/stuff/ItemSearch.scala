@@ -1,13 +1,12 @@
 package de.unruh.stuff
 
 import autowire.clientCallable
-import de.unruh.stuff.materialui.TextField
 import de.unruh.stuff.shared.{AjaxApi, Item}
 import org.scalajs.dom.{Event, HTMLInputElement, console}
 import slinky.core.{Component, SyntheticEvent, TagElement}
 import slinky.core.annotations.react
 import slinky.core.facade.{React, ReactElement}
-import slinky.web.html.{className, div, h1, input, onChange, placeholder}
+import slinky.web.html.{autoFocus, className, div, h1, input, onChange, placeholder}
 
 import scala.collection.mutable.ListBuffer
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -60,7 +59,7 @@ import scala.util.{Failure, Success}
       } else ItemList(state.results, props.onClick)
     div (className := "item-search") (
       // TODO: Add an X on the right side to clear the content
-      input(className := "item-search-input", onChange := changed _, placeholder := "Search..."),
+      input(className := "item-search-input", onChange := changed _, placeholder := "Search...", autoFocus := true),
 //      TextField(TextField.Props(
 //        fullWidth = true, placeholder = "Search", variant = TextField.FILLED,
 //        autoFocus = true, onChange = changed _)),

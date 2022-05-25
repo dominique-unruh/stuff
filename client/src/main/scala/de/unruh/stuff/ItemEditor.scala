@@ -1,6 +1,5 @@
 package de.unruh.stuff
 
-import de.unruh.stuff.materialui.{ImageList, ImageListItem, Paper, Stack, Typography}
 import de.unruh.stuff.shared.Item
 import slinky.core.{Component, WithAttrs}
 import slinky.core.annotations.react

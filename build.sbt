@@ -33,10 +33,6 @@ lazy val client = project
     Compile / npmDependencies  ++= Seq(
       "react" -> "latest",
       "react-dom" -> "latest",
-      "@mui/material" -> "latest",
-      "@emotion/react" -> "latest",
-      "@emotion/styled" -> "latest",
-      "@mui/icons-material" -> "latest",
     ),
     webpackBundlingMode := BundlingMode.LibraryAndApplication(),
   )

@@ -35,7 +35,7 @@ lazy val client = project
     Compile / npmDependencies  ++= Seq(
       "react" -> "latest",
       "react-dom" -> "latest",
-      "html5-qrcode" -> "latest",
+      "@zxing/library" -> "latest",
     ),
     webpackBundlingMode := BundlingMode.LibraryAndApplication(),
   )

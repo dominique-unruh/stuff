@@ -3,14 +3,16 @@ package de.unruh.stuff
 import autowire.clientCallable
 import de.unruh.stuff.shared.{AjaxApi, Code, Item, Utils}
 import org.scalajs.dom.window.alert
-import org.scalajs.dom.{Event, HTMLInputElement, console}
+import org.scalajs.dom.{Event, HTMLInputElement, MediaTrackConstraintSet, MediaTrackConstraints, console, window}
 import slinky.core.{Component, SyntheticEvent, TagElement}
 import slinky.core.annotations.react
-import slinky.core.facade.{React, ReactElement}
-import slinky.web.html.{autoFocus, className, div, h1, input, onChange, placeholder, value}
+import slinky.core.facade.{React, ReactElement, ReactRef}
+import slinky.web.html.{autoFocus, button, className, div, h1, input, onChange, onClick, placeholder, value}
 
 import scala.collection.mutable.ListBuffer
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+import scala.scalajs.js
+import scala.scalajs.js.PropertyDescriptor
 import scala.util.{Failure, Success}
 
 @react class ItemSearch extends Component {
@@ -46,10 +48,26 @@ import scala.util.{Failure, Success}
     doSearch(event.target.value)
   }
 
-  private def qrcode(text: String, format: Option[String]): Unit = {
+  private def qrcode(format: Option[String], text: String): Unit = {
     val code = Code(format, text)
     doSearch(s"${Utils.addSpaceIfNeeded(state.searchString)}code:$code ")
   }
+
+/*  private val torchConstraint =
+  js.Object.defineProperty(this, "torch", new PropertyDescriptor {
+    enumerable = true
+    value = true
+  })*/
+
+
+  private val videoConstraints = new MediaTrackConstraints {
+    aspectRatio = 1
+    facingMode = "environment"
+  }
+
+  val qrCodeRef: ReactRef[QrCode] = React.createRef[QrCode]
+
+//  window.setTimeout({ () => qrCodeRef.current.setTorch(true) }, 3000  )
 
   override def render(): ReactElement = {
     val results : ReactElement =
@@ -64,13 +82,14 @@ import scala.util.{Failure, Success}
         h1("Nothing found")
       } else ItemList(state.results, props.onClick)
 
-    val qrbox = QrCode.Box.Function { (width: Double, height: Double) =>
+/*    val qrbox = QrCode.Box.Function { (width: Double, height: Double) =>
       val size = width.min(height) * 0.8
       (size, size)
-    }
+    }*/
 
     div (className := "item-search") (
-      QrCode(QrCode.Config(onDetect = qrcode, qrbox = qrbox)),
+      QrCode(onDetect = qrcode, constraints = videoConstraints).withRef(qrCodeRef),
+      button("Flashlight", onClick := { _ => qrCodeRef.current.setTorch(true) }),
       // TODO: Add an X on the right side to clear the content
       input(className := "item-search-input", onChange := changed _, placeholder := "Search...", autoFocus := true, value := state.searchString),
 //      TextField(TextField.Props(

@@ -135,8 +135,13 @@ body {
 }
 
 .qrcode-scanner {
-    /*width: 100%;*/
-    /*aspect-ratio: 1/1;*/
+    width: fit-content;
+    margin: auto;
+}
+
+.qrcode-scanner video {
+    max-height: 40vh;
+    border-radius: 4vh;
 }
 
 @media print {

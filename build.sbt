@@ -19,7 +19,9 @@ lazy val server = project
     libraryDependencies += guice,
     libraryDependencies += "com.vmunier" %% "scalajs-scripts" % "1.2.0",
     libraryDependencies += "net.jcazevedo" %% "moultingyaml" % "0.4.2",
-    libraryDependencies += "com.lihaoyi" %% "ujson-play" % "2.0.0"
+    libraryDependencies += "com.lihaoyi" %% "ujson-play" % "2.0.0",
+    libraryDependencies += "com.google.zxing" % "core" % "3.5.0",
+    libraryDependencies += "com.google.zxing" % "javase" % "3.5.0",
   )
   .enablePlugins(PlayScala, WebScalaJSBundlerPlugin)
   .dependsOn(shared.jvm)

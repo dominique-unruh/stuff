@@ -7,7 +7,7 @@
 <html lang="en">
     <head>
         <title>Stuff</title>
-        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
+        <link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/main.css")">
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
         <script>let stuff_csrf_token = "@CSRF.getToken.value";
                 let stuff_username = "@escapeEcmaScript(username)"</script>

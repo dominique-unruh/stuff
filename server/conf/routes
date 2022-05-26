@@ -3,7 +3,9 @@
 # ~~~~
 
 GET     /                             controllers.Application.app
-GET     /files/:user/:id/:file  controllers.Application.file(user, id: Long, file)
+GET     /files/:user/:id/:file        controllers.Application.file(user, id: Long, file)
+GET     /qrsheet                      controllers.Application.qrSheet()
+GET     /qrcode                       controllers.Application.qrCode(content: String, size: Int)
 
 POST    /api/*method                controllers.Application.ajaxApi(method)
 

@@ -1,0 +1,32 @@
+@import de.unruh.stuff.QrSheet
+@(formData: QrSheet.SheetOptions)(implicit requestHeader: RequestHeader)
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Stuff</title>
+        <link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/main.css")">
+        <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
+    </head>
+
+    <body>
+        @helper.form(routes.Application.qrSheet(), Symbol("class") -> "qrsheet-form") {
+            <p><label>Template: <input type="text" name="template" value="@formData.templateDefault"></label></p>
+            <p><label>Count: <input type="number" name="count" value="@formData.countDefault"></label></p>
+            <p><label>Size: <input type="number" name="size" value="@formData.sizeDefault"></label></p>
+            <p><button type="submit">Generate</button></p>
+        }
+
+        @if(formData.template.nonEmpty) {
+            @if(formData.template.get.contains("XXX")) {
+                @for(i <- 1 to formData.countDefault) {
+                    <img class="qrsheet-image"
+                    src="@routes.Application.qrCode(QrSheet.instantiateTemplate(formData.templateDefault), formData.sizeDefault)"
+                    alt="[QR code for printing]"/>
+                }
+            } else {
+                <h2>Template must contain XXX</h2>
+            }
+        }
+    </body>
+</html>

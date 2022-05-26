@@ -138,3 +138,9 @@ body {
     /*width: 100%;*/
     /*aspect-ratio: 1/1;*/
 }
+
+@media print {
+    .qrsheet-form {
+        display: none;
+    }
+}

@@ -1,15 +1,24 @@
 package controllers
 
-import de.unruh.stuff.{AjaxApiServer, ExtendedURL, Paths}
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.client.j2se.MatrixToImageWriter
+import com.google.zxing.qrcode.QRCodeWriter
+import controllers.Application.qrSheetOptionsForm
+import controllers.AuthenticationController.{Login, loginForm}
+import de.unruh.stuff.{AjaxApiServer, ExtendedURL, Paths, QrSheet}
 
 import javax.inject._
 import de.unruh.stuff.shared.SharedMessages
+import play.api.data.Form
+import play.api.data.Forms.{mapping, number, optional, text}
 import play.api.http.MimeTypes
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc._
 import play.filters.csrf.AddCSRFToken
 
+import java.io.ByteArrayOutputStream
 import java.nio.file.Files
+import javax.imageio.ImageIO
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
@@ -38,4 +47,26 @@ class Application @Inject()(cc: ControllerComponents) extends AbstractController
     assert(Files.isRegularFile(path))
     Ok(Files.readAllBytes(path)).withHeaders("Cache-Control" -> "max-age=604800, immutable")
   }
+
+  def qrSheet() : Handler = Action { implicit request =>
+    val form = qrSheetOptionsForm.bindFromRequest().value.getOrElse(QrSheet.SheetOptions())
+    Ok(views.html.qrsheet(form))
+  }
+
+  def qrCode(content: String, size: Int) : Handler = Action { implicit request =>
+//    val form = qrImageOptionsForm.bindFromRequest()
+//    assert(!form.hasErrors)
+    Ok(QrSheet.createQrCode(content, size))
+      .withHeaders("Cache-Control" -> "max-age=604800, immutable")
+      .as("image/png")
+  }
+}
+
+object Application {
+  val qrSheetOptionsForm: Form[QrSheet.SheetOptions] =
+    Form(mapping("template" -> optional(text), "count" -> optional(number), "size" -> optional(number))
+      (QrSheet.SheetOptions.apply)(QrSheet.SheetOptions.unapply))
+
+/*  val qrImageOptionsForm: Form[QrSheet.ImageOptions] = Form(mapping("content" -> text, "size" -> number)
+    (QrSheet.ImageOptions.apply)(QrSheet.ImageOptions.unapply))*/
 }

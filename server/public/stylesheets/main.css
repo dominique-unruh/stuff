@@ -84,7 +84,7 @@ body {
 }
 
 .item-list-item {
-    height: 6rem;
+    height: 4rem;
     margin-top: .5rem;
     overflow: clip;
 }
@@ -117,8 +117,8 @@ body {
 
 .item-list-item .item-name {
     font-weight: bold;
-    font-size: 1.5rem;
-    margin-top: .7rem;
+    font-size: 1.2rem;
+    padding-top: .2rem;
 }
 
 .item-list-item .item-description {
@@ -144,7 +144,7 @@ body {
 }
 
 .qrcode-scanner video {
-    max-height: 40vh;
+    max-height: 30vh;
     border-radius: 4vh; /* 20vh for a circle */
     /*box-shadow: 0 0 4vh 0 black;*/
 }

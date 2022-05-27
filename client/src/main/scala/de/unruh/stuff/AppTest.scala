@@ -58,7 +58,7 @@ object AppTest {
     val root = document.getElementById("react-root")
     ReactDOM.render(
       ItemSearch(onClick = {
-        item:Item =>
+        item:Item.Id =>
           ReactDOM.render(ItemEditor(item), root)
       }),
       root)

@@ -79,4 +79,7 @@ object Item {
   implicit val rw: upickle.default.ReadWriter[Item] = upickle.default.macroRW
 
   type Id = Long
+
+  /** Represents an id that will never occur */
+  val INVALID_ID : Id = -1
 }

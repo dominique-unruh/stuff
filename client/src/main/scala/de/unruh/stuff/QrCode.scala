@@ -55,9 +55,6 @@ import scala.util.Random
   }
 
   private def decodingStarted(): Unit = {
-    console.log("scan started", state.scanner)
-    console.log("scan started", state.scanner.stream)
-    console.log("scan started", state.scanner.stream.getVideoTracks()(0))
     updateFlashLight()
   }
 

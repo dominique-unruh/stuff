@@ -4,14 +4,10 @@ import org.scalajs.dom
 import org.scalajs.dom.{BodyInit, Headers, HttpMethod, RequestInit, Response, console, webcrypto}
 import ujson.{Js, Value}
 
-import scala.collection.IterableOnce.iterableOnceExtensionMethods
 import scala.collection.mutable
 import scala.concurrent.Future
-import scala.scalajs.js.UndefOr
 import scala.scalajs.js.Thenable.Implicits.thenable2future
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.scalajs.js
-import scala.scalajs.js.annotation.JSGlobal
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 object AjaxApiClient extends autowire.Client[ujson.Value, upickle.default.Reader, upickle.default.Writer]{
   def write[Result: upickle.default.Writer](r: Result): Value = upickle.default.writeJs(r)

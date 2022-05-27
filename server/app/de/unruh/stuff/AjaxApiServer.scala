@@ -15,10 +15,16 @@ object AjaxApiImpl extends AjaxApi {
   // TODO: Return only IDs
   // TODO: truncate to reasonable number of results
   // TODO: most recent first
-  override def search(searchString: String): Seq[Item] = {
+  override def search(searchString: String): Seq[Item.Id] = {
     // TODO don't reload DB each time
     val db = Yaml.loadDb(dbPath)
-    Search.search(db, searchString)
+    Search.search(db, searchString).map(_.id)
+  }
+
+  override def getItem(id: Id): Item = {
+    // TODO don't reload DB each time
+    val db = Yaml.loadDb(dbPath)
+    db.getOrElse(id, throw new IllegalArgumentException(s"Unknown item id $id"))
   }
 }
 

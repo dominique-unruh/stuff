@@ -13,9 +13,9 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.util.{Failure, Success}
 
 @react class ItemSearch extends Component {
-  case class Props(onClick: Item => Unit = { _ => () })
+  case class Props(onClick: Item.Id => Unit = { _ => () })
   case class State(searchString: String = "", waiting: Boolean = false, error: Boolean = false,
-                   results: Seq[Item] = Nil, flashLight: Boolean = false)
+                   results: Seq[Item.Id] = Nil, flashLight: Boolean = false)
   override def initialState : State = State()
 
   override def componentDidMount(): Unit = {

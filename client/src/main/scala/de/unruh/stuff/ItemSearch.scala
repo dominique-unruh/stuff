@@ -14,8 +14,9 @@ import scala.util.{Failure, Success}
 
 @react class ItemSearch extends Component {
   case class Props(onClick: Item => Unit = { _ => () })
-  case class State(searchString: String, waiting: Boolean, error: Boolean, results: Seq[Item])
-  override def initialState : State = State("", waiting = false, error = false, Nil)
+  case class State(searchString: String = "", waiting: Boolean = false, error: Boolean = false,
+                   results: Seq[Item] = Nil, flashLight: Boolean = false)
+  override def initialState : State = State()
 
   override def componentDidMount(): Unit = {
     super.componentDidMount()
@@ -55,7 +56,7 @@ import scala.util.{Failure, Success}
     facingMode = "environment"
   }
 
-  val qrCodeRef: ReactRef[QrCode] = React.createRef[QrCode]
+//  val qrCodeRef: ReactRef[QrCode] = React.createRef[QrCode]
 
   override def render(): ReactElement = {
     val results : ReactElement =
@@ -68,8 +69,8 @@ import scala.util.{Failure, Success}
       } else ItemList(state.results, props.onClick)
 
     div (className := Utils.joinClasses("item-search", if (state.waiting) "state-waiting" else null)) (
-      QrCode(onDetect = qrcode, constraints = videoConstraints).withRef(qrCodeRef),
-      button("Flashlight", onClick := { _ => qrCodeRef.current.setTorch(true) }),
+      QrCode(onDetect = qrcode, constraints = videoConstraints, flashLight = state.flashLight)/*.withRef(qrCodeRef)*/,
+      button("Flashlight", onClick := { _ => setState(_.copy(flashLight = true)) }),
       // TODO: Add an X on the right side to clear the content
       input(className := "item-search-input", onChange := changed _, placeholder := "Search...", autoFocus := true, value := state.searchString),
       results

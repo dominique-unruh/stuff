@@ -1,18 +1,12 @@
 @import views.html.helper.CSRF
 @(form: Form[AuthenticationController.Login])(implicit assetsFinder: AssetsFinder, requestHeader: RequestHeader)
 
-<html lang="en">
-    <head>
-        <title>Stuff - Login</title>
-        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("stylesheets/main.css")">
-    </head>
-    <body>
-        <h1>Sign in</h1>
-        @helper.form(routes.AuthenticationController.authenticate()) {
-            @CSRF.formField
-            <p><input type="text" name="user" placeholder="Username" value="@form("user").value"></p>
-            <p><input type="password" name="password" placeholder="Password"></p>
-            <p><button type="submit">Login</button></p>
-        }
-    </body>
-</html>
+@main(title="Log in"){
+    <h1>Sign in</h1>
+    @helper.form(routes.AuthenticationController.authenticate()) {
+        @CSRF.formField
+        <p><input type="text" name="user" placeholder="Username" value="@form("user").value"></p>
+        <p><input type="password" name="password" placeholder="Password"></p>
+        <p><button type="submit">Login</button></p>
+    }
+}

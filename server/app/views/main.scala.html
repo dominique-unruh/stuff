@@ -1,0 +1,16 @@
+@import play.twirl.api.HtmlFormat
+@(title: String = "", onload: String = "", header: Html = HtmlFormat.empty)(content: Html)
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>@if(title.nonEmpty) {@title – } else {}Stuff: manage your things</title>
+        <link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/main.css")">
+        <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        @header
+    </head>
+    <body onload="@onload">
+        @content
+    </body>
+</html>

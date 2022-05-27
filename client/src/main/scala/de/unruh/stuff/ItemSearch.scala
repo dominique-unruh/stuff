@@ -3,16 +3,13 @@ package de.unruh.stuff
 import autowire.clientCallable
 import de.unruh.stuff.shared.{AjaxApi, Code, Item, Utils}
 import org.scalajs.dom.window.alert
-import org.scalajs.dom.{Event, HTMLInputElement, MediaTrackConstraintSet, MediaTrackConstraints, console, window}
-import slinky.core.{Component, SyntheticEvent, TagElement}
+import org.scalajs.dom.{Event, MediaTrackConstraints, console}
+import slinky.core.{Component, SyntheticEvent}
 import slinky.core.annotations.react
 import slinky.core.facade.{React, ReactElement, ReactRef}
 import slinky.web.html.{autoFocus, button, className, div, h1, input, onChange, onClick, placeholder, value}
 
-import scala.collection.mutable.ListBuffer
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-import scala.scalajs.js
-import scala.scalajs.js.PropertyDescriptor
 import scala.util.{Failure, Success}
 
 @react class ItemSearch extends Component {
@@ -53,13 +50,6 @@ import scala.util.{Failure, Success}
     doSearch(s"${Utils.addSpaceIfNeeded(state.searchString)}code:$code ")
   }
 
-/*  private val torchConstraint =
-  js.Object.defineProperty(this, "torch", new PropertyDescriptor {
-    enumerable = true
-    value = true
-  })*/
-
-
   private val videoConstraints = new MediaTrackConstraints {
     aspectRatio = 1
     facingMode = "environment"
@@ -67,35 +57,21 @@ import scala.util.{Failure, Success}
 
   val qrCodeRef: ReactRef[QrCode] = React.createRef[QrCode]
 
-//  window.setTimeout({ () => qrCodeRef.current.setTorch(true) }, 3000  )
-
   override def render(): ReactElement = {
     val results : ReactElement =
       if (state.error) {
         // TODO Nicer formatting (e.g., https://mui.com/material-ui/react-alert/)
-        h1("Failed to load results")
-//      } else if (state.waiting) {
-//        // TODO: User overlaid rotating circle, appearing only after 800ms (https://mui.com/material-ui/react-progress/) (Better?: https://mui.com/material-ui/react-backdrop/)
-//        h1("Waiting for results")
+        h1("Failed to load results", className := "search-failed")
       } else if (state.results.isEmpty) {
         // TODO Nicer formatting (https://mui.com/material-ui/react-alert/ ?)
-        h1("Nothing found")
+        h1("Nothing found", className := "no-search-results")
       } else ItemList(state.results, props.onClick)
 
-/*    val qrbox = QrCode.Box.Function { (width: Double, height: Double) =>
-      val size = width.min(height) * 0.8
-      (size, size)
-    }*/
-
-    div (className := "item-search") (
+    div (className := Utils.joinClasses("item-search", if (state.waiting) "state-waiting" else null)) (
       QrCode(onDetect = qrcode, constraints = videoConstraints).withRef(qrCodeRef),
       button("Flashlight", onClick := { _ => qrCodeRef.current.setTorch(true) }),
       // TODO: Add an X on the right side to clear the content
       input(className := "item-search-input", onChange := changed _, placeholder := "Search...", autoFocus := true, value := state.searchString),
-//      TextField(TextField.Props(
-//        fullWidth = true, placeholder = "Search", variant = TextField.FILLED,
-//        autoFocus = true, onChange = changed _)),
-//      s"waiting=${state.waiting}, error=${state.error}, searchString=${state.searchString}",
       results
     )
   }

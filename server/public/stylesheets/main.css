@@ -125,6 +125,10 @@ body {
     margin-top: .3rem;
 }
 
+.state-waiting > .item-list {
+    filter: blur(.5ex);
+}
+
 .item-search-input {
     width: 100%;
     border: none;
@@ -141,7 +145,8 @@ body {
 
 .qrcode-scanner video {
     max-height: 40vh;
-    border-radius: 4vh;
+    border-radius: 4vh; /* 20vh for a circle */
+    /*box-shadow: 0 0 4vh 0 black;*/
 }
 
 @media print {

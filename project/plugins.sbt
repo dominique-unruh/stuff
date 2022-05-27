@@ -9,3 +9,4 @@ addSbtPlugin("com.typesafe.sbt"          % "sbt-gzip"                  % "1.0.2"
 addSbtPlugin("com.typesafe.sbt"          % "sbt-digest"                % "1.1.4")
 //addSbtPlugin("org.scalablytyped.converter" % "sbt-converter"           % "1.0.0-beta37")
 addSbtPlugin("ch.epfl.scala" % "sbt-web-scalajs-bundler" % "0.20.0")
+addSbtPlugin("com.heroku" % "sbt-heroku" % "2.1.4")

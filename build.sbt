@@ -1,4 +1,5 @@
 import play.sbt.routes.RoutesKeys
+import sbt.Compile
 
 ThisBuild / organization := "de.unruh"
 ThisBuild / scalaVersion := "2.13.8"
@@ -51,3 +52,9 @@ lazy val shared = crossProject(JSPlatform, JVMPlatform)
   )
   .in(file("shared"))
 //  .jsConfigure(_.enablePlugins(ScalaJSBundlerPlugin))
+
+Compile / herokuAppName := "unruh-stuff"
+Compile / herokuJdkVersion := "11"
+Compile / herokuProcessTypes := Map(
+  "web" -> "target/universal/stage/bin/server -Dhttp.port=$PORT -Dconfig.file=server/conf/heroku.conf",
+)

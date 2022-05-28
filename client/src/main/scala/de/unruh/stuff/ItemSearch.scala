@@ -27,7 +27,7 @@ object ItemSearch {
       if (results.isEmpty) {
         // TODO Nicer formatting (https://mui.com/material-ui/react-alert/ ?)
         h1("Nothing found", className := "no-search-results")
-      } else div(ItemList(results, props.onClick).toScalaJSReact)
+      } else div(ItemList(results, props.onClick))
     }
 
     private def changed(event: ReactFormEventFromInput) =
@@ -82,7 +82,7 @@ object ItemSearch {
   private val initialState = State()
 
   //noinspection TypeAnnotation
-  val Component: Component[Props, State, Backend, CtorType.Props] = ScalaComponent.builder[Props]
+  val Component = ScalaComponent.builder[Props]
     .initialState(initialState)
     .renderBackend[Backend]
     .build

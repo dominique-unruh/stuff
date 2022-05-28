@@ -2,17 +2,25 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
+# Paths involved in the single-page part of the app
 GET     /                             controllers.Application.app
+
+# Files attached to items
 GET     /files/:user/:id/:file        controllers.Application.file(user, id: Long, file)
+
+# QR code generation
 GET     /qrsheet                      controllers.Application.qrSheet()
 GET     /qrcode                       controllers.Application.qrCode(content: String, size: Int)
 
+# Ajax queries
 POST    /api/*method                controllers.Application.ajaxApi(method)
 
+# Assets
 # Prefix must match `play.assets.urlPrefix`
 GET        /assets/*file                 controllers.Assets.at(file)
 GET        /versionedAssets/*file        controllers.Assets.versioned(path="/public", file: Asset)
 
+# Authentication
 GET     /login                      controllers.AuthenticationController.login()
 GET     /logout                     controllers.AuthenticationController.logout()
 POST    /login                      controllers.AuthenticationController.authenticate()

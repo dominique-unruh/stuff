@@ -30,6 +30,7 @@ lazy val client = project
   .settings(
     libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.2.0",
     libraryDependencies += "com.github.japgolly.scalajs-react" %%% "core" % "2.1.1",
+    libraryDependencies += "com.github.japgolly.scalajs-react" %%% "extra" % "2.1.1",
     scalacOptions += "-Ymacro-annotations",
     Compile / npmDependencies  ++= Seq(
       "react" -> "17.0.2",

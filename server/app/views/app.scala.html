@@ -1,4 +1,3 @@
-@import play.twirl.api.utils.StringEscapeUtils
 @import views.html.helper.CSRF
 @import play.twirl.api.utils.StringEscapeUtils.escapeEcmaScript
 @(username: String)(implicit requestHeader: RequestHeader)
@@ -9,7 +8,7 @@
 }
 
 @main(header = header,
-      onload = s"test('${StringEscapeUtils.escapeEcmaScript(username)}')") {
+      onload = "appMain()") {
 
     <div id="react-root">
         <h1>Loading...</h1>

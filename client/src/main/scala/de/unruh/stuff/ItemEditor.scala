@@ -1,25 +1,14 @@
 package de.unruh.stuff
 
-import de.unruh.stuff.ItemListItem.{Props, loadAndRender, onError, renderBody}
 import de.unruh.stuff.shared.Item
 import japgolly.scalajs.react.{React, ScalaComponent}
 import japgolly.scalajs.react.callback.AsyncCallback
 import japgolly.scalajs.react.component.Scala.Unmounted
 import japgolly.scalajs.react.vdom.{TagMod, VdomElement, all}
 import japgolly.scalajs.react.vdom.all.{className, div, h1, h2, href, img, li, onClick, src}
-import org.scalajs.dom.console
-import slinky.core.facade.ReactElement
-//import slinky.core.{Component, WithAttrs}
-//import slinky.core.annotations.react
-//import slinky.core.facade.ReactElement
-//import slinky.web.html.{a, className, div, h1, h2, href, img, key, li, p, src, style, width}
 
 import java.net.URI
-import scala.collection.mutable.ListBuffer
-import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-import scala.scalajs.js
-import scala.util.{Failure, Success}
 
 import japgolly.scalajs.react.vdom.Implicits._
 
@@ -28,16 +17,6 @@ object ItemEditor {
 
   def apply(props: Props): Unmounted[Props, Unit, Unit] = Component(props)
   def apply(itemId: Item.Id): Unmounted[Props, Unit, Unit] = apply(Props(itemId))
-
-//  case class State(itemId: Item.Id, item: Option[Item] = None)
-//  override def initialState: State = State(itemId = props.itemId)
-
-/*  // TODO: also react to itemId updates, see ItemListItem
-  override def componentDidMount(): Unit =
-  // TODO: also handle failures (user feedback)
-    DbCache.getItem(state.itemId).onComplete
-      { case Success(item) => setState(_.copy(item = Some(item)))
-      case Failure(exception) => console.warn(exception) }*/
 
   def renderBody(item: Item): VdomElement = {
     def url(url: URI) = ExtendedURL.resolve(JSVariables.username, url)

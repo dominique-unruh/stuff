@@ -31,12 +31,7 @@ lazy val client = project
   .settings(
     libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.2.0",
     libraryDependencies += "com.github.japgolly.scalajs-react" %%% "core" % "2.1.1",
-    libraryDependencies += "me.shadaj" %%% "slinky-core" % "0.7.2", // TODO remove
-    libraryDependencies += "me.shadaj" %%% "slinky-web" % "0.7.2", // TODO remove
-    libraryDependencies += "me.shadaj" %%% "slinky-scalajsreact-interop" % "0.7.2", // TODO remove
-    dependencyOverrides += "com.github.japgolly.scalajs-react" %%% "core" % "2.1.1", // TODO remove
-    libraryDependencies += "com.github.japgolly.scalajs-react" %%% "extra" % "2.1.1", // TODO remove maybe
-      scalacOptions += "-Ymacro-annotations",
+    scalacOptions += "-Ymacro-annotations",
     Compile / npmDependencies  ++= Seq(
       "react" -> "17.0.2",
       "react-dom" -> "17.0.2",

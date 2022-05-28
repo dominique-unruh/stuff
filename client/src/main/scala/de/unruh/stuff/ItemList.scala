@@ -16,7 +16,6 @@ import org.scalajs.dom.console
 import scala.util.{Failure, Success}
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import japgolly.scalajs.react.vdom.Implicits._
-import slinky.scalajsreact.Converters._
 
 object ItemListItem {
   case class Props(itemId: Item.Id, onClick: Item.Id => Unit = { _ => () })

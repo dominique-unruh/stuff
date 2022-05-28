@@ -5,17 +5,11 @@ import de.unruh.stuff.shared.{AjaxApi, Item, SharedMessages}
 import japgolly.scalajs.react.vdom.{VdomElement, VdomNode}
 import org.scalajs.dom
 import org.scalajs.dom.{Event, HTMLInputElement, console, document}
-import slinky.core.{Component, CustomAttribute, CustomTag, ExternalComponent, ExternalComponentNoProps, ExternalComponentWithAttributes, ExternalComponentWithRefType, SyntheticEvent, WithAttrs}
-import slinky.core.annotations.react
-import slinky.core.facade.ReactElement
-import slinky.web.ReactDOM
-import slinky.web.html.{`type`, div, h1, input, onChange, value}
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.scalajs.js
 import scala.scalajs.js.annotation.{JSExportTopLevel, JSImport}
 import scala.scalajs.js.{UndefOr, |}
-import slinky.scalajsreact.Converters._
 
 
 

@@ -64,8 +64,6 @@ object ItemSearch {
       }
 
     def render(implicit props: Props, state: State): VdomNode = {
-//      import japgolly.scalajs.react.vdom.all._
-
       div (className := "item-search") (
         QrCode(onDetect = qrcode, constraints = videoConstraints, flashLight = state.flashLight)/*.withRef(qrCodeRef)*/,
         button(onClick --> bs.modState(_.copy(flashLight = true)), "Flashlight"),

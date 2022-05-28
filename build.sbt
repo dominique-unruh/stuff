@@ -1,4 +1,3 @@
-import play.sbt.routes.RoutesKeys
 import sbt.Compile
 
 ThisBuild / organization := "de.unruh"
@@ -52,6 +51,7 @@ lazy val shared = crossProject(JSPlatform, JVMPlatform)
   .in(file("shared"))
 //  .jsConfigure(_.enablePlugins(ScalaJSBundlerPlugin))
 
+// Doesn't work:
 Compile / herokuAppName := "unruh-stuff"
 Compile / herokuJdkVersion := "11"
 Compile / herokuProcessTypes := Map(

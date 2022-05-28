@@ -1,9 +1,6 @@
 package de.unruh.stuff
 
-import de.unruh.stuff.ItemSearch.{Backend, Props, initialState}
-import de.unruh.stuff.zxing.BrowserMultiFormatReader
 import japgolly.scalajs.react.component.Scala.Unmounted
-import japgolly.scalajs.react.util.Effect.callback
 import japgolly.scalajs.react.vdom.{VdomElement, all}
 import japgolly.scalajs.react.vdom.all.{className, div, video}
 import japgolly.scalajs.react.{BackendScope, Callback, ScalaComponent}

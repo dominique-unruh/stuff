@@ -5,7 +5,7 @@ import japgolly.scalajs.react.{React, ScalaComponent}
 import japgolly.scalajs.react.callback.AsyncCallback
 import japgolly.scalajs.react.component.Scala.Unmounted
 import japgolly.scalajs.react.vdom.{TagMod, VdomElement, all}
-import japgolly.scalajs.react.vdom.all.{className, div, h1, h2, href, img, li, onClick, src}
+import japgolly.scalajs.react.vdom.all.{className, div, h1, h2, href, img, li, src}
 
 import java.net.URI
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue

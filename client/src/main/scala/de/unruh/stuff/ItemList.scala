@@ -1,37 +1,20 @@
 package de.unruh.stuff
 
-import de.unruh.stuff.ItemSearch.{Backend, Props, State, initialState}
 import de.unruh.stuff.shared.Item
 import japgolly.scalajs.react.callback.AsyncCallback
 import japgolly.scalajs.react.{Callback, React, ScalaComponent}
 import japgolly.scalajs.react.component.Scala.Unmounted
 import japgolly.scalajs.react.vdom.all.{className, div, h1, img, onClick}
 import japgolly.scalajs.react.vdom.{TagMod, VdomElement, VdomNode, all}
-import org.scalajs.dom.console
-//import slinky.core.{Component, StatelessComponent}
-//import slinky.core.annotations.react
-//import slinky.core.facade.ReactElement
-//import slinky.web.html.{className, div, img, key, src}
 
-import scala.util.{Failure, Success}
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import japgolly.scalajs.react.vdom.Implicits._
 
 object ItemListItem {
   case class Props(itemId: Item.Id, onClick: Item.Id => Unit = { _ => () })
-  /*case class State(
-                  /** Item that we have last requested from server */
-                    itemId : Item.Id = Item.INVALID_ID,
-                  /** Data of the item (as loaded from server or cache) */
-                  item: Option[Item] = None)
-
-  class Backend {}
-
-  private val initialState = State()*/
 
   //noinspection TypeAnnotation
   val Component = ScalaComponent.builder[Props]
-//    .initialState(initialState)
     .render_P(render(_))
     .build
 
@@ -88,8 +71,7 @@ object ItemList {
   def apply(props: Props): Unmounted[Props, Unit, Unit] = Component(props)
 
   def render(props: Props) : VdomNode = {
-    val listItems: Seq[VdomNode] = props.items.zipWithIndex.map {
-      case (item, idx) => ItemListItem(item, props.onClick) }
+    val listItems: Seq[VdomNode] = props.items.map(ItemListItem(_, props.onClick))
     all.div(all.className := "item-list")(listItems :_*)
   }
 

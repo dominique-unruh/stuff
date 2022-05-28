@@ -6,11 +6,17 @@
 @header = {
     <script>let stuff_csrf_token = "@CSRF.getToken.value";
     let stuff_username = "@escapeEcmaScript(username)"</script>
-    @scalajs.html.scripts("client", routes.Assets.versioned(_).toString,
-                           name => getClass.getResource(s"/public/$name") != null)
 }
 
 @main(header = header,
       onload = s"test('${StringEscapeUtils.escapeEcmaScript(username)}')") {
-    <div id="react-root"></div>
+
+    <div id="react-root">
+        <h1>Loading...</h1>
+
+        <b>(If nothing ever appears, please make sure JavaScript is enabled.)</b>
+    </div>
+
+    @scalajs.html.scripts("client", routes.Assets.versioned(_).toString,
+        name => getClass.getResource(s"/public/$name") != null)
 }

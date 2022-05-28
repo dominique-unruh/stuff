@@ -32,7 +32,7 @@ import scala.util.Random
       else
         console.warn(exn, exception)
     } else {
-      console.log("Scan success", result, exception)
+//      console.log("Scan success", result, exception)
       props.onDetect(zxing.BarcodeFormat.fromT(result.getBarcodeFormat()).map(_.toString), result.getText())
     }
   }

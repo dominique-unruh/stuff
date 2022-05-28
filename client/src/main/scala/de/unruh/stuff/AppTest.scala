@@ -2,6 +2,7 @@ package de.unruh.stuff
 
 import autowire.clientCallable
 import de.unruh.stuff.shared.{AjaxApi, Item, SharedMessages}
+import japgolly.scalajs.react.vdom.{VdomElement, VdomNode}
 import org.scalajs.dom
 import org.scalajs.dom.{Event, HTMLInputElement, console, document}
 import slinky.core.{Component, CustomAttribute, CustomTag, ExternalComponent, ExternalComponentNoProps, ExternalComponentWithAttributes, ExternalComponentWithRefType, SyntheticEvent, WithAttrs}
@@ -14,7 +15,7 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.scalajs.js
 import scala.scalajs.js.annotation.{JSExportTopLevel, JSImport}
 import scala.scalajs.js.{UndefOr, |}
-
+import slinky.scalajsreact.Converters._
 
 
 
@@ -56,11 +57,19 @@ object AppTest {
 //    val call = AjaxApiClient[AjaxApi].search("").call()
 //    call.onComplete(result => console.log(result.toString))
     val root = document.getElementById("react-root")
+    val itemSearch : VdomElement = ItemSearch.Component(ItemSearch.Props(onClick = {
+      item:Item.Id =>
+        ReactDOM.render(ItemEditor(item), root)
+    }))
+
+    itemSearch.renderIntoDOM(root)
+/*
     ReactDOM.render(
       ItemSearch(onClick = {
         item:Item.Id =>
           ReactDOM.render(ItemEditor(item), root)
       }),
       root)
+*/
   }
 }

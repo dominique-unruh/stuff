@@ -9,7 +9,6 @@ import japgolly.scalajs.react.vdom.all.{autoFocus, button, className, div, h1, o
 import japgolly.scalajs.react.vdom.Implicits._
 import japgolly.scalajs.react.{AsyncCallback, BackendScope, CtorType, React, ReactFormEventFromInput, ScalaComponent}
 import org.scalajs.dom.{MediaTrackConstraints, console}
-import slinky.scalajsreact.Converters._
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
@@ -68,7 +67,7 @@ object ItemSearch {
 //      import japgolly.scalajs.react.vdom.all._
 
       div (className := "item-search") (
-        QrCode(onDetect = qrcode, constraints = videoConstraints, flashLight = state.flashLight).toScalaJSReact/*.withRef(qrCodeRef)*/,
+        QrCode(onDetect = qrcode, constraints = videoConstraints, flashLight = state.flashLight)/*.withRef(qrCodeRef)*/,
         button(onClick --> bs.modState(_.copy(flashLight = true)), "Flashlight"),
         // TODO: Add an X on the right side to clear the content
         all.input(className := "item-search-input", onChange ==> changed,

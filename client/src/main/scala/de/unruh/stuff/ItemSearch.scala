@@ -2,7 +2,7 @@ package de.unruh.stuff
 
 import autowire.clientCallable
 import de.unruh.stuff.shared.{AjaxApi, Code, Item, Utils}
-import japgolly.scalajs.react.component.Scala.Component
+import japgolly.scalajs.react.component.Scala.{Component, Unmounted}
 import japgolly.scalajs.react.util.DefaultEffects
 import japgolly.scalajs.react.vdom.{VdomElement, VdomNode, all}
 import japgolly.scalajs.react.vdom.all.{autoFocus, button, className, div, h1, onChange, onClick, placeholder, value}
@@ -16,6 +16,10 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 object ItemSearch {
   case class Props(onClick: Item.Id => Unit = { _ => () })
   case class State(searchString: String = "", flashLight: Boolean = false)
+
+  def apply(props: Props): Unmounted[Props, State, Backend] = Component(props)
+  def apply(onClick: Item.Id => Unit = { _ => () }): Unmounted[Props, State, Backend] =
+    Component(Props(onClick=onClick))
 
   class Backend(bs: BackendScope[Props, State]) {
     def loadAndRenderResults(searchString: String)(implicit props: Props) : AsyncCallback[VdomElement] =

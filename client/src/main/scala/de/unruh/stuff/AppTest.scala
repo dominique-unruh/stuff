@@ -54,22 +54,10 @@ import slinky.scalajsreact.Converters._
 object AppTest {
   @JSExportTopLevel("test")
   def test(username: String): Unit = {
-//    val call = AjaxApiClient[AjaxApi].search("").call()
-//    call.onComplete(result => console.log(result.toString))
+    // TODO: use a router
     val root = document.getElementById("react-root")
-    val itemSearch : VdomElement = ItemSearch.Component(ItemSearch.Props(onClick = {
-      item:Item.Id =>
-        ReactDOM.render(ItemEditor(item), root)
-    }))
-
-    itemSearch.renderIntoDOM(root)
-/*
-    ReactDOM.render(
-      ItemSearch(onClick = {
-        item:Item.Id =>
-          ReactDOM.render(ItemEditor(item), root)
-      }),
-      root)
-*/
+    ItemSearch(onClick = {
+      item:Item.Id => ItemEditor(item).renderIntoDOM(root)
+    }).renderIntoDOM(root)
   }
 }

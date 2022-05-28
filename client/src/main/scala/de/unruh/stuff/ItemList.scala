@@ -76,7 +76,7 @@ object ItemListItem {
 
   def render(implicit props: Props): VdomElement = {
     React.Suspense(
-      fallback = div(onClick --> onClickHandler, all.className := "item-list-item", "LOADING"), // TODO
+      fallback = div(onClick --> onClickHandler, className := "item-list-item", "LOADING"), // TODO
       asyncBody = loadAndRender.handleError(onError))
   }
 }

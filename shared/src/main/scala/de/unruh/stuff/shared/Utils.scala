@@ -1,5 +1,7 @@
 package de.unruh.stuff.shared
 
+import java.util.concurrent.atomic.AtomicInteger
+
 object Utils {
   @deprecated("scalajs-react has support for this", "now")
   def joinClasses(classes: String*): String =
@@ -10,4 +12,7 @@ object Utils {
       str
     else
       str + " "
+
+  private val atomicInteger = new AtomicInteger(0)
+  def uniqueId() : Int = atomicInteger.incrementAndGet()
 }

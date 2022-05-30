@@ -2,6 +2,8 @@ package de.unruh.stuff
 
 import autowire.clientCallable
 import de.unruh.stuff.shared.{AjaxApi, Code, Item, Utils}
+import io.kinoplan.scalajs.react.material.ui.core.MuiInput
+import japgolly.scalajs.react.callback.Callback
 import japgolly.scalajs.react.component.Scala.{Component, Unmounted}
 import japgolly.scalajs.react.util.DefaultEffects
 import japgolly.scalajs.react.vdom.{VdomElement, VdomNode, all}
@@ -11,7 +13,10 @@ import japgolly.scalajs.react.{AsyncCallback, BackendScope, CtorType, React, Rea
 import org.scalajs.dom.{MediaTrackConstraints, console}
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+import scala.scalajs.js
 
+// TODO: Allow to activate/deactivate camera
+// TODO: Automatically deactivate camera after inactivity
 object ItemSearch {
   case class Props(onClick: Item.Id => Unit = { _ => () })
   case class State(searchString: String = "", flashLight: Boolean = false)
@@ -67,8 +72,8 @@ object ItemSearch {
       div (className := "item-search") (
         QrCode(onDetect = qrcode, constraints = videoConstraints, flashLight = state.flashLight)/*.withRef(qrCodeRef)*/,
         button(onClick --> bs.modState(_.copy(flashLight = true)), "Flashlight"),
-        // TODO: Add an X on the right side to clear the content
-        all.input(className := "item-search-input", onChange ==> changed,
+        MuiInput(inputProps = js.Dynamic.literal(`type`="search", label="Search", `aria-label`="Search"))
+          (className := "item-search-input", onChange ==> changed,
           placeholder := "Search...", autoFocus := true,
           value := state.searchString),
         React.Suspense(

@@ -29,8 +29,6 @@ object AjaxApiImpl extends AjaxApi {
 
   override def updateItem(item: Item): Unit = {
     Yaml.updateItem(dbPath, item)
-    // TODO implement
-    println(s"Ignoring update: $item")
   }
 }
 

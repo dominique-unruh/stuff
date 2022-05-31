@@ -31,43 +31,53 @@ object Yaml {
     override def read(yaml: YamlValue): Code = Code(yaml.convertTo[String])
   }
 
-  private def readField[A: YamlReader](yaml: YamlValue, name: String): A =
-    readFieldOption[A](yaml, name).getOrElse {
-      throw new IOException(s"Invalid yaml file: field $name missing.")
+  private def readField[A: YamlReader](yaml: YamlValue, field: Fields.Value): A =
+    readFieldOption[A](yaml, field).getOrElse {
+      throw new IOException(s"Invalid yaml file: field $field missing.")
     }
 
-  private def readFieldOption[A: YamlReader](yaml: YamlValue, name: String): Option[A] = yaml match {
-    case YamlObject(fields) => fields.get(YamlString(name)).map(_.convertTo[A])
+  private def readFieldOption[A: YamlReader](yaml: YamlValue, field: Fields.Value): Option[A] = yaml match {
+    case YamlObject(fields) => fields.get(YamlString(field.toString)).map(_.convertTo[A])
     case _ => throw new IOException("Invalid yaml file")
   }
 
-  private def readFieldDefault[A: YamlReader](yaml: YamlValue, name: String, default: => A): A =
-    readFieldOption[A](yaml, name).getOrElse(default)
+  private def readFieldDefault[A: YamlReader](yaml: YamlValue, field: Fields.Value, default: => A): A =
+    readFieldOption[A](yaml, field).getOrElse(default)
 
-  private def writeField[A: YamlWriter](value: A, name: String, condition: A => Boolean = { _:A => true }): Option[(YamlString, YamlValue)] =
+  private def writeField[A: YamlWriter](value: A, field: Fields.Value, condition: A => Boolean = { _:A => true }): Option[(YamlString, YamlValue)] =
     if (condition(value))
-      Some(YamlString(name) -> value.toYaml)
+      Some(YamlString(field.toString) -> value.toYaml)
     else
       None
 
+  object Fields extends Enumeration {
+    val id, name, description, photos, links, codes, files = Value
+  }
+
   implicit object itemFormat extends YamlFormat[Item] {
     override def write(item: Item): YamlObject = YamlObject(Seq(
-      writeField(item.id, "id"),
-      writeField(item.name, "name"),
-      writeField[RichText](item.description, "description", _.nonEmpty),
-      writeField[Seq[URI]](item.photos, "photos", _.nonEmpty),
-      writeField[Seq[URI]](item.links, "links", _.nonEmpty),
-      writeField[Seq[Code]](item.codes, "codes", _.nonEmpty),
+      writeField(item.id, Fields.id),
+      writeField(item.name, Fields.name),
+      writeField[RichText](item.description, Fields.description, _.nonEmpty),
+      writeField[Seq[URI]](item.photos, Fields.photos, _.nonEmpty),
+      writeField[Seq[URI]](item.links, Fields.links, _.nonEmpty),
+      writeField[Seq[Code]](item.codes, Fields.codes, _.nonEmpty),
     ).collect { case Some(v) => v } :_*)
 
-    override def read(yaml: YamlValue): Item =
-      Item(id = readField[Long](yaml, "id"),
-        name = readField[String](yaml, "name"),
-        description = readFieldDefault(yaml, "description", RichText.empty),
-        photos = readFieldDefault[Seq[URI]](yaml, "photos", Nil),
-        links = readFieldDefault[Seq[URI]](yaml, "links", Nil),
-        codes = readFieldDefault[Seq[Code]](yaml, "codes", Nil),
+    override def read(yaml: YamlValue): Item = {
+      assert(yaml.isInstanceOf[YamlObject])
+      for (key <- yaml.asYamlObject.fields.keys) {
+        assert(key.isInstanceOf[YamlString])
+        Fields.withName(key.asInstanceOf[YamlString].value) // Throws exception if key is not a known key
+      }
+      Item(id = readField[Long](yaml, Fields.id),
+        name = readField[String](yaml, Fields.name),
+        description = readFieldDefault(yaml, Fields.description, RichText.empty),
+        photos = readFieldDefault[Seq[URI]](yaml, Fields.photos, Nil),
+        links = readFieldDefault[Seq[URI]](yaml, Fields.links, Nil),
+        codes = readFieldDefault[Seq[Code]](yaml, Fields.codes, Nil),
       )
+    }
   }
 
   def parse(yaml: String): Item = yaml.parseYaml.convertTo[Item]

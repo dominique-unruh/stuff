@@ -62,8 +62,7 @@ object Code {
                  val links: Seq[URI] = Nil,
                  /** QR / barcodes */
                  val codes: Seq[Code] = Nil,
-               ) {
-}
+               )
 
 object Item {
   private def newID() = Random.nextLong()

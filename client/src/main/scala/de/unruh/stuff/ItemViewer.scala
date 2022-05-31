@@ -44,13 +44,6 @@ object ItemViewer {
         } else
           TagMod.empty,
 
-        if (item.links.nonEmpty) {
-          val links = for (link <- item.links)
-            yield li(all.a(href := link.toString)(link.toString))
-          div(className := "item-links")(links: _*)
-        } else
-          TagMod.empty,
-
         if (item.codes.nonEmpty) {
           val codes = for ((link, i) <- item.codes.zipWithIndex)
             yield li(link.toString)

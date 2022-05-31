@@ -1,5 +1,6 @@
 package de.unruh.stuff.db
 
+import de.unruh.stuff.Paths
 import de.unruh.stuff.shared.{Code, Item, RichText}
 import net.jcazevedo.moultingyaml.{DefaultYamlProtocol, PimpedAny, PimpedString, YamlFormat, YamlObject, YamlReader, YamlString, YamlValue, YamlWriter}
 
@@ -51,7 +52,7 @@ object Yaml {
       None
 
   object Fields extends Enumeration {
-    val id, name, description, photos, links, codes, files = Value
+    val id, name, description, photos, codes, files = Value
   }
 
   implicit object itemFormat extends YamlFormat[Item] {
@@ -60,7 +61,6 @@ object Yaml {
       writeField(item.name, Fields.name),
       writeField[RichText](item.description, Fields.description, _.nonEmpty),
       writeField[Seq[URI]](item.photos, Fields.photos, _.nonEmpty),
-      writeField[Seq[URI]](item.links, Fields.links, _.nonEmpty),
       writeField[Seq[Code]](item.codes, Fields.codes, _.nonEmpty),
     ).collect { case Some(v) => v } :_*)
 
@@ -74,7 +74,6 @@ object Yaml {
         name = readField[String](yaml, Fields.name),
         description = readFieldDefault(yaml, Fields.description, RichText.empty),
         photos = readFieldDefault[Seq[URI]](yaml, Fields.photos, Nil),
-        links = readFieldDefault[Seq[URI]](yaml, Fields.links, Nil),
         codes = readFieldDefault[Seq[Code]](yaml, Fields.codes, Nil),
       )
     }
@@ -86,7 +85,7 @@ object Yaml {
 
   def loadDb(path: Path): Map[Long, Item] = {
     Map.from(
-      for (file <- Files.list(path.resolve("items")).iterator.asScala;
+      for (file <- Files.list(Paths.itemsPath(path)).iterator.asScala;
            filename = file.getFileName.toString;
            if !filename.startsWith(".")
            if !filename.endsWith("~")
@@ -101,7 +100,7 @@ object Yaml {
 
   def updateItem(path: Path, item: Item): Unit = {
     assert(item.id != Item.INVALID_ID && item.id >= 0)
-    val itemPath = path.resolve("items").resolve(s"${item.id}.yaml")
+    val itemPath = Paths.itemsPath(path).resolve(s"${item.id}.yaml")
     assert(Files.exists(itemPath))
     val yaml = item.toYaml.prettyPrint
     Files.writeString(itemPath, yaml)

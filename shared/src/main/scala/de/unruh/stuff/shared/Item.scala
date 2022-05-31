@@ -58,14 +58,12 @@ object Code {
                  val description: RichText = RichText.empty,
                  /** Photos of the item. */
                  val photos: Seq[URI] = Nil,
-                 /** Links */
-                 val links: Seq[URI] = Nil,
                  /** QR / barcodes */
                  val codes: Seq[Code] = Nil,
                )
 
 object Item {
-  private def newID() = Random.nextLong()
+  private def newID(): Item.Id = Random.nextLong()
 /*  val testItems: Seq[Item] = Seq(
     Item(name="Shoe"),
     Item(name="Hat", description = RichText.html("A little test <i>with HTML</i>")),

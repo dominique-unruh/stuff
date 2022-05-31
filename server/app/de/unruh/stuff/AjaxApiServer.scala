@@ -12,7 +12,6 @@ import java.nio.file.Path
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object AjaxApiImpl extends AjaxApi {
-  // TODO: Return only IDs
   // TODO: truncate to reasonable number of results
   // TODO: most recent first
   override def search(searchString: String): Seq[Item.Id] = {

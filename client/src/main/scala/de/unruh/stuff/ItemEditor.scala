@@ -63,19 +63,10 @@ object ItemEditor {
             bs.modState(itemDescription.replace(RichText.html(event.target.value)))
           })),
 
-        // TODO link editor
-        // TODO Do we really need links if we have rich text descriptions?
-        if (item.links.nonEmpty) {
-          val links = for (link <- item.links)
-            yield li(all.a(href := link.toString)(link.toString))
-          div(className := "item-links")(links: _*)
-        } else
-          TagMod.empty,
-
         // TODO code editor
         if (item.codes.nonEmpty) {
-          val codes = for ((link, i) <- item.codes.zipWithIndex)
-            yield li(link.toString)
+          val codes = for (code <- item.codes)
+            yield li(code.toString)
           div(className := "item-codes")(codes: _*)
         } else
           TagMod.empty,

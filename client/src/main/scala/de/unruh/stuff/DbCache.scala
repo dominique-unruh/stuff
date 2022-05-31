@@ -21,15 +21,15 @@ object DbCache {
     }
   }
 
+  private implicit class FinallyFuture[A](val future: Future[A]) extends AnyVal {
+    def finalmente(code: => Unit): Future[A] = future.transform { result => code; result }
+  }
+
   def updateItem(item: Item) : Future[Unit] = {
-    ???
-    /* TODO:
-       store on server via AjaxApiClient[AjaxApi].putItem(id).call()
-       upon completion, set locally  (cache.put)
-       upon failure, invalidate locally  (cache.remove)
-       in both cases, updateCounter += 1
-       pass completion/failure through to return value future
-     */
+    for (_ <- AjaxApiClient[AjaxApi].updateItem(item).call()
+                  .finalmente { updateCounter += 1; cache.remove(item.id) };
+         _ = cache.put(item.id, item))
+      yield ()
   }
 
   private val cache = mutable.HashMap[Item.Id, Item]()

@@ -72,7 +72,7 @@ object ItemSearch {
       div (className := "item-search") (
         QrCode(onDetect = qrcode, constraints = videoConstraints, flashLight = state.flashLight)/*.withRef(qrCodeRef)*/,
         button(onClick --> bs.modState(_.copy(flashLight = true)), "Flashlight"),
-        MuiInput(inputProps = js.Dynamic.literal(`type`="search", label="Search", `aria-label`="Search"))
+        MuiInput(inputProps = js.Dynamic.literal(`type`="search"))
           (className := "item-search-input", onChange ==> changed,
           placeholder := "Search...", autoFocus := true,
           value := state.searchString),

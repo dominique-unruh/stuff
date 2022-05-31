@@ -26,6 +26,11 @@ object AjaxApiImpl extends AjaxApi {
     val db = Yaml.loadDb(dbPath)
     db.getOrElse(id, throw new IllegalArgumentException(s"Unknown item id $id"))
   }
+
+  override def updateItem(item: Item): Unit = {
+    // TODO implement
+    println(s"Ignoring update: $item")
+  }
 }
 
 object AjaxApiServer extends autowire.Server[JsValue, upickle.default.Reader, upickle.default.Writer] {

@@ -1,6 +1,7 @@
 package de.unruh.stuff.shared
 
 import de.unruh.stuff.shared.Item.{Id, newID}
+import monocle.macros.Lenses
 import org.apache.commons.text.StringEscapeUtils
 
 import java.io.FileInputStream
@@ -48,7 +49,7 @@ object Code {
   implicit val rw: upickle.default.ReadWriter[Code] = upickle.default.macroRW
 }
 
-case class Item(
+@Lenses case class Item(
                  /** Unique ID */
                  val id: Id = newID(),
                  /** Short name of the item. Plain text. */
@@ -82,4 +83,7 @@ object Item {
 
   /** Represents an id that will never occur */
   val INVALID_ID : Id = -1
+
+  /** An item with id [[INVALID_ID]] and dummy content. */
+  val invalid: Item = Item(id = INVALID_ID, name = "Invalid item: You should never see this. Please file a bug report.")
 }

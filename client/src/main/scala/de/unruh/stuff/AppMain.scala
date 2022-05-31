@@ -75,7 +75,7 @@ object AppMain {
 
     val redirectRoot = staticRedirect(root) ~> redirectToPage(Search)(HistoryReplace)
     val search = staticRoute("#search", Search) ~> renderR(ctl => ItemSearch(onClick = { item => ctl.set(ItemView(item)).runNow() }))
-    val item = dynamicRouteCT("#item" / long.caseClass[ItemView]) ~> { page:ItemView => render(ItemEditor(page.id)) }
+    val item = dynamicRouteCT("#item" / long.caseClass[ItemView]) ~> { page:ItemView => render(ItemViewer(page.id)) }
 
     ( redirectRoot | search | item )
       .notFound(redirectToPage(Search)(HistoryReplace))

@@ -48,9 +48,12 @@ lazy val client = project
 lazy val shared = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
   .settings(
+    scalacOptions += "-Ymacro-annotations",
     libraryDependencies += "org.apache.commons" % "commons-text" % "1.9",
     libraryDependencies += "com.lihaoyi" %%% "autowire" % "0.3.3",
-    libraryDependencies += "com.lihaoyi" %%% "upickle" % "2.0.0"
+    libraryDependencies += "com.lihaoyi" %%% "upickle" % "2.0.0",
+    libraryDependencies += "dev.optics" %%% "monocle-core"  % "3.1.0",
+    libraryDependencies += "dev.optics" %%% "monocle-macro" % "3.1.0",
   )
   .in(file("shared"))
 //  .jsConfigure(_.enablePlugins(ScalaJSBundlerPlugin))

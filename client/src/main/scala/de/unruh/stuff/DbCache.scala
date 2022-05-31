@@ -2,7 +2,7 @@ package de.unruh.stuff
 
 import autowire.clientCallable
 import de.unruh.stuff.shared.{AjaxApi, Item}
-import de.unruh.stuff.shared.Item.Id
+import de.unruh.stuff.shared.Item.{INVALID_ID, Id}
 
 import scala.collection.mutable
 import scala.concurrent.Future
@@ -26,6 +26,7 @@ object DbCache {
   }
 
   def updateItem(item: Item) : Future[Unit] = {
+    assert(item.id != INVALID_ID)
     for (_ <- AjaxApiClient[AjaxApi].updateItem(item).call()
                   .finalmente { updateCounter += 1; cache.remove(item.id) };
          _ = cache.put(item.id, item))

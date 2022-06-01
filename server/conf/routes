@@ -4,6 +4,7 @@
 
 # Paths involved in the single-page part of the app
 GET     /                             controllers.Application.app
+GET     /test                             controllers.Application.test
 
 # Files attached to items
 GET     /files/:user/:id/:file        controllers.Application.file(user, id: Long, file)

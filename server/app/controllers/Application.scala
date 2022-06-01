@@ -28,6 +28,10 @@ class Application @Inject()(cc: ControllerComponents) extends AbstractController
     Ok(views.html.app(username))
   }
 
+  def test: Handler = Action { implicit request =>
+    Ok(views.html.test(username))
+  }
+
   def ajaxApi(method: String): Handler = isAuthenticated { implicit request =>
     val apiRequest = autowire.Core.Request(
       method.split('/').toSeq,

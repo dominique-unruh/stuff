@@ -1,0 +1,21 @@
+@import views.html.helper.CSRF
+@import play.twirl.api.utils.StringEscapeUtils.escapeEcmaScript
+@(username: String)(implicit requestHeader: RequestHeader)
+
+@header = {
+    <script>let stuff_csrf_token = "@CSRF.getToken.value";
+    let stuff_username = "@escapeEcmaScript(username)"</script>
+}
+
+@main(header = header,
+    onload = "test()") {
+
+    <div id="react-root">
+        <h1>Loading...</h1>
+
+        <b>(If nothing ever appears, please make sure JavaScript is enabled.)</b>
+    </div>
+
+    @scalajs.html.scripts("client", routes.Assets.versioned(_).toString,
+        name => getClass.getResource(s"/public/$name") != null)
+}

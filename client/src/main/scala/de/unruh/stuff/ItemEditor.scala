@@ -1,5 +1,6 @@
 package de.unruh.stuff
 
+import de.unruh.stuff.reactsimplewysiwyg.DefaultEditor
 import de.unruh.stuff.shared.{Item, RichText}
 import io.kinoplan.scalajs.react.material.ui.core.MuiInput
 import japgolly.scalajs.react.component.Scala.{Component, Unmounted}
@@ -51,17 +52,15 @@ object ItemEditor {
 
         // TODO photo editor
         if (item.photos.nonEmpty) {
-          val images = for ((photo, i) <- item.photos.zipWithIndex)
+          val images = for (photo <- item.photos)
             yield (img(src := url(photo)): VdomElement)
           div(className := "item-photos")(images: _*)
         } else
           TagMod.empty,
 
-        // TODO rich text, e.g., https://lexical.dev/ (see also https://lexical.dev/docs/concepts/serialization#html)
-        div(textarea(value := item.description.asHtml, className := "item-description",
-          onChange ==> { event: ReactFormEventFromInput =>
-            bs.modState(itemDescription.replace(RichText.html(event.target.value)))
-          })),
+        div(DefaultEditor(value = item.description.asHtml, onChange = { event =>
+          bs.modState(itemDescription.replace(RichText.html(event.target.value))).runNow() })
+          (className := "item-description")),
 
         // TODO code editor
         if (item.codes.nonEmpty) {

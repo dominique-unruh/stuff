@@ -38,6 +38,7 @@ lazy val client = project
       "react-dom" -> "17.0.2",
       "@material-ui/core"  -> "3.9.4",
       "@zxing/library" -> "latest",
+      "react-simple-wysiwyg" -> "latest",
     ),
     Compile / npmExtraArgs += "--legacy-peer-deps",
     webpackBundlingMode := BundlingMode.LibraryAndApplication(),

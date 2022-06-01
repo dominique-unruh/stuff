@@ -90,4 +90,10 @@ object AppMain {
     val router = Router(baseUrl, routerConfig)
     router().renderIntoDOM(root)
   }
+
+  @JSExportTopLevel("test")
+  def test(): Unit = {
+    val root = document.getElementById("react-root")
+    HTMLViewer().renderIntoDOM(root)
+  }
 }

@@ -4,8 +4,8 @@ import de.unruh.stuff.shared.Item
 import japgolly.scalajs.react.callback.AsyncCallback
 import japgolly.scalajs.react.{Callback, React, ScalaComponent}
 import japgolly.scalajs.react.component.Scala.Unmounted
-import japgolly.scalajs.react.vdom.all.{className, div, h1, img, onClick}
-import japgolly.scalajs.react.vdom.{TagMod, VdomElement, VdomNode, all}
+import japgolly.scalajs.react.vdom.all.{className, dangerouslySetInnerHtml, div, h1, img, onClick}
+import japgolly.scalajs.react.vdom.{HtmlAttrs, TagMod, VdomElement, VdomNode, all}
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import japgolly.scalajs.react.vdom.Implicits._
@@ -38,7 +38,8 @@ object ItemListItem {
 
       // Description (if exists)
       if (item.description.nonEmpty)
-        div(className := "item-description")(item.description.asHtml)
+      // TODO: sanitize!?
+        div(dangerouslySetInnerHtml := item.description.asHtml, className := "item-description")
       else
         TagMod.empty
     )

@@ -4,8 +4,8 @@ import de.unruh.stuff.shared.{Item, RichText}
 import japgolly.scalajs.react.{BackendScope, Callback, React, ScalaComponent}
 import japgolly.scalajs.react.callback.AsyncCallback
 import japgolly.scalajs.react.component.Scala.Unmounted
-import japgolly.scalajs.react.vdom.{TagMod, VdomElement, all}
-import japgolly.scalajs.react.vdom.all.{className, div, h1, h2, href, img, li, onClick, src}
+import japgolly.scalajs.react.vdom.{HtmlAttrs, TagMod, VdomElement, all}
+import japgolly.scalajs.react.vdom.all.{className, dangerouslySetInnerHtml, div, h1, h2, href, img, li, onClick, src}
 
 import java.net.URI
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -40,7 +40,8 @@ object ItemViewer {
 
         // TODO HTML view (maybe https://lexical.dev/ in r/o mode?)
         if (item.description.nonEmpty) {
-          div(item.description.asHtml, className := "item-description")
+          // TODO: sanitize!?
+          div(dangerouslySetInnerHtml := item.description.asHtml, className := "item-description")
         } else
           TagMod.empty,
 

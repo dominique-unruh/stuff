@@ -41,12 +41,11 @@ object ItemEditor {
 
     private def cameraOnPhoto(photo: String) : Callback = {
       val url = URI.create(photo)
+      assert(url.getScheme == "data")
       val modify = State.cameraOpen.replace(false)
         .andThen(itemPhotos.modify(_.appended(url)))
       for (_ <- bs.modState(modify))
-        yield {
-          console.log("Photo", photo)
-        }
+        yield {}
     }
 
     private val cameraOnClose : Callback =

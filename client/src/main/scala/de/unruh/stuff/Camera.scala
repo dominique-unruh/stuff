@@ -8,7 +8,7 @@ import japgolly.scalajs.react.component.Scala.{Component, Unmounted}
 import japgolly.scalajs.react.vdom.all.{h1, onClick, untypedRef}
 import japgolly.scalajs.react.vdom.Implicits._
 import japgolly.scalajs.react.vdom.VdomElement
-import org.scalajs.dom.{console, html}
+import org.scalajs.dom.{MediaStreamConstraints, MediaTrackConstraints, console, html}
 
 import scala.scalajs.js
 import scala.scalajs.js.{Thenable, UndefOr, |}
@@ -20,8 +20,9 @@ trait Webcam extends js.Object {
 
 /** Wrapper for https://github.com/mozmorris/react-webcam */
 object Webcam extends ReactBridgeComponent {
-  def apply(audio: Boolean,
-            screenshotFormat: String): WithPropsNoChildren = autoNoChildren
+  def apply(audio: UndefOr[Boolean] = js.undefined,
+            videoConstraints: UndefOr[MediaTrackConstraints] = js.undefined,
+            screenshotFormat: UndefOr[String] = js.undefined): WithPropsNoChildren = autoNoChildren
   @js.native
   @JSImport("react-webcam", JSImport.Namespace) // apparently the module react-webcam does not contain Webcam but *is* Webcam
   private object Webcam extends js.Object
@@ -58,9 +59,10 @@ object Camera {
       MuiDialog(open = props.open,
         onClose = { (e,s) => props.onClose } : ReactHandler2[ReactEvent, String]) (
 
-        // TODO: ensure that we use the environment-camera
-        Webcam(audio=false, screenshotFormat = "image/jpeg")
-        (untypedRef := webcamRef.asInstanceOf[Ref.Simple[html.Element]], onClick --> clickHandler)
+        Webcam(audio=false, screenshotFormat = "image/jpeg",
+          videoConstraints = new MediaTrackConstraints { facingMode = "environment" })
+        (untypedRef := webcamRef.asInstanceOf[Ref.Simple[html.Element]], // Not sure how to do this without this untrue cast...
+          onClick --> clickHandler)
 
       )
     }

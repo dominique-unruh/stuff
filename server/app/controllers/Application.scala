@@ -33,6 +33,7 @@ class Application @Inject()(cc: ControllerComponents) extends AbstractController
   }
 
   def ajaxApi(method: String): Handler = isAuthenticated { implicit request =>
+    // TODO: increase maximum payload size (https://www.playframework.com/documentation/2.8.x/ScalaBodyParsers)
     val apiRequest = autowire.Core.Request(
       method.split('/').toSeq,
       request.body.asJson.get

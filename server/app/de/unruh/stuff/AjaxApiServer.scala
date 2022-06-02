@@ -26,6 +26,7 @@ object AjaxApiImpl extends AjaxApi {
     db.getOrElse(id, throw new IllegalArgumentException(s"Unknown item id $id"))
   }
 
+  // TODO: Replace any data-url photos (or files) by local URLs to files
   override def updateItem(item: Item): Unit = {
     Yaml.updateItem(dbPath, item)
   }

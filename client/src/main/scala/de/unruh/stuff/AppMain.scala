@@ -2,6 +2,7 @@ package de.unruh.stuff
 
 import de.unruh.stuff.shared.Item
 import de.unruh.stuff.shared.Utils
+import io.kinoplan.scalajs.react.material.ui.core.MuiInput
 import japgolly.scalajs.react.{CtorType, ScalaComponent}
 import japgolly.scalajs.react.callback.{Callback, CallbackTo}
 import japgolly.scalajs.react.component.Scala.{BackendScope, Component}
@@ -94,6 +95,11 @@ object AppMain {
   @JSExportTopLevel("test")
   def test(): Unit = {
     val root = document.getElementById("react-root")
-    HTMLViewer().renderIntoDOM(root)
+    Camera(onPhoto = {photo => Callback {console.log("Photo:", photo)}},
+      open = true,
+      onClose = Callback("Camera should be closed")
+    )
+      .renderIntoDOM(root)
+//    HTMLViewer().renderIntoDOM(root)
   }
 }

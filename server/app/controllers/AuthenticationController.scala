@@ -39,10 +39,10 @@ object AuthenticationController {
 trait Authenticated extends BaseController {
   private def usernameOption(request: RequestHeader): Option[String] = request.session.get("user")
   private def onUnauthorized(request: RequestHeader): Result = Results.Redirect(routes.AuthenticationController.login())
+  def isAuthenticated(action: Action[_]): EssentialAction =
+    Authenticated(usernameOption, onUnauthorized) { user => action }
   def isAuthenticated(f: => Request[AnyContent] => Result): EssentialAction =
-    Authenticated(usernameOption, onUnauthorized) { user =>
-      Action(request => f(request))
-    }
+      isAuthenticated(Action(request => f(request)))
   def username(implicit request: Request[_]) : String =
     usernameOption(request).getOrElse(throw new IllegalStateException("username invoked in unauthenticated context"))
 }

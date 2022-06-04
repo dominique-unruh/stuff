@@ -32,18 +32,21 @@ class Application @Inject()(cc: ControllerComponents) extends AbstractController
     Ok(views.html.test(username))
   }
 
-  def ajaxApi(method: String): Handler = isAuthenticated { implicit request =>
-    // TODO: increase maximum payload size (https://www.playframework.com/documentation/2.8.x/ScalaBodyParsers)
+  val KB = 1024
+  val MB: Int = KB * KB
+  val ajaxMaxLength: Int = 10 * MB
+
+  def ajaxApi(method: String): Handler = isAuthenticated (Action(parse.json(maxLength = ajaxMaxLength)) { implicit request =>
     val apiRequest = autowire.Core.Request(
       method.split('/').toSeq,
-      request.body.asJson.get
+      request.body
         .asInstanceOf[JsObject].value.toMap.map{case (k,v) => (k, v)}
     )
     val resultFuture = AjaxApiServer.routes.apply(apiRequest)
     val resultJson = Await.result(resultFuture, Duration.Inf)
     val resultString = Json.stringify(resultJson)
     Ok(resultString).as(MimeTypes.JSON)
-  }
+  })
 
   def file(user: String, id: Long, filename: String): Handler = isAuthenticated { implicit request =>
     assert(user == username)

@@ -38,7 +38,6 @@ object ItemViewer {
         } else
           TagMod.empty,
 
-        // TODO HTML view (maybe https://lexical.dev/ in r/o mode?)
         if (item.description.nonEmpty) {
           // TODO: sanitize!?
           div(dangerouslySetInnerHtml := item.description.asHtml, className := "item-description")

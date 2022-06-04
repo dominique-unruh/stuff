@@ -78,7 +78,7 @@ object ItemEditor {
           value := item.name
         ),
 
-        // TODO photo editor
+        // TODO allow removing pictures
         if (item.photos.nonEmpty) {
           val images = for (photo <- item.photos)
             yield (img(src := url(photo)): VdomElement)

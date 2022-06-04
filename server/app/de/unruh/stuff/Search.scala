@@ -44,7 +44,6 @@ object Search {
     override def doesMatch(item: Item): Boolean = {
       re.findFirstIn(item.name).nonEmpty ||
       re.findFirstIn(item.description.asHtml).nonEmpty
-      // TODO also search in keywords
     }
   }
   case class SearchSpecCode(code: Code) extends SearchSpec {

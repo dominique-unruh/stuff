@@ -40,8 +40,9 @@ lazy val client = project
       "@zxing/library" -> "latest",
       "react-simple-wysiwyg" -> "latest",
       "react-webcam" -> "latest",
+      "notistack" -> "0.4.1",
     ),
-//    Compile / npmExtraArgs += "--legacy-peer-deps",
+    Compile / npmExtraArgs += "--legacy-peer-deps",
     webpackBundlingMode := BundlingMode.LibraryAndApplication(),
   )
   .enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin)

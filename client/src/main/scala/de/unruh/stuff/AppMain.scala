@@ -1,22 +1,26 @@
 package de.unruh.stuff
 
+import de.unruh.stuff.notistack.{OptionsObject, SnackbarProvider, VariantType}
 import de.unruh.stuff.shared.Item
 import de.unruh.stuff.shared.Utils
 import io.kinoplan.scalajs.react.material.ui.core.MuiInput
-import japgolly.scalajs.react.{CtorType, ScalaComponent}
+import japgolly.scalajs.react.Ref.Simple
+import japgolly.scalajs.react.{CtorType, Ref, ScalaComponent}
 import japgolly.scalajs.react.callback.{Callback, CallbackTo}
 import japgolly.scalajs.react.component.Scala.{BackendScope, Component}
 import japgolly.scalajs.react.component.builder.Lifecycle.ShouldComponentUpdate
 import japgolly.scalajs.react.extra.router.SetRouteVia.HistoryReplace
 import japgolly.scalajs.react.extra.router.{BaseUrl, Router, RouterConfigDsl, RouterWithPropsConfig}
-import japgolly.scalajs.react.vdom.all.{div, h1, key, style}
-import org.scalajs.dom.{console, document}
+import japgolly.scalajs.react.vdom.Attr.ValueType
+import japgolly.scalajs.react.vdom.all.{button, div, h1, key, onClick, style, untypedRef}
+import org.scalajs.dom.{console, document, html}
 import japgolly.scalajs.react.vdom.Implicits._
 import japgolly.scalajs.react.vdom.{TagOf, VdomElement}
 import org.scalajs.dom.html.Div
 
 import scala.collection.immutable
 import scala.scalajs.js
+import scala.scalajs.js.UndefOr
 import scala.scalajs.js.annotation.JSExportTopLevel
 
 // TODO preserve scroll state
@@ -67,6 +71,20 @@ object StatePreservingRouter {
 }
 
 object AppMain {
+  private val snackbarProviderRef: Ref.Simple[SnackbarProvider] = Ref[SnackbarProvider]
+  private def getSnackbarProvider: CallbackTo[SnackbarProvider] =
+    for (snackbar <- snackbarProviderRef.get)
+      yield snackbar.getOrElse { throw new IllegalStateException("SnackbarProvider reference is empty") }
+
+  def successMessage(message: String): Callback =
+    for (snackbarProvider <- getSnackbarProvider)
+      yield snackbarProvider.handleEnqueueSnackbar(message, OptionsObject(variant=VariantType.success))
+
+  def errorMessage(message: String, exception: Throwable): Callback =
+    for (_ <- Callback { console.error(message, exception) };
+         snackbarProvider <- getSnackbarProvider)
+      yield snackbarProvider.handleEnqueueSnackbar(message, OptionsObject(variant=VariantType.error))
+
   sealed trait Page
   case object Search extends Page
   case class ItemView(id: Item.Id) extends Page
@@ -88,18 +106,23 @@ object AppMain {
   def appMain(): Unit = {
     val root = document.getElementById("react-root")
     val baseUrl = BaseUrl.until_#
-    val router = Router(baseUrl, routerConfig)
-    router().renderIntoDOM(root)
+    val router = Router(baseUrl, routerConfig)()
+    val snackbarProvider = SnackbarProvider()(router, untypedRef := snackbarProviderRef.asInstanceOf[Ref.Simple[html.Element]])
+    snackbarProvider.renderIntoDOM(root)
   }
 
   @JSExportTopLevel("test")
   def test(): Unit = {
+    val snackbarProviderRef = Ref[SnackbarProvider]
+    val app : VdomElement = button("Test", onClick --> Callback {
+      val sp: SnackbarProvider = snackbarProviderRef.get.runNow().get
+      console.log(sp)
+      sp.handleEnqueueSnackbar("Hello", OptionsObject(variant = VariantType.error))
+      console.log("Click")
+    })
+    val snackbarProvider = SnackbarProvider()(app, untypedRef := snackbarProviderRef.asInstanceOf[Ref.Simple[html.Element]])
     val root = document.getElementById("react-root")
-    Camera(onPhoto = {photo => Callback {console.log("Photo:", photo)}},
-      open = true,
-      onClose = Callback("Camera should be closed")
-    )
-      .renderIntoDOM(root)
+    snackbarProvider.renderIntoDOM(root)
 //    HTMLViewer().renderIntoDOM(root)
   }
 }

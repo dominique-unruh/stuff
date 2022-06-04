@@ -3,6 +3,7 @@ package de.unruh.stuff
 import de.unruh.stuff.reactsimplewysiwyg.DefaultEditor
 import de.unruh.stuff.shared.{Item, RichText}
 import io.kinoplan.scalajs.react.material.ui.core.MuiInput
+import japgolly.scalajs.react.callback.AsyncCallback
 import japgolly.scalajs.react.component.Scala.{Component, Unmounted}
 import japgolly.scalajs.react.vdom.all.{button, className, div, href, img, li, onChange, onClick, src, textarea, value}
 import japgolly.scalajs.react.vdom.{TagMod, VdomElement, all}
@@ -14,6 +15,7 @@ import japgolly.scalajs.react.vdom.Implicits._
 import org.scalajs.dom.console
 
 import java.net.URI
+import scala.util.{Failure, Success}
 
 object ItemEditor {
   case class Props(initialItem: Item, onSave: Callback)
@@ -32,11 +34,20 @@ object ItemEditor {
   private def url(url: URI) = ExtendedURL.resolve(JSVariables.username, url)
 
   class Backend(bs: BackendScope[Props, State]) {
-    private val save = Callback {
-      val state = bs.state.runNow()
-      val props = bs.props.runNow()
-      for (_ <- DbCache.updateItem(state.editedItem))
-        yield props.onSave.runNow()
+    private val save: AsyncCallback[Unit] = {
+      for (state <- bs.state.asAsyncCallback;
+           props <- bs.props.asAsyncCallback;
+           result <- DbCache.updateItemReact(state.editedItem).attemptTry;
+           _ <- (result match {
+             case Success(_) =>
+               for (_ <- AppMain.successMessage("Saved");
+                    _ <- props.onSave)
+                 yield {}
+             case Failure(exception) =>
+               AppMain.errorMessage("Failed to save item", exception)
+           }).asAsyncCallback
+           )
+      yield {}
     }
 
     private def cameraOnPhoto(photo: String) : Callback = {

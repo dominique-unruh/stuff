@@ -31,6 +31,10 @@ object AjaxApiImpl extends AjaxApi {
   override def updateItem(item: Item): Unit = {
     Yaml.updateItem(dbPath, item)
   }
+
+  override def createItem(item: Item): Item.Id = {
+    Yaml.createItem(dbPath, item)
+  }
 }
 
 object AjaxApiServer extends autowire.Server[JsValue, upickle.default.Reader, upickle.default.Writer] {

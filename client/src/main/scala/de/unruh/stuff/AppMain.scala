@@ -9,8 +9,8 @@ import japgolly.scalajs.react.{CtorType, Ref, ScalaComponent}
 import japgolly.scalajs.react.callback.{Callback, CallbackTo}
 import japgolly.scalajs.react.component.Scala.{BackendScope, Component}
 import japgolly.scalajs.react.component.builder.Lifecycle.ShouldComponentUpdate
-import japgolly.scalajs.react.extra.router.SetRouteVia.HistoryReplace
-import japgolly.scalajs.react.extra.router.{BaseUrl, Router, RouterConfigDsl, RouterWithPropsConfig}
+import japgolly.scalajs.react.extra.router.SetRouteVia.{HistoryPush, HistoryReplace}
+import japgolly.scalajs.react.extra.router.{BaseUrl, Router, RouterConfigDsl, RouterWithPropsConfig, SetRouteVia}
 import japgolly.scalajs.react.vdom.Attr.ValueType
 import japgolly.scalajs.react.vdom.all.{button, div, h1, key, onClick, style, untypedRef}
 import org.scalajs.dom.{console, document, html}
@@ -88,15 +88,27 @@ object AppMain {
   sealed trait Page
   case object Search extends Page
   case class ItemView(id: Item.Id) extends Page
+  case class ItemCreate() extends Page
 
   val routerConfig: RouterWithPropsConfig[Page, Unit] = RouterConfigDsl[Page].buildConfig { dsl =>
     import dsl._
 
     val redirectRoot = staticRedirect(root) ~> redirectToPage(Search)(HistoryReplace)
-    val search = staticRoute("#search", Search) ~> renderR(ctl => ItemSearch(onClick = { item => ctl.set(ItemView(item)).runNow() }))
+
+    val search = staticRoute("#search", Search) ~> renderR(ctl => ItemSearch(
+      onClick = { item => ctl.set(ItemView(item)) },
+      onCreate = {
+        case None => ctl.set(ItemCreate())
+        case Some(_) => ??? }))
+
     val item = dynamicRouteCT("#item" / long.caseClass[ItemView]) ~> { page:ItemView => render(ItemViewer(page.id)) }
 
-    ( redirectRoot | search | item )
+    val create = staticRoute("#create", ItemCreate()) ~> renderR( ctl => ItemEditor(Item.create(),
+      onSave = { item => ctl.set(ItemView(item.id), HistoryReplace) }, // replace by view
+      onCancel = ctl.set(Search, HistoryPush) , // go back
+    ))
+
+    ( redirectRoot | search | item | create )
       .notFound(redirectToPage(Search)(HistoryReplace))
   }
 //    .logToConsole

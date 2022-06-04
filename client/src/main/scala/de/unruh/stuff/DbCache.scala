@@ -26,6 +26,13 @@ object DbCache {
     def finalmente(code: => Unit): Future[A] = future.transform { result => code; result }
   }
 
+  def updateOrCreateItem(item: Item) : Future[Item.Id] =
+    if (item.id == INVALID_ID)
+      createItem(item)
+    else
+      for (_ <- updateItem(item))
+        yield item.id
+
   def updateItem(item: Item) : Future[Unit] = {
     assert(item.id != INVALID_ID)
     for (_ <- AjaxApiClient[AjaxApi].updateItem(item).call()
@@ -35,8 +42,13 @@ object DbCache {
       yield ()
   }
 
-  def updateItemReact(item: Item) : AsyncCallback[Unit] =
-    AsyncCallback.fromFuture(updateItem(item))
+  def createItem(item: Item) : Future[Item.Id] = {
+    assert(item.id == INVALID_ID)
+    AjaxApiClient[AjaxApi].createItem(item).call()
+  }
+
+  def updateOrCreateItemReact(item: Item) : AsyncCallback[Item.Id] =
+    AsyncCallback.fromFuture(updateOrCreateItem(item))
 
   private val cache = mutable.HashMap[Item.Id, Item]()
   /** Increase this when updating the DB so that pending Ajax calls will be ignored. */

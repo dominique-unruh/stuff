@@ -11,7 +11,7 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import japgolly.scalajs.react.vdom.Implicits._
 
 object ItemListItem {
-  case class Props(itemId: Item.Id, onClick: Item.Id => Unit = { _ => () })
+  case class Props(itemId: Item.Id, onClick: Item.Id => Callback)
 
   //noinspection TypeAnnotation
   val Component = ScalaComponent.builder[Props]
@@ -19,14 +19,10 @@ object ItemListItem {
     .build
 
   def apply(props: Props): Unmounted[Props, Unit, Unit] = Component(props)
-  def apply(itemId: Item.Id, onClick: Item.Id => Unit = { _ => () }): Unmounted[Props, Unit, Unit] = apply(Props(itemId=itemId, onClick=onClick))
-
-  private def onClickHandler(implicit props: Props) = Callback {
-    props.onClick(props.itemId)
-  }
+  def apply(itemId: Item.Id, onClick: Item.Id => Callback): Unmounted[Props, Unit, Unit] = apply(Props(itemId=itemId, onClick=onClick))
 
   private def renderBody(item: Item)(implicit props: Props): VdomElement = {
-    div(onClick --> onClickHandler, className := "item-list-item")(
+    div(onClick --> props.onClick(props.itemId), className := "item-list-item")(
       // Photo (if exists)
       if (item.photos.nonEmpty)
         img(all.src := ExtendedURL.resolve(JSVariables.username, item.photos.head), className := "item-photo")
@@ -59,15 +55,15 @@ object ItemListItem {
 
   def render(implicit props: Props): VdomElement = {
     React.Suspense(
-      fallback = div(onClick --> onClickHandler, className := "item-list-item", "LOADING"), // TODO
+      fallback = div(onClick --> props.onClick(props.itemId), className := "item-list-item", "LOADING"), // TODO
       asyncBody = loadAndRender.handleError(onError))
   }
 }
 
 object ItemList {
-  case class Props(items: Seq[Item.Id], onClick: Item.Id => Unit = { _ => () })
+  case class Props(items: Seq[Item.Id], onClick: Item.Id => Callback)
 
-  def apply(items: Seq[Item.Id], onClick: Item.Id => Unit = { _ => () }): Unmounted[Props, Unit, Unit] =
+  def apply(items: Seq[Item.Id], onClick: Item.Id => Callback): Unmounted[Props, Unit, Unit] =
     apply(Props(items=items, onClick=onClick))
   def apply(props: Props): Unmounted[Props, Unit, Unit] = Component(props)
 

@@ -81,4 +81,7 @@ object Item {
 
   /** An item with id [[INVALID_ID]] and dummy content. */
   val invalid: Item = Item(id = INVALID_ID, name = "Invalid item: You should never see this. Please file a bug report.", lastModified = -1)
+
+  /** Creates an empty item (for editing). */
+  def create(): Item = Item(id=INVALID_ID, name = "", lastModified = 0)
 }

@@ -59,7 +59,7 @@ object ItemViewer {
         for (item <- AsyncCallback.fromFuture(DbCache.getItem(props.itemId)))
           yield if (state.editing)
             ItemEditor(item,
-              onSave = bs.modState(State.editing.replace(false)),
+              onSave = { _ => bs.modState(State.editing.replace(false)) },
               onCancel = bs.modState(State.editing.replace(false)))
           else
             renderBodyView(item)

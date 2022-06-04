@@ -9,6 +9,7 @@ import java.io.{File, IOException}
 import java.net.URI
 import java.nio.file.{Files, Path}
 import scala.jdk.CollectionConverters.IteratorHasAsScala
+import scala.util.Random
 
 object Yaml {
 
@@ -100,11 +101,25 @@ object Yaml {
       })
   }
 
+  def itemExists(id: Item.Id): Boolean =
+    Files.exists(Paths.itemsPath(id))
+
+  def createItem(path: Path, item: Item): Item.Id = {
+    val item2 = item.copy(id = Random.nextInt(Int.MaxValue))
+    assert(!itemExists(item2.id))
+    updateItemMaybeNonExisting(path, item2)
+    item2.id
+  }
+
   def updateItem(path: Path, item: Item): Unit = {
+    assert(itemExists(item.id))
+    updateItemMaybeNonExisting(path, item)
+  }
+
+  private def updateItemMaybeNonExisting(path: Path, item: Item): Unit = {
     val item2 = ProcessItems.processItem(item)
     assert(item2.id != Item.INVALID_ID && item2.id >= 0)
-    val itemPath = Paths.itemsPath(path).resolve(s"${item2.id}.yaml")
-    assert(Files.exists(itemPath))
+    val itemPath = Paths.itemsPath(path, item2.id)
     val yaml = item2.toYaml.prettyPrint
     Files.writeString(itemPath, yaml)
   }

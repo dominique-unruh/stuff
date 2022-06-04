@@ -18,13 +18,13 @@ import java.net.URI
 import scala.util.{Failure, Success}
 
 object ItemEditor {
-  case class Props(initialItem: Item, onSave: Callback, onCancel: Callback)
+  case class Props(initialItem: Item, onSave: Item => Callback, onCancel: Callback)
 
   @Lenses case class State(editedItem: Item, cameraOpen: Boolean = false)
 
   def apply(props: Props): Unmounted[Props, State, Backend] = Component(props)
 
-  def apply(initialItem: Item, onSave: Callback, onCancel: Callback): Unmounted[Props, State, Backend] =
+  def apply(initialItem: Item, onSave: Item => Callback, onCancel: Callback): Unmounted[Props, State, Backend] =
     apply(Props(initialItem = initialItem, onSave = onSave, onCancel = onCancel))
 
   private val itemName = State.editedItem.andThen(Item.name)
@@ -37,14 +37,14 @@ object ItemEditor {
     private val save: AsyncCallback[Unit] = {
       for (state <- bs.state.asAsyncCallback;
            props <- bs.props.asAsyncCallback;
-           result <- DbCache.updateItemReact(state.editedItem).attemptTry;
+           result <- DbCache.updateOrCreateItemReact(state.editedItem).attemptTry;
            _ <- (result match {
-             case Success(_) =>
-               for (item <- AsyncCallback.fromFuture(DbCache.getItem(state.editedItem.id));
+             case Success(id) =>
+               for (item <- AsyncCallback.fromFuture(DbCache.getItem(id)); // Important to use the id returned from server. It might be fresh if we edited a new item
                     // This reloads the item. Important because the server processes the item in .updateItems
                     _ <- bs.modState(state => state.copy(editedItem = item)).asAsyncCallback;
                     _ <- AppMain.successMessage("Saved").asAsyncCallback;
-                    _ <- props.onSave.asAsyncCallback)
+                    _ <- props.onSave(item).asAsyncCallback)
                  yield {}
              case Failure(exception) =>
                AppMain.errorMessage("Failed to save item", exception).asAsyncCallback

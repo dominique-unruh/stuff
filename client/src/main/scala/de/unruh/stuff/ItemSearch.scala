@@ -21,12 +21,12 @@ object ItemSearch {
   /** How many results to load */
   val numResults = 100
 
-  case class Props(onClick: Item.Id => Unit = { _ => () })
+  case class Props(onClick: Item.Id => Callback, onCreate: Option[Code] => Callback)
   case class State(searchString: String = "", flashLight: Boolean = false)
 
   def apply(props: Props): Unmounted[Props, State, Backend] = Component(props)
-  def apply(onClick: Item.Id => Unit = { _ => () }): Unmounted[Props, State, Backend] =
-    Component(Props(onClick=onClick))
+  def apply(onClick: Item.Id => Callback, onCreate: Option[Code] => Callback): Unmounted[Props, State, Backend] =
+    Component(Props(onClick=onClick, onCreate = onCreate))
 
   class Backend(bs: BackendScope[Props, State]) {
     def loadAndRenderResults(searchString: String)(implicit props: Props) : AsyncCallback[VdomElement] =
@@ -74,7 +74,8 @@ object ItemSearch {
     def render(implicit props: Props, state: State): VdomNode = {
       div (className := "item-search") (
         QrCode(onDetect = qrcode, constraints = videoConstraints, flashLight = state.flashLight)/*.withRef(qrCodeRef)*/,
-        button(onClick --> bs.modState(_.copy(flashLight = true)), "Flashlight"),
+        div(button(onClick --> bs.modState(_.copy(flashLight = true)), "Flashlight"), " ",
+          button(onClick --> props.onCreate(None), "New")),
         MuiInput(inputProps = js.Dynamic.literal(`type`="search"))
           (className := "item-search-input", onChange ==> changed,
           placeholder := "Search...", autoFocus := true,

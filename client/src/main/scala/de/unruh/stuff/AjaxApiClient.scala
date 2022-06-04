@@ -4,6 +4,7 @@ import org.scalajs.dom
 import org.scalajs.dom.{BodyInit, Headers, HttpMethod, RequestInit, Response, console, webcrypto}
 import ujson.{Js, Value}
 
+import java.io.IOException
 import scala.collection.mutable
 import scala.concurrent.Future
 import scala.scalajs.js.Thenable.Implicits.thenable2future
@@ -23,8 +24,8 @@ object AjaxApiClient extends autowire.Client[ujson.Value, upickle.default.Reader
       body = ujson.Obj(mutable.LinkedHashMap.from(req.args)).render()
     }
     val url = "/api/" + req.path.mkString("/")
-    // TODO check whether the response is an error
     for (response <- dom.fetch(url, request);
+         _ = if (!response.ok) throw new IOException(s"Ajax call failed ($url): ${response.statusText}");
          text <- response.text)
       yield ujson.read(text)
   }

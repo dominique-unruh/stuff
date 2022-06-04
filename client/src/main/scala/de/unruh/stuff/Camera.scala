@@ -45,7 +45,7 @@ object Camera {
         onClose = { (e,s) => props.onClose } : ReactHandler2[ReactEvent, String]) (
 
         Webcam(audio=false, screenshotFormat = "image/jpeg",
-          videoConstraints = new MediaTrackConstraints { facingMode = "environment" })
+          videoConstraints = new MediaTrackConstraints { facingMode = "environment"; aspectRatio = 1 })
         (untypedRef := webcamRef.asInstanceOf[Ref.Simple[html.Element]], // Not sure how to do this without this untrue cast...
           onClick --> clickHandler)
 

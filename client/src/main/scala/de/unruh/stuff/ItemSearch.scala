@@ -18,6 +18,9 @@ import scala.scalajs.js
 // TODO: Allow to activate/deactivate camera
 // TODO: Automatically deactivate camera after inactivity
 object ItemSearch {
+  /** How many results to load */
+  val numResults = 100
+
   case class Props(onClick: Item.Id => Unit = { _ => () })
   case class State(searchString: String = "", flashLight: Boolean = false)
 
@@ -27,7 +30,7 @@ object ItemSearch {
 
   class Backend(bs: BackendScope[Props, State]) {
     def loadAndRenderResults(searchString: String)(implicit props: Props) : AsyncCallback[VdomElement] =
-      for (results <- AsyncCallback.fromFuture(AjaxApiClient[AjaxApi].search(searchString).call()))
+      for (results <- AsyncCallback.fromFuture(AjaxApiClient[AjaxApi].search(searchString, numResults).call()))
         yield
           renderResults(results)
 

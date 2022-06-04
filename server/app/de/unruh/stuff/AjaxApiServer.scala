@@ -12,12 +12,14 @@ import java.nio.file.Path
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object AjaxApiImpl extends AjaxApi {
-  // TODO: truncate to reasonable number of results
-  // TODO: most recent first
-  override def search(searchString: String): Seq[Item.Id] = {
+  override def search(searchString: String, numResults: Int): Seq[Item.Id] = {
     // TODO don't reload DB each time
     val db = Yaml.loadDb(dbPath)
-    Search.search(db, searchString).map(_.id)
+    val results = Search.search(db, searchString)
+    results
+      .sortBy(-_.lastModified)
+      .take(numResults)
+      .map(_.id)
   }
 
   override def getItem(id: Id): Item = {
@@ -26,7 +28,6 @@ object AjaxApiImpl extends AjaxApi {
     db.getOrElse(id, throw new IllegalArgumentException(s"Unknown item id $id"))
   }
 
-  // TODO: Replace any data-url photos (or files) by local URLs to files
   override def updateItem(item: Item): Unit = {
     Yaml.updateItem(dbPath, item)
   }

@@ -3,6 +3,7 @@ package de.unruh.stuff
 import autowire.clientCallable
 import de.unruh.stuff.shared.{AjaxApi, Item}
 import de.unruh.stuff.shared.Item.{INVALID_ID, Id}
+import japgolly.scalajs.react.callback.AsyncCallback
 
 import scala.collection.mutable
 import scala.concurrent.Future
@@ -32,6 +33,9 @@ object DbCache {
          _ = cache.put(item.id, item))
       yield ()
   }
+
+  def updateItemReact(item: Item) : AsyncCallback[Unit] =
+    AsyncCallback.fromFuture(updateItem(item))
 
   private val cache = mutable.HashMap[Item.Id, Item]()
   /** Increase this when updating the DB so that pending Ajax calls will be ignored. */

@@ -23,6 +23,7 @@ object AjaxApiClient extends autowire.Client[ujson.Value, upickle.default.Reader
       body = ujson.Obj(mutable.LinkedHashMap.from(req.args)).render()
     }
     val url = "/api/" + req.path.mkString("/")
+    // TODO check whether the response is an error
     for (response <- dom.fetch(url, request);
          text <- response.text)
       yield ujson.read(text)

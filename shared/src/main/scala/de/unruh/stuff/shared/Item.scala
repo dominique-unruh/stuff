@@ -6,7 +6,9 @@ import org.apache.commons.text.StringEscapeUtils
 
 import java.io.FileInputStream
 import java.net.{URI, URL}
+import java.nio.file.attribute.FileTime
 import java.nio.file.{Files, Path}
+import java.time.Instant
 import scala.util.Random
 import scala.util.matching.Regex
 
@@ -51,25 +53,21 @@ object Code {
 
 @Lenses case class Item(
                  /** Unique ID */
-                 val id: Id = newID(),
+                 id: Id = newID(),
                  /** Short name of the item. Plain text. */
-                 val name: String,
+                 name: String,
                  /** Description of the item. HTML rich text */
-                 val description: RichText = RichText.empty,
+                 description: RichText = RichText.empty,
                  /** Photos of the item. */
-                 val photos: Seq[URI] = Nil,
+                 photos: Seq[URI] = Nil,
                  /** QR / barcodes */
-                 val codes: Seq[Code] = Nil,
+                 codes: Seq[Code] = Nil,
+                 /** Last access */
+                 lastModified: Long,
                )
 
 object Item {
   private def newID(): Item.Id = Random.nextLong()
-/*  val testItems: Seq[Item] = Seq(
-    Item(name="Shoe"),
-    Item(name="Hat", description = RichText.html("A little test <i>with HTML</i>")),
-    Item(name="Kitten", photos=List(new URI("https://api.time.com/wp-content/uploads/2019/03/kitten-report.jpg?quality=85&w=800"))),
-    Item(name="Bubble gum", description=RichText.plain("Hardly used"))
-  )*/
 
   implicit val rwUri: upickle.default.ReadWriter[URI] =
     upickle.default.readwriter[String].bimap[URI](_.toString, URI.create)
@@ -82,5 +80,5 @@ object Item {
   val INVALID_ID : Id = -1
 
   /** An item with id [[INVALID_ID]] and dummy content. */
-  val invalid: Item = Item(id = INVALID_ID, name = "Invalid item: You should never see this. Please file a bug report.")
+  val invalid: Item = Item(id = INVALID_ID, name = "Invalid item: You should never see this. Please file a bug report.", lastModified = -1)
 }

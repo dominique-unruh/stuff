@@ -52,7 +52,7 @@ object Yaml {
       None
 
   object Fields extends Enumeration {
-    val id, name, description, photos, codes, files = Value
+    val id, name, description, photos, codes, files, lastmodified = Value
   }
 
   implicit object itemFormat extends YamlFormat[Item] {
@@ -62,6 +62,7 @@ object Yaml {
       writeField[RichText](item.description, Fields.description, _.nonEmpty),
       writeField[Seq[URI]](item.photos, Fields.photos, _.nonEmpty),
       writeField[Seq[Code]](item.codes, Fields.codes, _.nonEmpty),
+      writeField[Long](item.lastModified, Fields.lastmodified)
     ).collect { case Some(v) => v } :_*)
 
     override def read(yaml: YamlValue): Item = {
@@ -75,6 +76,7 @@ object Yaml {
         description = readFieldDefault(yaml, Fields.description, RichText.empty),
         photos = readFieldDefault[Seq[URI]](yaml, Fields.photos, Nil),
         codes = readFieldDefault[Seq[Code]](yaml, Fields.codes, Nil),
+        lastModified = readField[Long](yaml, Fields.lastmodified)
       )
     }
   }

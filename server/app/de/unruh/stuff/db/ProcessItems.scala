@@ -9,7 +9,7 @@ import play.twirl.api
 import java.net.{URI, URL}
 import java.nio.file.{FileAlreadyExistsException, Files, StandardOpenOption}
 import java.text.SimpleDateFormat
-import java.time.ZoneId
+import java.time.{Instant, ZoneId}
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.{Calendar, TimeZone}
 
@@ -49,6 +49,7 @@ object ProcessItems {
   }
 
   def processItem(item: Item): Item = {
-    item.copy(photos = item.photos.map(dataToLocalUrl("photo-", item.id, _)))
+    item.copy(photos = item.photos.map(dataToLocalUrl("photo-", item.id, _)),
+      lastModified = Instant.now().getEpochSecond)
   }
 }

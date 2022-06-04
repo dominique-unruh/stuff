@@ -38,7 +38,7 @@ The content of the file is YAML with the following supported tags:
 * `photos` (list of URLs, optional): The photos of the item (first one is the main photo) (`item.photos`)
   * Each entry is an extended URL (see below).
   * If the URL is local (see below), it must reference to an existing file in the `files/` directory with the right id.
-* `codes` (list of strings, optional, not implemented):
+* `codes` (list of strings, optional):
   QR or barcodes associated with this item.
   * Each barcode is represented by a string of the form `type:content`.
   * `type` represents the type of barcode (e.g., `QR_CODE`). For a full list of types see [here](https://github.com/mebjas/html5-qrcode/#supported-code-formats).
@@ -49,8 +49,6 @@ The content of the file is YAML with the following supported tags:
 * `files` (list of URLs, optional, not implemented): 
   Additional attached files (e.g., manuals).
   * Each string must be a local URL referencing an existing file in the `files/` directory with the right id.
-* `keywords` (list of strings, optional, not implemented):
-  Arbitrary keywords (plaintext strings), particularly for full text search
 * `lastaccessed` (integer, optional, not implemented): Time of last access (last opened in full screen view), in seconds since epoch
 * `lastmodified` (integer, optional, not implemented): Time of last modification, in seconds since epoch.
   Does not include automatic modifications such as, e.g., setting `lastaccessed`.

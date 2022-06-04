@@ -99,10 +99,11 @@ object Yaml {
   }
 
   def updateItem(path: Path, item: Item): Unit = {
-    assert(item.id != Item.INVALID_ID && item.id >= 0)
-    val itemPath = Paths.itemsPath(path).resolve(s"${item.id}.yaml")
+    val item2 = ProcessItems.processItem(item)
+    assert(item2.id != Item.INVALID_ID && item2.id >= 0)
+    val itemPath = Paths.itemsPath(path).resolve(s"${item2.id}.yaml")
     assert(Files.exists(itemPath))
-    val yaml = item.toYaml.prettyPrint
+    val yaml = item2.toYaml.prettyPrint
     Files.writeString(itemPath, yaml)
   }
 }

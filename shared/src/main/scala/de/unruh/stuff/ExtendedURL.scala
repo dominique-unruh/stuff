@@ -1,5 +1,7 @@
 package de.unruh.stuff
 
+import de.unruh.stuff.shared.Item
+
 import java.net.URI
 import scala.util.matching.Regex
 
@@ -17,5 +19,10 @@ object ExtendedURL {
       }
     } else
       url.toString
+  }
+
+  def forFile(id: Item.Id, filename: String) = {
+    assert(fileRegex.matches(filename))
+    new URI("localstuff", s"$id/$filename", null)
   }
 }

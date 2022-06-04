@@ -40,12 +40,15 @@ object ItemEditor {
            result <- DbCache.updateItemReact(state.editedItem).attemptTry;
            _ <- (result match {
              case Success(_) =>
-               for (_ <- AppMain.successMessage("Saved");
-                    _ <- props.onSave)
+               for (item <- AsyncCallback.fromFuture(DbCache.getItem(state.editedItem.id));
+                    // This reloads the item. Important because the server processes the item in .updateItems
+                    _ <- bs.modState(state => state.copy(editedItem = item)).asAsyncCallback;
+                    _ <- AppMain.successMessage("Saved").asAsyncCallback;
+                    _ <- props.onSave.asAsyncCallback)
                  yield {}
              case Failure(exception) =>
-               AppMain.errorMessage("Failed to save item", exception)
-           }).asAsyncCallback
+               AppMain.errorMessage("Failed to save item", exception).asAsyncCallback
+           })
            )
       yield {}
     }

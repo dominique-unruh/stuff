@@ -30,7 +30,8 @@ object DbCache {
     assert(item.id != INVALID_ID)
     for (_ <- AjaxApiClient[AjaxApi].updateItem(item).call()
                   .finalmente { updateCounter += 1; cache.remove(item.id) };
-         _ = cache.put(item.id, item))
+         // Removing the item from the cache because the server may process it in .updateItem
+         _ = cache.remove(item.id))
       yield ()
   }
 

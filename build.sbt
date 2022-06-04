@@ -22,6 +22,8 @@ lazy val server = project
     libraryDependencies += "com.lihaoyi" %% "ujson-play" % "2.0.0",
     libraryDependencies += "com.google.zxing" % "core" % "3.5.0",
     libraryDependencies += "com.google.zxing" % "javase" % "3.5.0",
+    libraryDependencies += "io.lemonlabs" %% "scala-uri" % "4.0.2",
+    libraryDependencies += "org.apache.tika" % "tika-core" % "2.4.0",
   )
   .enablePlugins(PlayScala, WebScalaJSBundlerPlugin)
   .dependsOn(shared.jvm)

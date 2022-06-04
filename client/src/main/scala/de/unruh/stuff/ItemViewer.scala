@@ -58,7 +58,9 @@ object ItemViewer {
     def loadAndRender(implicit props: Props, state: State): AsyncCallback[VdomElement] = {
         for (item <- AsyncCallback.fromFuture(DbCache.getItem(props.itemId)))
           yield if (state.editing)
-            ItemEditor(item, onSave = bs.modState(State.editing.replace(false)))
+            ItemEditor(item,
+              onSave = bs.modState(State.editing.replace(false)),
+              onCancel = bs.modState(State.editing.replace(false)))
           else
             renderBodyView(item)
     }

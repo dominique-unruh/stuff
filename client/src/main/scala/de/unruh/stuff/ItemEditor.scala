@@ -18,14 +18,14 @@ import java.net.URI
 import scala.util.{Failure, Success}
 
 object ItemEditor {
-  case class Props(initialItem: Item, onSave: Callback)
+  case class Props(initialItem: Item, onSave: Callback, onCancel: Callback)
 
   @Lenses case class State(editedItem: Item, cameraOpen: Boolean = false)
 
   def apply(props: Props): Unmounted[Props, State, Backend] = Component(props)
 
-  def apply(initialItem: Item, onSave: Callback): Unmounted[Props, State, Backend] =
-    apply(Props(initialItem = initialItem, onSave = onSave))
+  def apply(initialItem: Item, onSave: Callback, onCancel: Callback): Unmounted[Props, State, Backend] =
+    apply(Props(initialItem = initialItem, onSave = onSave, onCancel = onCancel))
 
   private val itemName = State.editedItem.andThen(Item.name)
   private val itemDescription = State.editedItem.andThen(Item.description)
@@ -53,6 +53,9 @@ object ItemEditor {
       yield {}
     }
 
+    /** Call the onCancel callback (when user wants to cancel) */
+    private val cancel = for (props <- bs.props; _ <- props.onCancel) yield {}
+
     private def cameraOnPhoto(photo: String) : Callback = {
       val url = URI.create(photo)
       assert(url.getScheme == "data")
@@ -71,7 +74,7 @@ object ItemEditor {
     def render(props: Props, state: State): VdomElement = {
       val item = state.editedItem
       div(className := "item-editor state-editing",
-        div(all.button("Save", onClick --> save)),
+        div(all.button("Save", onClick --> save), all.button("Cancel", onClick --> cancel)),
         MuiInput(
           //          inputProps = js.Dynamic.literal(`type`="search"),
           /*inputProps = MuiInputProps(ariaLabel = "Description")*/

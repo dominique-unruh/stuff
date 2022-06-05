@@ -1,8 +1,7 @@
 package de.unruh.stuff
 
 import de.unruh.stuff.notistack.{OptionsObject, SnackbarProvider, VariantType}
-import de.unruh.stuff.shared.Item
-import de.unruh.stuff.shared.Utils
+import de.unruh.stuff.shared.{Code, Item, Utils}
 import io.kinoplan.scalajs.react.material.ui.core.MuiInput
 import japgolly.scalajs.react.Ref.Simple
 import japgolly.scalajs.react.{CtorType, Ref, ScalaComponent}
@@ -88,7 +87,10 @@ object AppMain {
   sealed trait Page
   case object Search extends Page
   case class ItemView(id: Item.Id) extends Page
-  case class ItemCreate() extends Page
+  case class ItemCreate(code: Option[Code] = None) extends Page
+  object ItemCreate {
+    def apply(code: Code): ItemCreate = ItemCreate(Some(code))
+  }
 
   val routerConfig: RouterWithPropsConfig[Page, Unit] = RouterConfigDsl[Page].buildConfig { dsl =>
     import dsl._
@@ -99,16 +101,30 @@ object AppMain {
       onClick = { item => ctl.set(ItemView(item)) },
       onCreate = {
         case None => ctl.set(ItemCreate())
-        case Some(_) => ??? }))
+        case Some(code) => ctl.set(ItemCreate(code)) }))
 
     val item = dynamicRouteCT("#item" / long.caseClass[ItemView]) ~> { page:ItemView => render(ItemViewer(page.id)) }
 
-    val create = staticRoute("#create", ItemCreate()) ~> renderR( ctl => ItemEditor(Item.create(),
+/*
+    val renderCreate = dynRenderR[ItemCreate, VdomElement]( (page,ctl) => ItemEditor(Item.create(page.code),
+      onSave = { item => ctl.set(ItemView(item.id), HistoryReplace) }, // replace by view
+      onCancel = ctl.set(Search, HistoryPush) , // go back
+    ))
+*/
+
+    def renderCreate(page: ItemCreate) = renderR( ctl => ItemEditor(Item.create(page.code),
       onSave = { item => ctl.set(ItemView(item.id), HistoryReplace) }, // replace by view
       onCancel = ctl.set(Search, HistoryPush) , // go back
     ))
 
-    ( redirectRoot | search | item | create )
+    val remainingPathCode = remainingPath.pmap { str:String => Some(ItemCreate(Code(str))) }
+                                               { page => page.code.get.toString }
+
+    val create = staticRoute("#create", ItemCreate()) ~> renderCreate(ItemCreate())
+    val createCode = dynamicRoute[ItemCreate]("#create" / remainingPathCode)
+      { case ItemCreate(code : Some[Code]) => ItemCreate(code) } ~> renderCreate
+
+    ( redirectRoot | search | item | create | createCode )
       .notFound(redirectToPage(Search)(HistoryReplace))
   }
 //    .logToConsole

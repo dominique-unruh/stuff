@@ -83,5 +83,6 @@ object Item {
   val invalid: Item = Item(id = INVALID_ID, name = "Invalid item: You should never see this. Please file a bug report.", lastModified = -1)
 
   /** Creates an empty item (for editing). */
-  def create(): Item = Item(id=INVALID_ID, name = "", lastModified = 0)
+  def create(code: Option[Code]): Item = Item(id=INVALID_ID, name = "", lastModified = 0,
+    codes = code.toSeq)
 }

@@ -6,7 +6,7 @@ import io.kinoplan.scalajs.react.material.ui.core.MuiInput
 import japgolly.scalajs.react.callback.Callback
 import japgolly.scalajs.react.component.Scala.{Component, Unmounted}
 import japgolly.scalajs.react.util.DefaultEffects
-import japgolly.scalajs.react.vdom.{VdomElement, VdomNode, all}
+import japgolly.scalajs.react.vdom.{TagMod, VdomElement, VdomNode, all}
 import japgolly.scalajs.react.vdom.all.{autoFocus, button, className, div, h1, onChange, onClick, placeholder, value}
 import japgolly.scalajs.react.vdom.Implicits._
 import japgolly.scalajs.react.{AsyncCallback, BackendScope, CtorType, React, ReactFormEventFromInput, ScalaComponent}
@@ -22,40 +22,54 @@ object ItemSearch {
   val numResults = 100
 
   case class Props(onClick: Item.Id => Callback, onCreate: Option[Code] => Callback)
-  case class State(searchString: String = "", flashLight: Boolean = false)
+  case class State(
+                  /** User input search string */
+                    searchString: String = "",
+                  /** User input: flashlight on? */
+                  flashLight: Boolean = false,
+                  /** Current search initiated by QR code reader? `None` means no, `Some(code)` means yes. */
+                  searchFromCode: Option[Code] = None,
+                  )
 
   def apply(props: Props): Unmounted[Props, State, Backend] = Component(props)
   def apply(onClick: Item.Id => Callback, onCreate: Option[Code] => Callback): Unmounted[Props, State, Backend] =
     Component(Props(onClick=onClick, onCreate = onCreate))
 
   class Backend(bs: BackendScope[Props, State]) {
-    def loadAndRenderResults(searchString: String)(implicit props: Props) : AsyncCallback[VdomElement] =
+    def loadAndRenderResults(searchString: String)(implicit props: Props, state: State) : AsyncCallback[VdomElement] =
       for (results <- AsyncCallback.fromFuture(AjaxApiClient[AjaxApi].search(searchString, numResults).call()))
         yield
           renderResults(results)
 
-    def renderResults(results : Seq[Item.Id])(implicit props: Props) : VdomElement = {
+    def renderResults(results : Seq[Item.Id])(implicit props: Props, state: State) : VdomElement = {
       if (results.isEmpty) {
-        // TODO Nicer formatting (https://mui.com/material-ui/react-alert/ ?)
-        h1("Nothing found", className := "no-search-results")
+        div(
+          // TODO Nicer formatting (https://mui.com/material-ui/react-alert/ ?)
+          h1("Nothing found", className := "no-search-results"),
+          state.searchFromCode match {
+            case Some(code) =>
+              div(button(s"Create new item with code $code?", onClick --> props.onCreate(Some(code))))
+            case None => TagMod.empty
+          })
       } else div(ItemList(results, props.onClick))
     }
 
     private def changed(event: ReactFormEventFromInput) =
-      bs.modState(_.copy(searchString = event.target.value))
+      bs.modState(_.copy(searchString = event.target.value, searchFromCode = None))
 
     private def qrcode(format: Option[String], text: String) : Unit = {
       console.log(s"qrcode: $text")
       (for (state <- bs.state;
-           codeStr = Code(format, text).toString;
-           needToAdd = !state.searchString.endsWith(codeStr+" ");
-           newSearchString = s"${Utils.addSpaceIfNeeded(state.searchString)}code:$codeStr ";
-           _ <- if (needToAdd)
-                  bs.setState(state.copy(searchString = newSearchString))
-                else
-                  DefaultEffects.Sync.empty
-           )
-        yield {})
+            code = Code(format, text);
+            codeStr = code.toString;
+            needToAdd = !state.searchString.endsWith(codeStr+" ");
+            newSearchString = s"${Utils.addSpaceIfNeeded(state.searchString)}code:$codeStr ";
+            _ <- if (needToAdd)
+              bs.setState(state.copy(searchString = newSearchString, searchFromCode = Some(code)))
+            else
+              DefaultEffects.Sync.empty
+            )
+      yield {})
         .runNow()
     }
 
@@ -84,7 +98,7 @@ object ItemSearch {
           // TODO: Use React 18 stuff (useTransition/startTransition) to keep the old data in view, only blurred
           fallback = h1("Loading...", className := "state-waiting"),
           asyncBody = loadAndRenderResults(state.searchString).handleError(onError)
-        )
+        ),
       )
     }
   }

@@ -15,13 +15,14 @@ object QrCode {
   /** onDetect: (format, content) */
   // TODO class does not reinitialize when MediaTrackConstraints change. Should it?
   case class Props(onDetect: (Option[String], String) => Unit, constraints: MediaTrackConstraints,
-                   flashLight: Boolean = false)
+                   flashLight: Boolean, active: Boolean)
   case class State(scanner: zxing.BrowserMultiFormatReader,
                    flashLightState: Boolean = false)
 
   def apply(props: Props): Unmounted[Props, State, Backend] = Component(props)
-  def apply(onDetect: (Option[String], String) => Unit, constraints: MediaTrackConstraints, flashLight: Boolean = false): Unmounted[Props, State, Backend] =
-    apply(Props(onDetect=onDetect, constraints=constraints, flashLight=flashLight))
+  def apply(onDetect: (Option[String], String) => Unit, constraints: MediaTrackConstraints, flashLight: Boolean = false,
+           active: Boolean): Unmounted[Props, State, Backend] =
+    apply(Props(onDetect=onDetect, constraints=constraints, flashLight=flashLight, active=active))
 
   def initialState: State = State(scanner = new zxing.BrowserMultiFormatReader())
 
@@ -44,8 +45,10 @@ object QrCode {
       }
     }
 
+//    private val updateActive: Callback =
+
     /** Changes the flashLight state if necessary */
-    private val   updateFlashLight: Callback =
+    private val updateFlashLight: Callback =
       for (state <- bs.state;
            props <- bs.props;
            shouldSet = state.scanner.stream != null && !js.isUndefined(state.scanner.stream) && state.flashLightState != props.flashLight;
@@ -67,10 +70,16 @@ object QrCode {
     }
 
     private def startScanning(props: Props, state: State) : Unit = {
+      console.log("Start")
       state.scanner.decodeFromConstraints(
         constraints = new MediaStreamConstraints { video = props.constraints },
         videoId, callback(props))
         .`then`( { _:Unit => decodingStarted() : Unit | scala.scalajs.js.Thenable[Unit] }, js.undefined)
+    }
+
+    private def stopScanning(props: Props, state: State) : Unit = {
+      console.log("Stop")
+      state.scanner.stopStreams()
     }
 
     val componentDidMount : Callback =
@@ -87,8 +96,19 @@ object QrCode {
         }
     }
 
-    def componentDidUpdate: Callback =
-      updateFlashLight
+    private def updateActive(prevProps: Props): Callback =
+      for (props <- bs.props;
+           state <- bs.state)
+        yield
+          if (prevProps.active && !props.active)
+            stopScanning(props, state)
+          else if (!prevProps.active && props.active)
+            startScanning(props, state)
+
+    def componentDidUpdate(prevProp: Props, presState: State): Callback =
+      for (_ <- updateFlashLight;
+           _ <- updateActive(prevProp))
+        yield {}
   }
 
   //noinspection TypeAnnotation
@@ -97,6 +117,6 @@ object QrCode {
     .renderBackend[Backend]
     .componentDidMount(_.backend.componentDidMount)
     .componentWillUnmount(_.backend.componentWillUnmount)
-    .componentDidUpdate(_.backend.componentDidUpdate)
+    .componentDidUpdate(upd => upd.backend.componentDidUpdate(upd.prevProps, upd.prevState))
     .build
 }

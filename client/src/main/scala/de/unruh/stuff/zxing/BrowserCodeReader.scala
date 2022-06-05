@@ -43,4 +43,9 @@ class BrowserCodeReader() extends js.Object {
    * @memberOf BrowserCodeReader
    */
   def reset(): Unit = js.native
+
+  /**
+   * Stops the continuous scan and cleans the stream.
+   */
+  def stopStreams(): Unit = js.native
 }

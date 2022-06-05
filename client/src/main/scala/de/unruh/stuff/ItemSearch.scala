@@ -21,7 +21,7 @@ object ItemSearch {
   /** How many results to load */
   val numResults = 100
 
-  case class Props(onClick: Item.Id => Callback, onCreate: Option[Code] => Callback)
+  case class Props(onClick: Item.Id => Callback, onCreate: Option[Code] => Callback, visible: Boolean)
   case class State(
                   /** User input search string */
                     searchString: String = "",
@@ -32,8 +32,8 @@ object ItemSearch {
                   )
 
   def apply(props: Props): Unmounted[Props, State, Backend] = Component(props)
-  def apply(onClick: Item.Id => Callback, onCreate: Option[Code] => Callback): Unmounted[Props, State, Backend] =
-    Component(Props(onClick=onClick, onCreate = onCreate))
+  def apply(onClick: Item.Id => Callback, onCreate: Option[Code] => Callback, visible: Boolean): Unmounted[Props, State, Backend] =
+    Component(Props(onClick=onClick, onCreate = onCreate, visible = visible))
 
   class Backend(bs: BackendScope[Props, State]) {
     def loadAndRenderResults(searchString: String)(implicit props: Props, state: State) : AsyncCallback[VdomElement] =
@@ -87,7 +87,7 @@ object ItemSearch {
 
     def render(implicit props: Props, state: State): VdomNode = {
       div (className := "item-search") (
-        QrCode(onDetect = qrcode, constraints = videoConstraints, flashLight = state.flashLight)/*.withRef(qrCodeRef)*/,
+        QrCode(onDetect = qrcode, constraints = videoConstraints, flashLight = state.flashLight, active = props.visible)/*.withRef(qrCodeRef)*/,
         div(button(onClick --> bs.modState(_.copy(flashLight = true)), "Flashlight"), " ",
           button(onClick --> props.onCreate(None), "New")),
         MuiInput(inputProps = js.Dynamic.literal(`type`="search"))

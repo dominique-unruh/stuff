@@ -20,7 +20,7 @@ class RichText(html: String) {
 }
 object RichText {
   val empty: RichText = new RichText("")
-  def plain(text: String) = new RichText(/*StringEscapeUtils.escapeHtml4*/(text)) // TODO: escape
+//  def plain(text: String) = new RichText(StringEscapeUtils.escapeHtml4(text))
   def html(html: String): RichText = new RichText(html)
   implicit val rw: upickle.default.ReadWriter[RichText] =
     upickle.default.readwriter[String].bimap[RichText](_.asHtml, RichText.html)

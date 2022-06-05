@@ -9,7 +9,7 @@ import japgolly.scalajs.react.callback.{Callback, CallbackTo}
 import japgolly.scalajs.react.component.Scala.{BackendScope, Component}
 import japgolly.scalajs.react.component.builder.Lifecycle.ShouldComponentUpdate
 import japgolly.scalajs.react.extra.router.SetRouteVia.{HistoryPush, HistoryReplace}
-import japgolly.scalajs.react.extra.router.{BaseUrl, Router, RouterConfigDsl, RouterWithPropsConfig, SetRouteVia}
+import japgolly.scalajs.react.extra.router.{BaseUrl, ResolutionWithProps, Router, RouterConfigDsl, RouterWithProps, RouterWithPropsConfig, RouterWithPropsConfigDsl, SetRouteVia}
 import japgolly.scalajs.react.vdom.Attr.ValueType
 import japgolly.scalajs.react.vdom.all.{button, div, h1, key, onClick, style, untypedRef}
 import org.scalajs.dom.{console, document, html}
@@ -26,12 +26,12 @@ import scala.scalajs.js.annotation.JSExportTopLevel
 // TODO evict old pages at some point
 // TODO disable camera
 object StatePreservingRouter {
-  case class RoutedView(page: AppMain.Page, component: VdomElement)
-  case class Props(page: AppMain.Page, component: VdomElement)
+  case class RoutedView(page: AppMain.Page, component: VdomElement, hiddenComponent: VdomElement)
+  case class Props(page: AppMain.Page, component: VdomElement, hiddenComponent: VdomElement)
   case class State(history: Map[Int, RoutedView] = Map(), current: Int = -1)
 
   private def addPage(props: Props, state: State): State  = {
-    val newRoutedView = RoutedView(props.page, props.component)
+    val newRoutedView = RoutedView(props.page, props.component, props.hiddenComponent)
 
     for ((idx,routedView) <- state.history)
       if (routedView.page == newRoutedView.page)
@@ -52,7 +52,7 @@ object StatePreservingRouter {
       val components: immutable.Iterable[VdomElement] = for ((idx,routeView) <- state.history)
         yield {
           val show = idx==state.current
-          div(key := idx, routeView.component, displayNone.unless(show) )
+          div(key := idx, if (show) routeView.component else routeView.hiddenComponent, displayNone.unless(show) )
         }
       div(components.toSeq :_*)
     }
@@ -65,8 +65,14 @@ object StatePreservingRouter {
     .shouldComponentUpdate[CallbackTo](should => shouldComponentUpdate(should.currentState, should.nextState))
     .build
 
-  def routerRender(page: AppMain.Page, component: CallbackTo[VdomElement]): VdomElement =
-    Component(Props(page, component.runNow()))
+  def routerRender(page: AppMain.Page, component: CallbackTo[VdomElement]): VdomElement = {
+    val component2 = component.runNow()
+    Component(Props(page, component2, component2))
+  }
+
+  def routerRender(page: AppMain.Page, component: CallbackTo[VdomElement], hiddenComponent: CallbackTo[VdomElement]): VdomElement = {
+    Component(Props(page, component.runNow(), hiddenComponent.runNow()))
+  }
 }
 
 object AppMain {
@@ -92,16 +98,17 @@ object AppMain {
     def apply(code: Code): ItemCreate = ItemCreate(Some(code))
   }
 
-  val routerConfig: RouterWithPropsConfig[Page, Unit] = RouterConfigDsl[Page].buildConfig { dsl =>
+  val routerConfig: RouterWithPropsConfig[Page, Boolean] = RouterWithPropsConfigDsl[Page, Boolean].buildConfig { dsl =>
     import dsl._
 
     val redirectRoot = staticRedirect(root) ~> redirectToPage(Search)(HistoryReplace)
 
-    val search = staticRoute("#search", Search) ~> renderR(ctl => ItemSearch(
+    val search = staticRoute("#search", Search) ~> renderRP((ctl,visible) => ItemSearch(
       onClick = { item => ctl.set(ItemView(item)) },
       onCreate = {
         case None => ctl.set(ItemCreate())
-        case Some(code) => ctl.set(ItemCreate(code)) }))
+        case Some(code) => ctl.set(ItemCreate(code)) },
+      visible = visible))
 
     val item = dynamicRouteCT("#item" / long.caseClass[ItemView]) ~> { page:ItemView => render(ItemViewer(page.id)) }
 
@@ -128,13 +135,14 @@ object AppMain {
       .notFound(redirectToPage(Search)(HistoryReplace))
   }
 //    .logToConsole
-    .renderWith((ctl, res) => StatePreservingRouter.routerRender(res.page, CallbackTo { res.render() }))
+    .renderWith((ctl, res) => StatePreservingRouter.routerRender(res.page,
+      CallbackTo { res.renderP(true) }, CallbackTo { res.renderP(false) }))
 
   @JSExportTopLevel("appMain")
   def appMain(): Unit = {
     val root = document.getElementById("react-root")
     val baseUrl = BaseUrl.until_#
-    val router = Router(baseUrl, routerConfig)()
+    val router = RouterWithProps(baseUrl, routerConfig).withProps(true)()
     val snackbarProvider = SnackbarProvider()(router, untypedRef := snackbarProviderRef.asInstanceOf[Ref.Simple[html.Element]])
     snackbarProvider.renderIntoDOM(root)
   }

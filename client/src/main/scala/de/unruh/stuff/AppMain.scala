@@ -90,6 +90,11 @@ object AppMain {
          snackbarProvider <- getSnackbarProvider)
       yield snackbarProvider.handleEnqueueSnackbar(message, OptionsObject(variant=VariantType.error))
 
+  def errorMessage(message: String): Callback =
+    for (_ <- Callback { console.error(message) };
+         snackbarProvider <- getSnackbarProvider)
+    yield snackbarProvider.handleEnqueueSnackbar(message, OptionsObject(variant=VariantType.error))
+
   sealed trait Page
   case object Search extends Page
   case class ItemView(id: Item.Id) extends Page
@@ -104,20 +109,14 @@ object AppMain {
     val redirectRoot = staticRedirect(root) ~> redirectToPage(Search)(HistoryReplace)
 
     val search = staticRoute("#search", Search) ~> renderRP((ctl,visible) => ItemSearch(
-      onClick = { item => ctl.set(ItemView(item)) },
+      onSelectItem = { item => ctl.set(ItemView(item)) },
       onCreate = {
         case None => ctl.set(ItemCreate())
         case Some(code) => ctl.set(ItemCreate(code)) },
       visible = visible))
 
-    val item = dynamicRouteCT("#item" / long.caseClass[ItemView]) ~> { page:ItemView => render(ItemViewer(page.id)) }
-
-/*
-    val renderCreate = dynRenderR[ItemCreate, VdomElement]( (page,ctl) => ItemEditor(Item.create(page.code),
-      onSave = { item => ctl.set(ItemView(item.id), HistoryReplace) }, // replace by view
-      onCancel = ctl.set(Search, HistoryPush) , // go back
-    ))
-*/
+    val item = dynamicRouteCT("#item" / long.caseClass[ItemView]) ~> { page:ItemView =>
+      renderR(ctl => ItemViewer(itemId = page.id, onSelectItem = { item => ctl.set(ItemView(item)) })) }
 
     def renderCreate(page: ItemCreate) = renderR( ctl => ItemEditor(Item.create(page.code),
       onSave = { item => ctl.set(ItemView(item.id), HistoryReplace) }, // replace by view

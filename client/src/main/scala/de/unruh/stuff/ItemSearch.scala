@@ -32,8 +32,8 @@ object ItemSearch {
                   )
 
   def apply(props: Props): Unmounted[Props, State, Backend] = Component(props)
-  def apply(onClick: Item.Id => Callback, onCreate: Option[Code] => Callback, visible: Boolean): Unmounted[Props, State, Backend] =
-    Component(Props(onClick=onClick, onCreate = onCreate, visible = visible))
+  def apply(onSelectItem: Item.Id => Callback, onCreate: Option[Code] => Callback, visible: Boolean): Unmounted[Props, State, Backend] =
+    Component(Props(onClick=onSelectItem, onCreate = onCreate, visible = visible))
 
   class Backend(bs: BackendScope[Props, State]) {
     def loadAndRenderResults(searchString: String)(implicit props: Props, state: State) : AsyncCallback[VdomElement] =

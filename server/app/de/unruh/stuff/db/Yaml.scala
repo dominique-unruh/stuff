@@ -47,13 +47,19 @@ object Yaml {
     readFieldOption[A](yaml, field).getOrElse(default)
 
   private def writeField[A: YamlWriter](value: A, field: Fields.Value, condition: A => Boolean = { _:A => true }): Option[(YamlString, YamlValue)] =
+    writeField[A, A](value, field, condition, identity _)
+
+  private def writeFieldOption[A: YamlWriter](value: Option[A], field: Fields.Value): Option[(YamlString, YamlValue)] =
+    writeField[Option[A], A](value, field, _.nonEmpty, _.get)
+
+  private def writeField[A, B: YamlWriter](value: A, field: Fields.Value, condition: A => Boolean, map: A => B): Option[(YamlString, YamlValue)] =
     if (condition(value))
-      Some(YamlString(field.toString) -> value.toYaml)
+      Some(YamlString(field.toString) -> map(value).toYaml)
     else
       None
 
   object Fields extends Enumeration {
-    val id, name, description, photos, codes, files, lastmodified = Value
+    val id, name, description, photos, codes, files, lastmodified, location, prevlocation = Value
   }
 
   implicit object itemFormat extends YamlFormat[Item] {
@@ -63,7 +69,9 @@ object Yaml {
       writeField[RichText](item.description, Fields.description, _.nonEmpty),
       writeField[Seq[URI]](item.photos, Fields.photos, _.nonEmpty),
       writeField[Seq[Code]](item.codes, Fields.codes, _.nonEmpty),
-      writeField[Long](item.lastModified, Fields.lastmodified)
+      writeField[Long](item.lastModified, Fields.lastmodified),
+      writeFieldOption(item.location, Fields.location),
+      writeFieldOption(item.previousLocation, Fields.prevlocation)
     ).collect { case Some(v) => v } :_*)
 
     override def read(yaml: YamlValue): Item = {
@@ -77,7 +85,9 @@ object Yaml {
         description = readFieldDefault(yaml, Fields.description, RichText.empty),
         photos = readFieldDefault[Seq[URI]](yaml, Fields.photos, Nil),
         codes = readFieldDefault[Seq[Code]](yaml, Fields.codes, Nil),
-        lastModified = readField[Long](yaml, Fields.lastmodified)
+        lastModified = readField[Long](yaml, Fields.lastmodified),
+        location = readFieldOption[Item.Id](yaml, Fields.location),
+        previousLocation = readFieldOption[Item.Id](yaml, Fields.prevlocation),
       )
     }
   }

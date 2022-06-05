@@ -2,12 +2,12 @@ package de.unruh.stuff
 
 import de.unruh.stuff.reactsimplewysiwyg.DefaultEditor
 import de.unruh.stuff.shared.{Item, RichText}
-import io.kinoplan.scalajs.react.material.ui.core.MuiInput
+import io.kinoplan.scalajs.react.material.ui.core.{MuiDialog, MuiInput, ReactHandler2}
 import japgolly.scalajs.react.callback.AsyncCallback
 import japgolly.scalajs.react.component.Scala.{Component, Unmounted}
-import japgolly.scalajs.react.vdom.all.{button, className, div, href, img, li, onChange, onClick, src, textarea, value}
+import japgolly.scalajs.react.vdom.all.{button, className, div, h1, href, img, li, onChange, onClick, src, textarea, value}
 import japgolly.scalajs.react.vdom.{TagMod, VdomElement, all}
-import japgolly.scalajs.react.{BackendScope, Callback, CtorType, ReactFormEventFromInput, ScalaComponent}
+import japgolly.scalajs.react.{BackendScope, Callback, CtorType, ReactEvent, ReactFormEventFromInput, ScalaComponent}
 import monocle.macros.Lenses
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -20,7 +20,11 @@ import scala.util.{Failure, Success}
 object ItemEditor {
   case class Props(initialItem: Item, onSave: Item => Callback, onCancel: Callback)
 
-  @Lenses case class State(editedItem: Item, cameraOpen: Boolean = false)
+  @Lenses case class State(editedItem: Item,
+                           cameraOpen: Boolean = false,
+                          /** Searching for a location to insert */
+                           searching: Boolean = false,
+                          )
 
   def apply(props: Props): Unmounted[Props, State, Backend] = Component(props)
 
@@ -71,6 +75,23 @@ object ItemEditor {
     private val openCamera : Callback =
       bs.modState(_.copy(cameraOpen=true))
 
+    /** Activate search to insert a location */
+    private val put : Callback =
+      bs.modState(_.copy(searching = true))
+
+    private val endSearch : Callback =
+      bs.modState(_.copy(searching = false))
+
+    /** Sets a new location and hides the search dialog */
+    private def setLocation(id: Item.Id): Callback =
+      for (state <- bs.state;
+           newItem = state.editedItem.setLocation(id);
+           _ <- bs.setState(state.copy(editedItem = newItem, searching = false)))
+        yield {}
+
+    private val remove : Callback =
+      bs.modState(state => state.copy(state.editedItem.clearLocation()))
+
     def render(props: Props, state: State): VdomElement = {
       val item = state.editedItem
       div(className := "item-editor state-editing",
@@ -94,6 +115,24 @@ object ItemEditor {
 
         // This will show as a modal popup when "open = true"
         Camera(open = state.cameraOpen, onPhoto=cameraOnPhoto, onClose = cameraOnClose),
+
+        item.location match {
+          case Some(location) =>
+            div("Location:", button("Put", onClick --> put), button("Remove", onClick --> remove),
+              ItemListItem(location, onClick = { _ => Callback.empty }))
+          case None =>
+            div("Location:", button("Put", onClick --> put))
+        },
+
+        MuiDialog(open = state.searching,
+          onClose = { (e,s) => endSearch } : ReactHandler2[ReactEvent, String]) (
+          // TODO: don't show create actions
+          // TODO: in search results, show prevLocation first
+          ItemSearch(visible = true,
+            onCreate = { _ => AppMain.errorMessage("Creating items is not possible from this search") },
+            onSelectItem = setLocation,
+          )
+        ),
 
         div(button(onClick --> openCamera)("Add photo")),
 

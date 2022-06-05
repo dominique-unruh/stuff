@@ -64,7 +64,18 @@ object Code {
                  codes: Seq[Code] = Nil,
                  /** Last access */
                  lastModified: Long,
-               )
+                 /** Location of the item */
+                 location: Option[Item.Id] = None,
+                 /** Previous location of the item */
+                 previousLocation: Option[Item.Id] = None,
+               ) {
+
+  /** Sets the location (and stores the previous location, if set, in [[previousLocation]]) */
+  def setLocation(location: Option[Item.Id]): Item = copy(location = location,
+    previousLocation = this.location match { case None => previousLocation; case Some(loc) => Some(loc) })
+  def setLocation(location: Item.Id): Item = setLocation(Some(location))
+  def clearLocation(): Item = setLocation(None)
+}
 
 object Item {
   private def newID(): Item.Id = Random.nextLong()

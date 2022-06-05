@@ -5,7 +5,7 @@ import japgolly.scalajs.react.{BackendScope, Callback, React, ScalaComponent}
 import japgolly.scalajs.react.callback.AsyncCallback
 import japgolly.scalajs.react.component.Scala.Unmounted
 import japgolly.scalajs.react.vdom.{HtmlAttrs, TagMod, VdomElement, all}
-import japgolly.scalajs.react.vdom.all.{className, dangerouslySetInnerHtml, div, h1, h2, href, img, li, onClick, src}
+import japgolly.scalajs.react.vdom.all.{button, className, dangerouslySetInnerHtml, div, h1, h2, href, img, li, onClick, src}
 
 import java.net.URI
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -13,19 +13,22 @@ import japgolly.scalajs.react.vdom.Implicits._
 import monocle.macros.Lenses
 
 object ItemViewer {
-  case class Props(itemId: Item.Id)
+  case class Props(itemId: Item.Id,
+                   /** When the user click on a link to another item */
+                   onSelectItem: Item.Id => Callback)
   @Lenses case class State(editing: Boolean = false,
 /*                          /** Current editor content. Should be [[Item.invalid]] if `editing==false`
                            * and a valid item if `editing==true`. */
                            editItem: Item = Item.invalid*/)
 
   def apply(props: Props): Unmounted[Props, State, Backend] = Component(props)
-  def apply(itemId: Item.Id): Unmounted[Props, State, Backend] = apply(Props(itemId))
+  def apply(itemId: Item.Id, onSelectItem: Item.Id => Callback): Unmounted[Props, State, Backend] =
+    apply(Props(itemId=itemId, onSelectItem=onSelectItem))
 
   class Backend(bs: BackendScope[Props, State]) {
     private def url(url: URI) = ExtendedURL.resolve(JSVariables.username, url)
 
-    private def renderBodyView(item: Item): VdomElement = {
+    private def renderBodyView(item: Item)(implicit props: Props): VdomElement = {
       div(className := "item-editor",
         div(all.button("Edit", onClick --> bs.modState(_.copy(editing = true)))),
 
@@ -37,6 +40,13 @@ object ItemViewer {
           div(className := "item-photos")(images: _*)
         } else
           TagMod.empty,
+
+        // TODO: Add put and remove buttons
+        item.location match {
+          case Some(location) =>
+            div(ItemListItem(location, onClick = props.onSelectItem))
+          case None => TagMod.empty
+        },
 
         if (item.description.nonEmpty) {
           // TODO: sanitize!?

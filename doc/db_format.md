@@ -50,8 +50,10 @@ The content of the file is YAML with the following supported tags:
   Additional attached files (e.g., manuals).
   * Each string must be a local URL referencing an existing file in the `files/` directory with the right id.
 * `lastaccessed` (integer, optional, not implemented): Time of last access (last opened in full screen view), in seconds since epoch
-* `lastmodified` (integer, optional, not implemented): Time of last modification, in seconds since epoch.
+* `lastmodified` (integer, optional): Time of last modification, in seconds since epoch.
   Does not include automatic modifications such as, e.g., setting `lastaccessed`.
+* `location` (integer, optional, not implemented): Id of an existing item that contains this item. 
+* `prevlocation` (integer, optional, not implemented): Previous value of `location` (for UI suggestions when setting `location`). 
 
 For all fields that are lists of something (e.g., `photos`, `links`), empty lists are disallowed.
 (But the whole field can be omitted if it is optional.)
@@ -63,6 +65,6 @@ interpretation will be left to the browser), or a *local URL*.
 
 A *local URL* references a file in the `files` directory.
 It is of the form `localstuff:id/file`.
-Here `id` is the id of an item (and an item must only reference local URL with its own ID).
+Here `id` is the id of an item (and an item must only reference local URLs with its own ID).
 And `file` is the name of a file in the directory `files/id`.
 

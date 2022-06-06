@@ -2,6 +2,7 @@ package controllers
 
 import AuthenticationController.loginForm
 import controllers.AssetsFinder
+import de.unruh.stuff.Config
 import play.api.data.Form
 import play.api.data.Forms.{mapping, text}
 import play.api.mvc.Security.Authenticated
@@ -24,9 +25,14 @@ class AuthenticationController @Inject()(val controllerComponents: ControllerCom
     val form = loginForm.bindFromRequest()
     assert(!form.hasErrors)
     val login = form.value.get
-    assert(login.user == "unruh")
-    assert(login.password == "secret")
-    Redirect(routes.Application.app).withSession("user" -> login.user)
+    Config.config.users.get(login.user) match {
+      case None => Unauthorized(s"Unknown user ${login.user}")
+      case Some(user) =>
+        if (login.password != user.password)
+          Unauthorized(s"Invalid password")
+        else
+          Redirect(routes.Application.app).withSession("user" -> login.user)
+    }
   }
 }
 

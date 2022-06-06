@@ -5,6 +5,7 @@ import de.unruh.stuff.shared.Item
 import java.nio.file.Path
 
 object Paths {
+  val configPath: Path = Path.of("stuff-config.yaml")
   val dbPath: Path = Path.of("../my-stuff").toAbsolutePath.normalize()
   val filesPath: Path = dbPath.resolve("files")
   def itemsPath(path: Path): Path = path.resolve("items")

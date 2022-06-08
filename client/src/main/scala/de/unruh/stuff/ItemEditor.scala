@@ -21,7 +21,6 @@ object ItemEditor {
   case class Props(initialItem: Item, onSave: Item => Callback, onCancel: Callback)
 
   @Lenses case class State(editedItem: Item,
-                           cameraOpen: Boolean = false,
                           /** Searching for a location to insert */
                            searching: Boolean = false,
                           )
@@ -63,17 +62,9 @@ object ItemEditor {
     private def cameraOnPhoto(photo: String) : Callback = {
       val url = URI.create(photo)
       assert(url.getScheme == "data")
-      val modify = State.cameraOpen.replace(false)
-        .andThen(itemPhotos.modify(_.appended(url)))
-      for (_ <- bs.modState(modify))
-        yield {}
+      val modify = itemPhotos.modify(_.appended(url))
+      bs.modState(modify)
     }
-
-    private val cameraOnClose : Callback =
-      bs.modState(_.copy(cameraOpen=false))
-
-    private val openCamera : Callback =
-      bs.modState(_.copy(cameraOpen=true))
 
     /** Activate search to insert a location */
     private val put : Callback =
@@ -113,8 +104,11 @@ object ItemEditor {
         } else
           TagMod.empty,
 
-        // This will show as a modal popup when "open = true"
-        Camera(open = state.cameraOpen, onPhoto=cameraOnPhoto, onClose = cameraOnClose),
+        ModalAction[String](
+          button = { (open:Callback) => div(button(onClick --> open)("Add photo")) : VdomElement },
+          modal = { (onPhoto:String=>Callback) => Camera(onPhoto = onPhoto) : VdomElement },
+          onAction = cameraOnPhoto _
+        ),
 
         item.location match {
           case Some(location) =>
@@ -133,8 +127,6 @@ object ItemEditor {
             onSelectItem = setLocation,
           )
         ),
-
-        div(button(onClick --> openCamera)("Add photo")),
 
         div(DefaultEditor(value = item.description.asHtml, onChange = { event =>
           bs.modState(itemDescription.replace(RichText.html(event.target.value))).runNow() })

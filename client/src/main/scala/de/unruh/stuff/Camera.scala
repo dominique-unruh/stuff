@@ -20,14 +20,12 @@ import scala.scalajs.js.annotation.{JSGlobal, JSImport}
 
 // TODO: If opening camera fails, report to user
 object Camera {
-  case class Props(onPhoto: String => Callback,
-                   onClose: Callback,
-                   open: Boolean)
+  case class Props(onPhoto: String => Callback)
   type State = Unit
 
   def apply(props: Props): Unmounted[Props, State, Backend] = Component(props)
-  def apply(onPhoto: String => Callback, onClose: Callback, open: Boolean): Unmounted[Props, State, Backend] =
-    apply(Props(onPhoto=onPhoto, onClose=onClose, open=open))
+  def apply(onPhoto: String => Callback): Unmounted[Props, State, Backend] =
+    apply(Props(onPhoto=onPhoto))
 
   class Backend(bs: BackendScope[Props, State]) {
     private val webcamRef = Ref[Webcam]
@@ -39,18 +37,13 @@ object Camera {
            _ <- props.onPhoto(image))
         yield ()
 
-    def render(props: Props): VdomElement = {
+    def render(props: Props): VdomElement = (
       // https://mui.com/material-ui/react-dialog/
-      MuiDialog(open = props.open,
-        onClose = { (e,s) => props.onClose } : ReactHandler2[ReactEvent, String]) (
-
         Webcam(audio=false, screenshotFormat = "image/jpeg",
           videoConstraints = new MediaTrackConstraints { facingMode = "environment"; aspectRatio = 1 })
         (untypedRef := webcamRef.asInstanceOf[Ref.Simple[html.Element]], // Not sure how to do this without this untrue cast...
           onClick --> clickHandler)
-
       )
-    }
   }
 
   //noinspection TypeAnnotation

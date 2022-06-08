@@ -18,7 +18,7 @@ import scala.scalajs.js.annotation.{JSGlobal, JSImport}
 
 
 
-
+// TODO: If opening camera fails, report to user
 object Camera {
   case class Props(onPhoto: String => Callback,
                    onClose: Callback,

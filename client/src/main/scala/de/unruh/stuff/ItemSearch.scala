@@ -31,6 +31,11 @@ object ItemSearch {
                   searchFromCode: Option[Code] = None,
                   )
 
+  val videoConstraints: MediaTrackConstraints = new MediaTrackConstraints {
+    aspectRatio = 1
+    facingMode = "environment"
+  }
+
   def apply(props: Props): Unmounted[Props, State, Backend] = Component(props)
   def apply(onSelectItem: Item.Id => Callback, onCreate: Option[Code] => Callback, visible: Boolean): Unmounted[Props, State, Backend] =
     Component(Props(onClick=onSelectItem, onCreate = onCreate, visible = visible))
@@ -71,11 +76,6 @@ object ItemSearch {
             )
       yield {})
         .runNow()
-    }
-
-    private val videoConstraints = new MediaTrackConstraints {
-      aspectRatio = 1
-      facingMode = "environment"
     }
 
     private def onError(error: Throwable): AsyncCallback[VdomElement] =

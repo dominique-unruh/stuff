@@ -5,7 +5,7 @@ import japgolly.scalajs.react.{BackendScope, Callback, React, ScalaComponent}
 import japgolly.scalajs.react.callback.AsyncCallback
 import japgolly.scalajs.react.component.Scala.Unmounted
 import japgolly.scalajs.react.vdom.{HtmlAttrs, TagMod, VdomElement, all}
-import japgolly.scalajs.react.vdom.all.{button, className, dangerouslySetInnerHtml, div, h1, h2, href, img, li, onClick, src}
+import japgolly.scalajs.react.vdom.all.{button, className, dangerouslySetInnerHtml, div, h1, h2, href, img, li, a, onClick, src}
 
 import java.net.URI
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -55,8 +55,11 @@ object ItemViewer {
           TagMod.empty,
 
         if (item.codes.nonEmpty) {
-          val codes = for ((link, i) <- item.codes.zipWithIndex)
-            yield li(link.toString)
+          val codes = for ((code, i) <- item.codes.zipWithIndex)
+            yield code.link match {
+              case None => li(code.toString)
+              case Some(url) => li(a(code.toString, href := url.toString))
+            }
           div(className := "item-codes")(codes: _*)
         } else
           TagMod.empty,

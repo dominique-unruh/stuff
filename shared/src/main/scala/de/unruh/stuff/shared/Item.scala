@@ -1,5 +1,6 @@
 package de.unruh.stuff.shared
 
+import de.unruh.stuff.shared.Code.urlRegex
 import de.unruh.stuff.shared.Item.{Id, newID}
 import monocle.macros.Lenses
 import org.apache.commons.text.StringEscapeUtils
@@ -27,6 +28,18 @@ object RichText {
 }
 
 case class Code(format: Option[String], content: String) {
+  def link: Option[URI] =
+    try (format.getOrElse("UNKNOWN"), content) match {
+      case ("QR_CODE",Code.urlRegex()) => Some(URI.create(content))
+      case ("EAN_13",Code.isbnRegex()) => Some(URI.create(s"https://www.goodreads.com/search?query=$content"))
+      case ("EAN_13" | "EAN_8" | "UPC_A" | "UPC_E", _) => Some(URI.create(s"https://www.barcodelookup.com/$content"))
+          // Alternative: https://www.ean-search.org/?q=XXXXXXXXX
+      case _ => None
+    } catch {
+      case e : Throwable => None
+        // TODO: log error
+    }
+
   /** True if the two codes match. The contents must be equal, and the formats must be equal if both are not `None`. */
   def matches(other: Code): Boolean =
     (content == other.content) &&
@@ -35,7 +48,11 @@ case class Code(format: Option[String], content: String) {
   assert(format.getOrElse("") != "UNKNOWN")
   override def toString: String = s"${format.getOrElse("UNKNOWN")}:$content"
 }
+
 object Code {
+  val urlRegex: Regex = "https?://.*".r
+  val isbnRegex: Regex = "978[0-9]{10}".r
+
   val codeRegex: Regex = "([A-Za-z0-9_-]+):(.*)".r
   def apply(string : String): Code = {
     string match {

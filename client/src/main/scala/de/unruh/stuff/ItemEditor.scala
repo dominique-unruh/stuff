@@ -1,7 +1,7 @@
 package de.unruh.stuff
 
 import de.unruh.stuff.reactsimplewysiwyg.DefaultEditor
-import de.unruh.stuff.shared.{Item, RichText}
+import de.unruh.stuff.shared.{Code, Item, RichText}
 import io.kinoplan.scalajs.react.material.ui.core.{MuiDialog, MuiInput, ReactHandler2}
 import japgolly.scalajs.react.callback.AsyncCallback
 import japgolly.scalajs.react.component.Scala.{Component, Unmounted}
@@ -21,9 +21,6 @@ object ItemEditor {
   case class Props(initialItem: Item, onSave: Item => Callback, onCancel: Callback)
 
   @Lenses case class State(editedItem: Item,
-                           cameraOpen: Boolean = false,
-                          /** Searching for a location to insert */
-                           searching: Boolean = false,
                           )
 
   def apply(props: Props): Unmounted[Props, State, Backend] = Component(props)
@@ -32,6 +29,7 @@ object ItemEditor {
     apply(Props(initialItem = initialItem, onSave = onSave, onCancel = onCancel))
 
   private val itemName = State.editedItem.andThen(Item.name)
+  private val itemCodes = State.editedItem.andThen(Item.codes)
   private val itemDescription = State.editedItem.andThen(Item.description)
   private val itemPhotos = State.editedItem.andThen(Item.photos)
 
@@ -63,34 +61,46 @@ object ItemEditor {
     private def cameraOnPhoto(photo: String) : Callback = {
       val url = URI.create(photo)
       assert(url.getScheme == "data")
-      val modify = State.cameraOpen.replace(false)
-        .andThen(itemPhotos.modify(_.appended(url)))
-      for (_ <- bs.modState(modify))
-        yield {}
+      val modify = itemPhotos.modify(_.appended(url))
+      bs.modState(modify)
     }
-
-    private val cameraOnClose : Callback =
-      bs.modState(_.copy(cameraOpen=false))
-
-    private val openCamera : Callback =
-      bs.modState(_.copy(cameraOpen=true))
-
-    /** Activate search to insert a location */
-    private val put : Callback =
-      bs.modState(_.copy(searching = true))
-
-    private val endSearch : Callback =
-      bs.modState(_.copy(searching = false))
 
     /** Sets a new location and hides the search dialog */
     private def setLocation(id: Item.Id): Callback =
       for (state <- bs.state;
            newItem = state.editedItem.setLocation(id);
-           _ <- bs.setState(state.copy(editedItem = newItem, searching = false)))
+           _ <- bs.setState(state.copy(editedItem = newItem)))
         yield {}
 
     private val remove : Callback =
       bs.modState(state => state.copy(state.editedItem.clearLocation()))
+
+    private val putLocationElement : VdomElement = ModalAction[Item.Id](
+      onAction = setLocation _,
+      button = { (put:Callback) => button("Put", onClick --> put) : VdomElement },
+      modal = { (action:Item.Id => Callback) =>
+        // TODO: don't show create actions
+        // TODO: in search results, show prevLocation first
+        ItemSearch(visible = true,
+          onCreate = { _ => AppMain.errorMessage("Creating items is not possible from this search") },
+          onSelectItem = action,
+        ) : VdomElement
+      })
+
+    private def addCode(code: Code) =
+      bs.modState(itemCodes.modify(_.appended(code)))
+
+    private val addCodeElement : VdomElement = ModalAction[Code](
+      onAction = addCode _,
+      button = { (put:Callback) => button("Add code", onClick --> put) : VdomElement },
+      modal = { (action:Code => Callback) =>
+        QrCode(
+          onDetect = { (f,c) => Code(f,c) },
+          constraints = ItemSearch.videoConstraints,
+          active = true,
+        ) : VdomElement
+      })
+
 
     def render(props: Props, state: State): VdomElement = {
       val item = state.editedItem
@@ -113,28 +123,19 @@ object ItemEditor {
         } else
           TagMod.empty,
 
-        // This will show as a modal popup when "open = true"
-        Camera(open = state.cameraOpen, onPhoto=cameraOnPhoto, onClose = cameraOnClose),
+        ModalAction[String](
+          button = { (open:Callback) => div(button(onClick --> open)("Add photo")) : VdomElement },
+          modal = { (onPhoto:String=>Callback) => Camera(onPhoto = onPhoto) : VdomElement },
+          onAction = cameraOnPhoto _
+        ),
 
         item.location match {
           case Some(location) =>
-            div("Location:", button("Put", onClick --> put), button("Remove", onClick --> remove),
+            div("Location:", putLocationElement, button("Remove", onClick --> remove),
               ItemListItem(location, onClick = { _ => Callback.empty }))
           case None =>
-            div("Location:", button("Put", onClick --> put))
+            div("Location:", putLocationElement)
         },
-
-        MuiDialog(open = state.searching,
-          onClose = { (e,s) => endSearch } : ReactHandler2[ReactEvent, String]) (
-          // TODO: don't show create actions
-          // TODO: in search results, show prevLocation first
-          ItemSearch(visible = true,
-            onCreate = { _ => AppMain.errorMessage("Creating items is not possible from this search") },
-            onSelectItem = setLocation,
-          )
-        ),
-
-        div(button(onClick --> openCamera)("Add photo")),
 
         div(DefaultEditor(value = item.description.asHtml, onChange = { event =>
           bs.modState(itemDescription.replace(RichText.html(event.target.value))).runNow() })
@@ -144,9 +145,9 @@ object ItemEditor {
         if (item.codes.nonEmpty) {
           val codes = for (code <- item.codes)
             yield li(code.toString)
-          div(className := "item-codes")(codes: _*)
+          div(className := "item-codes")(codes.appended(addCodeElement): _*)
         } else
-          TagMod.empty,
+          addCodeElement,
 
         div(className := "item-id", item.id.toString),
       )

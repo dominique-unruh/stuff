@@ -21,8 +21,6 @@ object ItemEditor {
   case class Props(initialItem: Item, onSave: Item => Callback, onCancel: Callback)
 
   @Lenses case class State(editedItem: Item,
-                          /** Searching for a location to insert */
-                           searching: Boolean = false,
                           )
 
   def apply(props: Props): Unmounted[Props, State, Backend] = Component(props)
@@ -66,22 +64,27 @@ object ItemEditor {
       bs.modState(modify)
     }
 
-    /** Activate search to insert a location */
-    private val put : Callback =
-      bs.modState(_.copy(searching = true))
-
-    private val endSearch : Callback =
-      bs.modState(_.copy(searching = false))
-
     /** Sets a new location and hides the search dialog */
     private def setLocation(id: Item.Id): Callback =
       for (state <- bs.state;
            newItem = state.editedItem.setLocation(id);
-           _ <- bs.setState(state.copy(editedItem = newItem, searching = false)))
+           _ <- bs.setState(state.copy(editedItem = newItem)))
         yield {}
 
     private val remove : Callback =
       bs.modState(state => state.copy(state.editedItem.clearLocation()))
+
+    private val putLocationElement : VdomElement = ModalAction[Item.Id](
+      onAction = setLocation _,
+      button = { (put:Callback) => button("Put", onClick --> put) : VdomElement },
+      modal = { (action:Item.Id => Callback) =>
+        // TODO: don't show create actions
+        // TODO: in search results, show prevLocation first
+        ItemSearch(visible = true,
+          onCreate = { _ => AppMain.errorMessage("Creating items is not possible from this search") },
+          onSelectItem = action,
+        ) : VdomElement
+       })
 
     def render(props: Props, state: State): VdomElement = {
       val item = state.editedItem
@@ -112,21 +115,11 @@ object ItemEditor {
 
         item.location match {
           case Some(location) =>
-            div("Location:", button("Put", onClick --> put), button("Remove", onClick --> remove),
+            div("Location:", putLocationElement, button("Remove", onClick --> remove),
               ItemListItem(location, onClick = { _ => Callback.empty }))
           case None =>
-            div("Location:", button("Put", onClick --> put))
+            div("Location:", putLocationElement)
         },
-
-        MuiDialog(open = state.searching,
-          onClose = { (e,s) => endSearch } : ReactHandler2[ReactEvent, String]) (
-          // TODO: don't show create actions
-          // TODO: in search results, show prevLocation first
-          ItemSearch(visible = true,
-            onCreate = { _ => AppMain.errorMessage("Creating items is not possible from this search") },
-            onSelectItem = setLocation,
-          )
-        ),
 
         div(DefaultEditor(value = item.description.asHtml, onChange = { event =>
           bs.modState(itemDescription.replace(RichText.html(event.target.value))).runNow() })

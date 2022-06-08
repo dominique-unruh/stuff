@@ -1,7 +1,7 @@
 package de.unruh.stuff
 
 import de.unruh.stuff.reactsimplewysiwyg.DefaultEditor
-import de.unruh.stuff.shared.{Item, RichText}
+import de.unruh.stuff.shared.{Code, Item, RichText}
 import io.kinoplan.scalajs.react.material.ui.core.{MuiDialog, MuiInput, ReactHandler2}
 import japgolly.scalajs.react.callback.AsyncCallback
 import japgolly.scalajs.react.component.Scala.{Component, Unmounted}
@@ -29,6 +29,7 @@ object ItemEditor {
     apply(Props(initialItem = initialItem, onSave = onSave, onCancel = onCancel))
 
   private val itemName = State.editedItem.andThen(Item.name)
+  private val itemCodes = State.editedItem.andThen(Item.codes)
   private val itemDescription = State.editedItem.andThen(Item.description)
   private val itemPhotos = State.editedItem.andThen(Item.photos)
 
@@ -84,7 +85,22 @@ object ItemEditor {
           onCreate = { _ => AppMain.errorMessage("Creating items is not possible from this search") },
           onSelectItem = action,
         ) : VdomElement
-       })
+      })
+
+    private def addCode(code: Code) =
+      bs.modState(itemCodes.modify(_.appended(code)))
+
+    private val addCodeElement : VdomElement = ModalAction[Code](
+      onAction = addCode _,
+      button = { (put:Callback) => button("Add code", onClick --> put) : VdomElement },
+      modal = { (action:Code => Callback) =>
+        QrCode(
+          onDetect = { (f,c) => Code(f,c) },
+          constraints = ItemSearch.videoConstraints,
+          active = true,
+        ) : VdomElement
+      })
+
 
     def render(props: Props, state: State): VdomElement = {
       val item = state.editedItem
@@ -129,9 +145,9 @@ object ItemEditor {
         if (item.codes.nonEmpty) {
           val codes = for (code <- item.codes)
             yield li(code.toString)
-          div(className := "item-codes")(codes: _*)
+          div(className := "item-codes")(codes.appended(addCodeElement): _*)
         } else
-          TagMod.empty,
+          addCodeElement,
 
         div(className := "item-id", item.id.toString),
       )

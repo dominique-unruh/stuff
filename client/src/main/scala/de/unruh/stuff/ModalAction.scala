@@ -4,7 +4,7 @@ import io.kinoplan.scalajs.react.material.ui.core.{MuiDialog, ReactHandler2}
 import japgolly.scalajs.react.{Callback, CtorType, ReactEvent, ScalaComponent}
 import japgolly.scalajs.react.component.Scala.{BackendScope, Component, Unmounted}
 import japgolly.scalajs.react.vdom.VdomElement
-import japgolly.scalajs.react.vdom.all.{button, div, onClick}
+import japgolly.scalajs.react.vdom.all.{button, div, onClick, span}
 
 object ModalAction {
   case class Props[A](onAction: A => Callback,
@@ -31,7 +31,7 @@ object ModalAction {
         yield {}
 
     def render[A](props: Props[A], state: State): VdomElement =
-        div (props.button (open),
+        span (props.button (open),
           MuiDialog(open = state.open, onClose = { (e, s) => close }: ReactHandler2[ReactEvent, String])
           ( // This will show as a modal popup when "open = true"
             props.modal(v => action(props, v))

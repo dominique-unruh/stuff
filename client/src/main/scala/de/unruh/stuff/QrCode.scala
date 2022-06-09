@@ -14,13 +14,13 @@ import japgolly.scalajs.react.vdom.Implicits._
 object QrCode {
   /** onDetect: (format, content) */
   // TODO class does not reinitialize when MediaTrackConstraints change. Should it?
-  case class Props(onDetect: (Option[String], String) => Unit, constraints: MediaTrackConstraints,
+  case class Props(onDetect: (Option[String], String) => Callback, constraints: MediaTrackConstraints,
                    flashLight: Boolean, active: Boolean)
   case class State(scanner: zxing.BrowserMultiFormatReader,
                    flashLightState: Boolean = false)
 
   def apply(props: Props): Unmounted[Props, State, Backend] = Component(props)
-  def apply(onDetect: (Option[String], String) => Unit, constraints: MediaTrackConstraints, flashLight: Boolean = false,
+  def apply(onDetect: (Option[String], String) => Callback, constraints: MediaTrackConstraints, flashLight: Boolean = false,
            active: Boolean): Unmounted[Props, State, Backend] =
     apply(Props(onDetect=onDetect, constraints=constraints, flashLight=flashLight, active=active))
 
@@ -40,8 +40,7 @@ object QrCode {
         else
           console.warn(exn, exception)
       } else {
-        //      console.log("Scan success", result, exception)
-        props.onDetect(zxing.BarcodeFormat.fromT(result.getBarcodeFormat()).map(_.toString), result.getText())
+        props.onDetect(zxing.BarcodeFormat.fromT(result.getBarcodeFormat()).map(_.toString), result.getText()).runNow()
       }
     }
 

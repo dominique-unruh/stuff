@@ -62,9 +62,9 @@ object ItemSearch {
     private def changed(event: ReactFormEventFromInput) =
       bs.modState(_.copy(searchString = event.target.value, searchFromCode = None))
 
-    private def qrcode(format: Option[String], text: String) : Unit = {
-      console.log(s"qrcode: $text")
-      (for (state <- bs.state;
+    private def qrcode(format: Option[String], text: String) : Callback =
+      for (state <- bs.state;
+            _ = console.log(s"qrcode: $text");
             code = Code(format, text);
             codeStr = code.toString;
             needToAdd = !state.searchString.endsWith(codeStr+" ");
@@ -74,9 +74,7 @@ object ItemSearch {
             else
               DefaultEffects.Sync.empty
             )
-      yield {})
-        .runNow()
-    }
+      yield {}
 
     private def onError(error: Throwable): AsyncCallback[VdomElement] =
       AsyncCallback.delay {

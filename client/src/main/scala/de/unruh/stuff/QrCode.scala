@@ -10,6 +10,7 @@ import scala.scalajs.js
 import scala.scalajs.js.{UndefOr, |}
 import scala.util.Random
 import japgolly.scalajs.react.vdom.Implicits._
+import org.log4s
 
 object QrCode {
   /** onDetect: (format, content) */
@@ -35,14 +36,15 @@ object QrCode {
       if (exception != null && exception.nonEmpty) {
         val exn = exception.get
         if (exn.isInstanceOf[zxing.NotFoundException])
-        //        console.log("No QR code found...")
           {}
         else
-          console.warn(exn, exception)
+          logger.warn("Exception in ZXing: " + exception)
       } else {
         props.onDetect(zxing.BarcodeFormat.fromT(result.getBarcodeFormat()).map(_.toString), result.getText()).runNow()
       }
     }
+
+    private val logger = log4s.getLogger
 
 //    private val updateActive: Callback =
 
@@ -69,7 +71,6 @@ object QrCode {
     }
 
     private def startScanning(props: Props, state: State) : Unit = {
-      console.log("Start")
       state.scanner.decodeFromConstraints(
         constraints = new MediaStreamConstraints { video = props.constraints },
         videoId, callback(props))
@@ -77,7 +78,6 @@ object QrCode {
     }
 
     private def stopScanning(props: Props, state: State) : Unit = {
-      console.log("Stop")
       state.scanner.stopStreams()
     }
 

@@ -10,6 +10,7 @@ import japgolly.scalajs.react.vdom.{TagMod, VdomElement, VdomNode, all}
 import japgolly.scalajs.react.vdom.all.{autoFocus, button, className, div, h1, onChange, onClick, placeholder, value}
 import japgolly.scalajs.react.vdom.Implicits._
 import japgolly.scalajs.react.{AsyncCallback, BackendScope, CtorType, React, ReactFormEventFromInput, ScalaComponent}
+import org.log4s
 import org.scalajs.dom.{MediaTrackConstraints, console}
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -64,7 +65,7 @@ object ItemSearch {
 
     private def qrcode(format: Option[String], text: String) : Callback =
       for (state <- bs.state;
-            _ = console.log(s"qrcode: $text");
+            _ = logger.debug(s"qrcode: $text");
             code = Code(format, text);
             codeStr = code.toString;
             needToAdd = !state.searchString.endsWith(codeStr+" ");
@@ -100,6 +101,8 @@ object ItemSearch {
       )
     }
   }
+
+  private val logger = log4s.getLogger
 
   private val initialState = State()
 

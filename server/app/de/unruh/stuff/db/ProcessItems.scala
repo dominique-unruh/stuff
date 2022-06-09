@@ -37,10 +37,8 @@ object ProcessItems {
       val filename = s"$prefix${dateFormat.format(calendar.getTime)}_${counter.incrementAndGet}$extension"
       val dir = Paths.filesPath.resolve(itemId.toString)
       val path = dir.resolve(filename)
-      println(dataUrl.mediaType.value, extension, path)
       assert(!Files.exists(path))
       val localUrl = ExtendedURL.forFile(itemId, filename)
-      println(localUrl)
       try Files.createDirectory(dir)
       catch { case _ : FileAlreadyExistsException => }
       Files.write(path, dataUrl.data, StandardOpenOption.CREATE_NEW)

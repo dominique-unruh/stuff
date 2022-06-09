@@ -151,9 +151,7 @@ object AppMain {
     val snackbarProviderRef = Ref[SnackbarProvider]
     val app : VdomElement = button("Test", onClick --> Callback {
       val sp: SnackbarProvider = snackbarProviderRef.get.runNow().get
-      console.log(sp)
       sp.handleEnqueueSnackbar("Hello", OptionsObject(variant = VariantType.error))
-      console.log("Click")
     })
     val snackbarProvider = SnackbarProvider()(app, untypedRef := snackbarProviderRef.asInstanceOf[Ref.Simple[html.Element]])
     val root = document.getElementById("react-root")

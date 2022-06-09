@@ -26,6 +26,7 @@ import scala.concurrent.duration.Duration
 class Application @Inject()(cc: ControllerComponents) extends AbstractController(cc) with Authenticated {
   def app: Handler = isAuthenticated { implicit request =>
     Ok(views.html.app(username))
+      .withHeaders("Cache-Control" -> "no-cache")
   }
 
   def test: Handler = Action { implicit request =>

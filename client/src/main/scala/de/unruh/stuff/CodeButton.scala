@@ -2,9 +2,10 @@ package de.unruh.stuff
 
 import de.unruh.stuff.shared.Code
 import japgolly.scalajs.react.component.Scala.{Component, Unmounted}
-import japgolly.scalajs.react.vdom.all.{button, href, li, onClick}
+import japgolly.scalajs.react.vdom.all.{button, href, li, a, onClick}
 import japgolly.scalajs.react.vdom.{TagMod, VdomElement}
-import japgolly.scalajs.react.{CtorType, ScalaComponent}
+import japgolly.scalajs.react.{Callback, CtorType, ScalaComponent}
+import japgolly.scalajs.react.vdom.Implicits._
 
 object CodeButton {
   case class Props(code: Code, link: Boolean, onRemove: Option[Code => Callback])

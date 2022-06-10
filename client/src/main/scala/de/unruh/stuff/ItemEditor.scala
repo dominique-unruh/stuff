@@ -101,6 +101,8 @@ object ItemEditor {
         ) : VdomElement
       })
 
+    private def removeCode(code: Code): Callback =
+      bs.modState(itemCodes.modify(_.filterNot(_ == code)))
 
     def render(props: Props, state: State): VdomElement = {
       val item = state.editedItem
@@ -141,10 +143,8 @@ object ItemEditor {
           bs.modState(itemDescription.replace(RichText.html(event.target.value))).runNow() })
           (className := "item-description")),
 
-        // TODO code editor
         if (item.codes.nonEmpty) {
-          val codes = for (code <- item.codes)
-            yield li(code.toString)
+          val codes = item.codes.map(CodeButton(_, link=false, onRemove = Some(removeCode)) : VdomElement)
           div(className := "item-codes")(codes.appended(addCodeElement): _*)
         } else
           addCodeElement,

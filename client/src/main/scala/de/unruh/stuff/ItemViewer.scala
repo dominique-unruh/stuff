@@ -1,16 +1,18 @@
 package de.unruh.stuff
 
-import de.unruh.stuff.shared.{Item, RichText}
-import japgolly.scalajs.react.{BackendScope, Callback, React, ScalaComponent}
+import de.unruh.stuff.shared.{Code, Item, RichText}
+import japgolly.scalajs.react.{BackendScope, Callback, CtorType, React, ScalaComponent}
 import japgolly.scalajs.react.callback.AsyncCallback
-import japgolly.scalajs.react.component.Scala.Unmounted
+import japgolly.scalajs.react.component.Scala.{Component, Unmounted}
 import japgolly.scalajs.react.vdom.{HtmlAttrs, TagMod, VdomElement, all}
-import japgolly.scalajs.react.vdom.all.{button, className, dangerouslySetInnerHtml, div, h1, h2, href, img, li, a, onClick, src}
+import japgolly.scalajs.react.vdom.all.{a, button, className, dangerouslySetInnerHtml, div, h1, h2, href, img, li, onClick, src}
 
 import java.net.URI
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import japgolly.scalajs.react.vdom.Implicits._
 import monocle.macros.Lenses
+
+
 
 object ItemViewer {
   case class Props(itemId: Item.Id,
@@ -55,11 +57,7 @@ object ItemViewer {
           TagMod.empty,
 
         if (item.codes.nonEmpty) {
-          val codes = for ((code, i) <- item.codes.zipWithIndex)
-            yield code.link match {
-              case None => li(code.toString)
-              case Some(url) => li(a(code.toString, href := url.toString))
-            }
+          val codes = item.codes.map(CodeButton(_, link=true) : VdomElement)
           div(className := "item-codes")(codes: _*)
         } else
           TagMod.empty,

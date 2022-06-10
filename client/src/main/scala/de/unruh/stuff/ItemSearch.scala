@@ -10,6 +10,7 @@ import japgolly.scalajs.react.vdom.{TagMod, VdomElement, VdomNode, all}
 import japgolly.scalajs.react.vdom.all.{autoFocus, button, className, div, h1, onChange, onClick, placeholder, value}
 import japgolly.scalajs.react.vdom.Implicits._
 import japgolly.scalajs.react.{AsyncCallback, BackendScope, CtorType, React, ReactFormEventFromInput, ScalaComponent}
+import org.log4s
 import org.scalajs.dom.{MediaTrackConstraints, console}
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -62,9 +63,9 @@ object ItemSearch {
     private def changed(event: ReactFormEventFromInput) =
       bs.modState(_.copy(searchString = event.target.value, searchFromCode = None))
 
-    private def qrcode(format: Option[String], text: String) : Unit = {
-      console.log(s"qrcode: $text")
-      (for (state <- bs.state;
+    private def qrcode(format: Option[String], text: String) : Callback =
+      for (state <- bs.state;
+            _ = logger.debug(s"qrcode: $text");
             code = Code(format, text);
             codeStr = code.toString;
             needToAdd = !state.searchString.endsWith(codeStr+" ");
@@ -74,9 +75,7 @@ object ItemSearch {
             else
               DefaultEffects.Sync.empty
             )
-      yield {})
-        .runNow()
-    }
+      yield {}
 
     private def onError(error: Throwable): AsyncCallback[VdomElement] =
       AsyncCallback.delay {
@@ -102,6 +101,8 @@ object ItemSearch {
       )
     }
   }
+
+  private val logger = log4s.getLogger
 
   private val initialState = State()
 

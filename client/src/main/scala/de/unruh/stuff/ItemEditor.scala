@@ -87,7 +87,7 @@ object ItemEditor {
         ) : VdomElement
       })
 
-    private def addCode(code: Code) =
+    private def addCode(code: Code): Callback =
       bs.modState(itemCodes.modify(_.appended(code)))
 
     private val addCodeElement : VdomElement = ModalAction[Code](
@@ -95,7 +95,7 @@ object ItemEditor {
       button = { (put:Callback) => button("Add code", onClick --> put) : VdomElement },
       modal = { (action:Code => Callback) =>
         QrCode(
-          onDetect = { (f,c) => Code(f,c) },
+          onDetect = { (f,c) => action(Code(f,c)) },
           constraints = ItemSearch.videoConstraints,
           active = true,
         ) : VdomElement

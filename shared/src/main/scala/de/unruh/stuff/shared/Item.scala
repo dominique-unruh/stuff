@@ -4,6 +4,7 @@ import de.unruh.stuff.shared.Code.urlRegex
 import de.unruh.stuff.shared.Item.{Id, newID}
 import monocle.macros.Lenses
 import org.apache.commons.text.StringEscapeUtils
+import org.log4s
 
 import java.io.FileInputStream
 import java.net.{URI, URL}
@@ -36,8 +37,9 @@ case class Code(format: Option[String], content: String) {
           // Alternative: https://www.ean-search.org/?q=XXXXXXXXX
       case _ => None
     } catch {
-      case e : Throwable => None
-        // TODO: log error
+      case e : Throwable =>
+        Code.logger.error(e)(s"While creating link for $this")
+        None
     }
 
   /** True if the two codes match. The contents must be equal, and the formats must be equal if both are not `None`. */
@@ -52,6 +54,8 @@ case class Code(format: Option[String], content: String) {
 object Code {
   val urlRegex: Regex = "https?://.*".r
   val isbnRegex: Regex = "978[0-9]{10}".r
+
+  private val logger = log4s.getLogger
 
   val codeRegex: Regex = "([A-Za-z0-9_-]+):(.*)".r
   def apply(string : String): Code = {

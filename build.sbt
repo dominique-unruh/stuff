@@ -59,6 +59,7 @@ lazy val shared = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies += "com.lihaoyi" %%% "upickle" % "2.0.0",
     libraryDependencies += "dev.optics" %%% "monocle-core"  % "3.1.0",
     libraryDependencies += "dev.optics" %%% "monocle-macro" % "3.1.0",
+    libraryDependencies += "org.log4s" %%% "log4s" % "1.10.0",
   )
   .in(file("shared"))
 //  .jsConfigure(_.enablePlugins(ScalaJSBundlerPlugin))

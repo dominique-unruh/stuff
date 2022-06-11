@@ -6,7 +6,7 @@ import de.unruh.stuff.{Camera, ExtendedURL, ItemSearch, JSVariables, ModalAction
 import de.unruh.stuff.shared.Code
 import japgolly.scalajs.react.component.Scala.{Component, Unmounted}
 import japgolly.scalajs.react.vdom.{TagMod, VdomElement}
-import japgolly.scalajs.react.vdom.all.{button, className, div, img, onClick, src}
+import japgolly.scalajs.react.vdom.all.{button, className, div, img, onClick, span, src}
 import japgolly.scalajs.react.{Callback, CtorType, ScalaComponent}
 
 import java.net.URI
@@ -20,6 +20,9 @@ object PhotosEditor {
 
   private def url(url: URI) = ExtendedURL.resolve(JSVariables.username, url)
 
+  private def removePhoto(photo: URI)(implicit props: Props): Callback =
+    props.change(_.filterNot(_ == photo))
+
   private def addPhoto(photo: String)(implicit props: Props): Callback = {
     val url = URI.create(photo)
     assert(url.getScheme == "data")
@@ -30,10 +33,10 @@ object PhotosEditor {
     .stateless
     .render_P { implicit props =>
       div(
-        // TODO allow removing pictures
         if (props.photos.nonEmpty) {
           val images = for (photo <- props.photos)
-            yield (img(src := url(photo)): VdomElement)
+            yield span(img(src := url(photo)),
+              button("X", onClick --> removePhoto(photo)))
           div(className := "item-photos")(images: _*)
         } else
           TagMod.empty,

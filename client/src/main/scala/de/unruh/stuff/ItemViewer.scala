@@ -6,7 +6,7 @@ import japgolly.scalajs.react.{BackendScope, Callback, CtorType, React, ScalaCom
 import japgolly.scalajs.react.callback.AsyncCallback
 import japgolly.scalajs.react.component.Scala.{Component, Unmounted}
 import japgolly.scalajs.react.vdom.{HtmlAttrs, TagMod, VdomElement, all}
-import japgolly.scalajs.react.vdom.all.{a, button, className, dangerouslySetInnerHtml, div, h1, h2, href, img, li, onClick, src}
+import japgolly.scalajs.react.vdom.all.{a, button, className, dangerouslySetInnerHtml, div, h1, h2, href, img, li, onClick, span, src}
 
 import java.net.URI
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -39,7 +39,7 @@ object ItemViewer {
 
         if (item.photos.nonEmpty) {
           val images = for ((photo, i) <- item.photos.zipWithIndex)
-            yield (img(src := url(photo)): VdomElement)
+            yield span(img(src := url(photo)))
           div(className := "item-photos")(images: _*)
         } else
           TagMod.empty,

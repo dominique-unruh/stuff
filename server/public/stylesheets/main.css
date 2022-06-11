@@ -27,14 +27,26 @@ body {
     white-space: nowrap;
 }
 
-.item-editor .item-photos > img {
-    height: 30vh;
+.item-editor .item-photos span {
+    display: inline-block;
+    position: relative;
     margin-right: 2vh;
+    height: 30vh;
+}
+
+.item-editor .item-photos img {
+    height: 100%;
     border-radius: 2vh;
     display: inline-block;
     color: white;
     text-align: center;
     text-decoration: none;
+}
+
+.item-editor .item-photos button {
+    position: absolute;
+    top: 0;
+    right: 0;
 }
 
 /*.item-editor .item-links {

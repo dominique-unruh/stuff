@@ -1,5 +1,6 @@
 package de.unruh.stuff
 
+import de.unruh.stuff.editor.ItemEditor
 import de.unruh.stuff.shared.{Code, Item, RichText}
 import japgolly.scalajs.react.{BackendScope, Callback, CtorType, React, ScalaComponent}
 import japgolly.scalajs.react.callback.AsyncCallback

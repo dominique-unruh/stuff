@@ -111,7 +111,7 @@ object AppMain {
 
     val search = staticRoute("#search", Search) ~> renderRP((ctl,visible) => ItemSearch(
       onSelectItem = { item => ctl.set(ItemView(item)) },
-      onCreate = {
+      onCreate = Some {
         case None => ctl.set(ItemCreate())
         case Some(code) => ctl.set(ItemCreate(code)) },
       visible = visible))

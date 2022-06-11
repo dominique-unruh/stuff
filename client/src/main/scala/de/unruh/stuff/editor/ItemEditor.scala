@@ -77,11 +77,11 @@ object ItemEditor {
       onAction = setLocation _,
       button = { (put: Callback) => button("Put", onClick --> put): VdomElement },
       modal = { (action: Item.Id => Callback) =>
-        // TODO: don't show create actions
         // TODO: in search results, show prevLocation first
         ItemSearch(visible = true,
-          onCreate = { _ => AppMain.errorMessage("Creating items is not possible from this search") },
+          onCreate = None,
           onSelectItem = action,
+          showCreate = false,
         ): VdomElement
       })
 

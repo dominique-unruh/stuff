@@ -22,7 +22,7 @@ object ItemSearch {
   /** How many results to load */
   val numResults = 100
 
-  case class Props(onClick: Item.Id => Callback, onCreate: Option[Code] => Callback, visible: Boolean)
+  case class Props(onClick: Item.Id => Callback, onCreate: Option[Option[Code] => Callback], visible: Boolean)
   case class State(
                   /** User input search string */
                     searchString: String = "",
@@ -38,7 +38,7 @@ object ItemSearch {
   }
 
   def apply(props: Props): Unmounted[Props, State, Backend] = Component(props)
-  def apply(onSelectItem: Item.Id => Callback, onCreate: Option[Code] => Callback, visible: Boolean): Unmounted[Props, State, Backend] =
+  def apply(onSelectItem: Item.Id => Callback, onCreate: Option[Option[Code] => Callback], visible: Boolean, showCreate: Boolean = true): Unmounted[Props, State, Backend] =
     Component(Props(onClick=onSelectItem, onCreate = onCreate, visible = visible))
 
   class Backend(bs: BackendScope[Props, State]) {
@@ -53,9 +53,9 @@ object ItemSearch {
           // TODO Nicer formatting (https://mui.com/material-ui/react-alert/ ?)
           h1("Nothing found", className := "no-search-results"),
           state.searchFromCode match {
-            case Some(code) =>
-              div(button(s"Create new item with code $code?", onClick --> props.onCreate(Some(code))))
-            case None => TagMod.empty
+            case Some(code) if props.onCreate.nonEmpty =>
+              div(button(s"Create new item with code $code?", onClick --> props.onCreate.get(Some(code))))
+            case _ => TagMod.empty
           })
       } else div(ItemList(results, props.onClick))
     }
@@ -87,8 +87,11 @@ object ItemSearch {
     def render(implicit props: Props, state: State): VdomNode = {
       div (className := "item-search") (
         QrCode(onDetect = qrcode, constraints = videoConstraints, flashLight = state.flashLight, active = props.visible)/*.withRef(qrCodeRef)*/,
-        div(button(onClick --> bs.modState(_.copy(flashLight = true)), "Flashlight"), " ",
-          button(onClick --> props.onCreate(None), "New")),
+        div(
+          button(onClick --> bs.modState(_.copy(flashLight = true)), "Flashlight"),
+          " ",
+          props.onCreate match { case Some(onCreate) => button(onClick --> onCreate(None), "New"); case None => TagMod.empty }
+        ),
         MuiInput(inputProps = js.Dynamic.literal(`type`="search"))
           (className := "item-search-input", onChange ==> changed,
           placeholder := "Search...", autoFocus := true,

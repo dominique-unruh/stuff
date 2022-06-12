@@ -3,19 +3,20 @@ package de.unruh.stuff.editor
 import de.unruh.stuff.{CodeButton, ItemSearch, ModalAction, QrCode}
 import de.unruh.stuff.shared.Code
 import japgolly.scalajs.react.component.Scala.{Component, Unmounted}
+import japgolly.scalajs.react.extra.StateSnapshot
 import japgolly.scalajs.react.vdom.VdomElement
 import japgolly.scalajs.react.vdom.all.{button, className, div, onClick}
 import japgolly.scalajs.react.{Callback, CtorType, ScalaComponent}
 import japgolly.scalajs.react.vdom.Implicits._
 
 object CodesEditor {
-  case class Props(codes: Seq[Code], change: (Seq[Code] => Seq[Code]) => Callback)
+  case class Props(codes: StateSnapshot[Seq[Code]])
 
-  def apply(codes: Seq[Code], change: (Seq[Code] => Seq[Code]) => Callback): Unmounted[Props, Unit, Unit] =
-    Component(Props(codes = codes, change = change))
+  def apply(codes: StateSnapshot[Seq[Code]]): Unmounted[Props, Unit, Unit] =
+    Component(Props(codes = codes))
 
   private def addCode(code: Code)(implicit props: Props): Callback =
-    props.change(_.appended(code))
+    props.codes.modState(_.appended(code))
 
   private def addCodeElement(implicit props: Props): VdomElement = ModalAction[Code](
     onAction = addCode _,
@@ -29,13 +30,13 @@ object CodesEditor {
     })
 
   private def removeCode(code: Code)(implicit props: Props): Callback =
-    props.change(_.filterNot(_ == code))
+    props.codes.modState(_.filterNot(_ == code))
 
   val Component: Component[Props, Unit, Unit, CtorType.Props] = ScalaComponent.builder[Props]
     .stateless
     .render_P { implicit props =>
-      if (props.codes.nonEmpty) {
-        val codes = props.codes.map(CodeButton(_, link = false, onRemove = Some(removeCode)): VdomElement)
+      if (props.codes.value.nonEmpty) {
+        val codes = props.codes.value.map(CodeButton(_, link = false, onRemove = Some(removeCode)): VdomElement)
         div(className := "item-codes")(codes.appended(addCodeElement): _*)
       } else
         addCodeElement

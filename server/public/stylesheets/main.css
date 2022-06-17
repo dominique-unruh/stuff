@@ -150,13 +150,19 @@ body {
     height: 2rem;
 }
 
+/* We make sure to repeat the size of the video element here so that during reinitialization of the camera,
+ * the layout doesn't temporarily move. */
 .qrcode-scanner {
-    width: fit-content;
+    height: 30vh;
+    width: 30vh;
     margin: auto;
+    border: 1px solid black;
+    border-radius: 4vh; /* 20vh for a circle */
 }
 
 .qrcode-scanner video {
     max-height: 30vh;
+    max-width: 30vh;
     border-radius: 4vh; /* 20vh for a circle */
     /*box-shadow: 0 0 4vh 0 black;*/
 }

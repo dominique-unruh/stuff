@@ -1,6 +1,7 @@
 package de.unruh.stuff
 
 import autowire.clientCallable
+import de.unruh.stuff.shared.Item.Id
 import de.unruh.stuff.shared.{AjaxApi, Code, Item, Utils}
 import io.kinoplan.scalajs.react.material.ui.core.MuiInput
 import japgolly.scalajs.react.callback.Callback
@@ -25,9 +26,14 @@ object ItemSearch {
   val numResults = 100
 
   case class Props(onClick: Item.Id => Callback, onCreate: Option[Option[Code] => Callback], visible: Boolean)
+  case class ResultProps(searchString: String = "", searchFromCode: Option[Code], parent: Props)
+  object ResultProps {
+    def apply(props: Props, state: State): ResultProps =
+      new ResultProps(searchString = state.searchString, searchFromCode = state.searchFromCode, parent = props)
+  }
   case class State(
                   /** User input search string */
-                    searchString: String = "",
+                  searchString: String = "",
                   /** User input: flashlight on? */
                   flashLight: Boolean = false,
                   /** Current search initiated by QR code reader? `None` means no, `Some(code)` means yes. */
@@ -40,25 +46,27 @@ object ItemSearch {
   }
 
   def apply(props: Props): Unmounted[Props, State, Unit] = Component(props)
-  def apply(onSelectItem: Item.Id => Callback, onCreate: Option[Option[Code] => Callback], visible: Boolean, showCreate: Boolean = true): Unmounted[Props, State, Unit] =
+  def apply(onSelectItem: Item.Id => Callback, onCreate: Option[Option[Code] => Callback], visible: Boolean): Unmounted[Props, State, Unit] =
     Component(Props(onClick=onSelectItem, onCreate = onCreate, visible = visible))
 
-  private def loadAndRenderResults(searchString: String)(implicit props: Props, state: State) : AsyncCallback[VdomElement] =
-    for (results <- AsyncCallback.fromFuture(AjaxApiClient[AjaxApi].search(searchString, numResults).call()))
+  private def loadAndRenderResults(implicit $: Lifecycle.RenderScope[ResultProps, Unit, Unit]) : AsyncCallback[VdomElement] =
+    for (results <- AsyncCallback.fromFuture(AjaxApiClient[AjaxApi].search($.props.searchString, numResults).call()))
       yield
         renderResults(results)
 
-  def renderResults(results : Seq[Item.Id])(implicit props: Props, state: State) : VdomElement = {
+  def renderResults(results : Seq[Item.Id])(implicit $: Lifecycle.RenderScope[ResultProps, Unit, Unit]) : VdomElement = {
     if (results.isEmpty) {
       div(
         // TODO Nicer formatting (https://mui.com/material-ui/react-alert/ ?)
         h1("Nothing found", className := "no-search-results"),
-        state.searchFromCode match {
-          case Some(code) if props.onCreate.nonEmpty =>
-            div(button(s"Create new item with code $code?", onClick --> props.onCreate.get(Some(code))))
+        $.props.searchFromCode match {
+          case Some(code) if $.props.parent.onCreate.nonEmpty =>
+            div(button(s"Create new item with code $code?", onClick --> $.props.parent.onCreate.get(Some(code))))
           case _ => TagMod.empty
         })
-    } else div(ItemList(results, props.onClick))
+    } else div(
+      button("test", onClick --> Callback { console.log($.props.searchString) }),
+      ItemList(results, $.props.parent.onClick))
   }
 
   private def changed(event: ReactFormEventFromInput)(implicit $: RenderScope[Props, State, Unit]) =
@@ -86,31 +94,42 @@ object ItemSearch {
       h1("Failed to load results", className := "search-failed")
     }
 
-    def render(implicit $: Lifecycle.RenderScope[Props, State, Unit]): VdomNode = {
-      implicit val state: State = $.state
-      implicit val props: Props = $.props
-      div (className := "item-search") (
-        QrCode(onDetect = qrcode, constraints = videoConstraints, flashLight = state.flashLight, active = props.visible)/*.withRef(qrCodeRef)*/,
-        div(
-          button(onClick --> $.modState(_.copy(flashLight = true)), "Flashlight"),
-          " ",
-          props.onCreate match { case Some(onCreate) => button(onClick --> onCreate(None), "New"); case None => TagMod.empty }
-        ),
-        MuiInput(inputProps = js.Dynamic.literal(`type`="search"))
-          (className := "item-search-input", onChange ==> changed,
-          placeholder := "Search...", autoFocus := true,
-          value := state.searchString),
-        React.Suspense(
-          // TODO: Use React 18 stuff (useTransition/startTransition) to keep the old data in view, only blurred
-          fallback = h1("Loading...", className := "state-waiting"),
-          asyncBody = loadAndRenderResults(state.searchString).handleError(onError)
-        ),
-      )
-    }
+  def render(implicit $: Lifecycle.RenderScope[Props, State, Unit]): VdomNode = {
+    implicit val state: State = $.state
+    implicit val props: Props = $.props
+    div (className := "item-search") (
+      QrCode(onDetect = qrcode, constraints = videoConstraints, flashLight = state.flashLight, active = props.visible)/*.withRef(qrCodeRef)*/,
+      div(
+        button(onClick --> $.modState(_.copy(flashLight = true)), "Flashlight"),
+        " ",
+        props.onCreate match { case Some(onCreate) => button(onClick --> onCreate(None), "New"); case None => TagMod.empty }
+      ),
+      MuiInput(inputProps = js.Dynamic.literal(`type`="search"))
+      (className := "item-search-input", onChange ==> changed,
+        placeholder := "Search...", autoFocus := true,
+        value := state.searchString),
+      ResultComponent(ResultProps(props, state)),
+    )
+  }
 
   private val logger = log4s.getLogger
 
   private val initialState = State()
+
+  private val ResultComponent = ScalaComponent.builder[ResultProps]
+    .stateless
+    .render { $ =>
+      console.log("Rerender")
+      React.Suspense(
+        // TODO: Use React 18 stuff (useTransition/startTransition) to keep the old data in view, only blurred
+        fallback = h1("Loading...", className := "state-waiting"),
+        asyncBody = loadAndRenderResults($).handleError(onError)
+      )
+    }
+    .shouldComponentUpdatePure { upd =>
+      upd.currentProps.searchString != upd.nextProps.searchString ||
+      upd.currentProps.searchFromCode != upd.nextProps.searchFromCode }
+    .build
 
   //noinspection TypeAnnotation
   val Component = ScalaComponent.builder[Props]

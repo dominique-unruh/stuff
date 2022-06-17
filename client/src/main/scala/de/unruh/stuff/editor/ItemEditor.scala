@@ -78,7 +78,6 @@ object ItemEditor {
       ItemSearch(visible = true,
         onCreate = None,
         onSelectItem = action,
-        showCreate = false,
       ): VdomElement
     })
 

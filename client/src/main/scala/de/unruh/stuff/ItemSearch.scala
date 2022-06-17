@@ -5,6 +5,8 @@ import de.unruh.stuff.shared.{AjaxApi, Code, Item, Utils}
 import io.kinoplan.scalajs.react.material.ui.core.MuiInput
 import japgolly.scalajs.react.callback.Callback
 import japgolly.scalajs.react.component.Scala.{Component, Unmounted}
+import japgolly.scalajs.react.component.builder.Lifecycle
+import japgolly.scalajs.react.component.builder.Lifecycle.RenderScope
 import japgolly.scalajs.react.util.DefaultEffects
 import japgolly.scalajs.react.vdom.{TagMod, VdomElement, VdomNode, all}
 import japgolly.scalajs.react.vdom.all.{autoFocus, button, className, div, h1, onChange, onClick, placeholder, value}
@@ -37,58 +39,60 @@ object ItemSearch {
     facingMode = "environment"
   }
 
-  def apply(props: Props): Unmounted[Props, State, Backend] = Component(props)
-  def apply(onSelectItem: Item.Id => Callback, onCreate: Option[Option[Code] => Callback], visible: Boolean, showCreate: Boolean = true): Unmounted[Props, State, Backend] =
+  def apply(props: Props): Unmounted[Props, State, Unit] = Component(props)
+  def apply(onSelectItem: Item.Id => Callback, onCreate: Option[Option[Code] => Callback], visible: Boolean, showCreate: Boolean = true): Unmounted[Props, State, Unit] =
     Component(Props(onClick=onSelectItem, onCreate = onCreate, visible = visible))
 
-  class Backend(bs: BackendScope[Props, State]) {
-    def loadAndRenderResults(searchString: String)(implicit props: Props, state: State) : AsyncCallback[VdomElement] =
-      for (results <- AsyncCallback.fromFuture(AjaxApiClient[AjaxApi].search(searchString, numResults).call()))
-        yield
-          renderResults(results)
+  private def loadAndRenderResults(searchString: String)(implicit props: Props, state: State) : AsyncCallback[VdomElement] =
+    for (results <- AsyncCallback.fromFuture(AjaxApiClient[AjaxApi].search(searchString, numResults).call()))
+      yield
+        renderResults(results)
 
-    def renderResults(results : Seq[Item.Id])(implicit props: Props, state: State) : VdomElement = {
-      if (results.isEmpty) {
-        div(
-          // TODO Nicer formatting (https://mui.com/material-ui/react-alert/ ?)
-          h1("Nothing found", className := "no-search-results"),
-          state.searchFromCode match {
-            case Some(code) if props.onCreate.nonEmpty =>
-              div(button(s"Create new item with code $code?", onClick --> props.onCreate.get(Some(code))))
-            case _ => TagMod.empty
-          })
-      } else div(ItemList(results, props.onClick))
+  def renderResults(results : Seq[Item.Id])(implicit props: Props, state: State) : VdomElement = {
+    if (results.isEmpty) {
+      div(
+        // TODO Nicer formatting (https://mui.com/material-ui/react-alert/ ?)
+        h1("Nothing found", className := "no-search-results"),
+        state.searchFromCode match {
+          case Some(code) if props.onCreate.nonEmpty =>
+            div(button(s"Create new item with code $code?", onClick --> props.onCreate.get(Some(code))))
+          case _ => TagMod.empty
+        })
+    } else div(ItemList(results, props.onClick))
+  }
+
+  private def changed(event: ReactFormEventFromInput)(implicit $: RenderScope[Props, State, Unit]) =
+    $.modState(_.copy(searchString = event.target.value, searchFromCode = None))
+
+  private def qrcode(format: Option[String], text: String)(implicit $: RenderScope[Props, State, Unit]) : Callback = {
+    val state = $.state
+    logger.debug(s"qrcode: $text")
+    val code = Code(format, text)
+    val codeStr = code.toString
+    val needToAdd = !state.searchString.endsWith(codeStr+" ")
+    if (needToAdd) {
+      val newSearchString = s"${Utils.addSpaceIfNeeded(state.searchString)}code:$codeStr "
+      $.modState(_.copy(
+        searchString = newSearchString,
+        searchFromCode = Some(code)))
+    } else
+      DefaultEffects.Sync.empty
+  }
+
+  private def onError(error: Throwable): AsyncCallback[VdomElement] =
+    AsyncCallback.delay {
+      error.printStackTrace()
+      // TODO Nicer formatting (e.g., https://mui.com/material-ui/react-alert/)
+      h1("Failed to load results", className := "search-failed")
     }
 
-    private def changed(event: ReactFormEventFromInput) =
-      bs.modState(_.copy(searchString = event.target.value, searchFromCode = None))
-
-    private def qrcode(format: Option[String], text: String) : Callback =
-      for (state <- bs.state;
-            _ = logger.debug(s"qrcode: $text");
-            code = Code(format, text);
-            codeStr = code.toString;
-            needToAdd = !state.searchString.endsWith(codeStr+" ");
-            newSearchString = s"${Utils.addSpaceIfNeeded(state.searchString)}code:$codeStr ";
-            _ <- if (needToAdd)
-              bs.setState(state.copy(searchString = newSearchString, searchFromCode = Some(code)))
-            else
-              DefaultEffects.Sync.empty
-            )
-      yield {}
-
-    private def onError(error: Throwable): AsyncCallback[VdomElement] =
-      AsyncCallback.delay {
-        error.printStackTrace()
-        // TODO Nicer formatting (e.g., https://mui.com/material-ui/react-alert/)
-        h1("Failed to load results", className := "search-failed")
-      }
-
-    def render(implicit props: Props, state: State): VdomNode = {
+    def render(implicit $: Lifecycle.RenderScope[Props, State, Unit]): VdomNode = {
+      implicit val state: State = $.state
+      implicit val props: Props = $.props
       div (className := "item-search") (
         QrCode(onDetect = qrcode, constraints = videoConstraints, flashLight = state.flashLight, active = props.visible)/*.withRef(qrCodeRef)*/,
         div(
-          button(onClick --> bs.modState(_.copy(flashLight = true)), "Flashlight"),
+          button(onClick --> $.modState(_.copy(flashLight = true)), "Flashlight"),
           " ",
           props.onCreate match { case Some(onCreate) => button(onClick --> onCreate(None), "New"); case None => TagMod.empty }
         ),
@@ -103,7 +107,6 @@ object ItemSearch {
         ),
       )
     }
-  }
 
   private val logger = log4s.getLogger
 
@@ -112,6 +115,6 @@ object ItemSearch {
   //noinspection TypeAnnotation
   val Component = ScalaComponent.builder[Props]
     .initialState(initialState)
-    .renderBackend[Backend]
+    .render(render(_))
     .build
 }

@@ -18,19 +18,21 @@ import japgolly.scalajs.react.vdom.Implicits._
 import japgolly.scalajs.react.vdom.{TagOf, VdomElement}
 import monocle.{Lens, Optional, PLens, Prism}
 import monocle.macros.Lenses
+import org.log4s
 import org.scalajs.dom.html.Div
 
 import scala.collection.immutable
 import scala.scalajs.js
-import scala.scalajs.js.UndefOr
+import scala.scalajs.js.{Date, UndefOr}
 import scala.scalajs.js.annotation.JSExportTopLevel
 
-// TODO preserve scroll state
-// TODO evict old pages at some point
-// TODO disable camera
 object StatePreservingRouter {
+  /** How many pages to hold in memory */
+  val maxPages = 20
+
   @Lenses
-  case class RoutedView(page: AppMain.Page, component: VdomElement, hiddenComponent: VdomElement, scrollPosition: Double)
+  case class RoutedView(page: AppMain.Page, component: VdomElement, hiddenComponent: VdomElement,
+                        scrollPosition: Double, lastShown: Double)
   case class Props(page: AppMain.Page, component: VdomElement, hiddenComponent: VdomElement)
   @Lenses
   case class State(history: Map[Int, RoutedView] = Map(), current: Int = -1)
@@ -41,10 +43,19 @@ object StatePreservingRouter {
     }
   }
 
+  def evictOldest(history: Map[Int, RoutedView]): Map[Int, RoutedView] =
+    if (history.sizeCompare(maxPages) > 0) {
+      val oldest = history.values.minBy(_.lastShown).lastShown
+      history.filter(_._2.lastShown > oldest)
+    } else
+      history
+
+  private val logger = log4s.getLogger
+
   private def addPage(props: Props, state: State): State  = {
     // Save current scroll position
     val state2 = State.currentHistory.andThen(RoutedView.scrollPosition).modify(_ => window.scrollY).apply(state)
-    val newRoutedView = RoutedView(props.page, props.component, props.hiddenComponent, scrollPosition = 0)
+    val newRoutedView = RoutedView(props.page, props.component, props.hiddenComponent, scrollPosition = 0, lastShown = Date.now())
 
     // Try to find and replace old history entry. (While maintaining old scroll position)
     for ((idx,routedView) <- state2.history)
@@ -52,7 +63,9 @@ object StatePreservingRouter {
         return state2.copy(history = state2.history.updated(idx, newRoutedView.copy(scrollPosition = routedView.scrollPosition)), current = idx)
 
     val newId = Utils.uniqueId()
-    state2.copy(state.history + (newId -> newRoutedView), current = newId)
+    val newHistory = evictOldest(state2.history + (newId -> newRoutedView))
+    logger.debug(s"New page($newId): ${newRoutedView.page}")
+    state2.copy(newHistory, current = newId)
   }
 
   private def shouldComponentUpdate(currentState: State, nextState: State): CallbackTo[Boolean] = CallbackTo {

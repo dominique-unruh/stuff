@@ -13,9 +13,11 @@ import japgolly.scalajs.react.extra.router.SetRouteVia.{HistoryPush, HistoryRepl
 import japgolly.scalajs.react.extra.router.{BaseUrl, ResolutionWithProps, Router, RouterConfigDsl, RouterWithProps, RouterWithPropsConfig, RouterWithPropsConfigDsl, SetRouteVia}
 import japgolly.scalajs.react.vdom.Attr.ValueType
 import japgolly.scalajs.react.vdom.all.{button, div, h1, key, onClick, style, untypedRef}
-import org.scalajs.dom.{console, document, html}
+import org.scalajs.dom.{console, document, html, window}
 import japgolly.scalajs.react.vdom.Implicits._
 import japgolly.scalajs.react.vdom.{TagOf, VdomElement}
+import monocle.{Lens, Optional, PLens, Prism}
+import monocle.macros.Lenses
 import org.scalajs.dom.html.Div
 
 import scala.collection.immutable
@@ -27,19 +29,30 @@ import scala.scalajs.js.annotation.JSExportTopLevel
 // TODO evict old pages at some point
 // TODO disable camera
 object StatePreservingRouter {
-  case class RoutedView(page: AppMain.Page, component: VdomElement, hiddenComponent: VdomElement)
+  @Lenses
+  case class RoutedView(page: AppMain.Page, component: VdomElement, hiddenComponent: VdomElement, scrollPosition: Double)
   case class Props(page: AppMain.Page, component: VdomElement, hiddenComponent: VdomElement)
+  @Lenses
   case class State(history: Map[Int, RoutedView] = Map(), current: Int = -1)
+  object State {
+    val currentHistory: Optional[State, RoutedView] = Optional[State, RoutedView] {
+      state => state.history.get(state.current) } {
+      view => state => if (state.current == -1) state else state.copy(history = state.history.updated(state.current, view))
+    }
+  }
 
   private def addPage(props: Props, state: State): State  = {
-    val newRoutedView = RoutedView(props.page, props.component, props.hiddenComponent)
+    // Save current scroll position
+    val state2 = State.currentHistory.andThen(RoutedView.scrollPosition).modify(_ => window.scrollY).apply(state)
+    val newRoutedView = RoutedView(props.page, props.component, props.hiddenComponent, scrollPosition = 0)
 
-    for ((idx,routedView) <- state.history)
+    // Try to find and replace old history entry. (While maintaining old scroll position)
+    for ((idx,routedView) <- state2.history)
       if (routedView.page == newRoutedView.page)
-        return state.copy(history = state.history.updated(idx, newRoutedView), current = idx)
+        return state2.copy(history = state2.history.updated(idx, newRoutedView.copy(scrollPosition = routedView.scrollPosition)), current = idx)
 
     val newId = Utils.uniqueId()
-    state.copy(state.history + (newId -> newRoutedView), current = newId)
+    state2.copy(state.history + (newId -> newRoutedView), current = newId)
   }
 
   private def shouldComponentUpdate(currentState: State, nextState: State): CallbackTo[Boolean] = CallbackTo {
@@ -50,6 +63,11 @@ object StatePreservingRouter {
 
   class Backend(bs: BackendScope[Props, State]) {
     def render(state: State): VdomElement = {
+      for (current <- State.currentHistory.getOption(state)) {
+        console.log("Scroll to ", current.scrollPosition.toInt)
+        window.setTimeout(() => window.scrollTo(0, current.scrollPosition.toInt), 0)
+//        window.scrollTo(0, current.scrollPosition.toInt)
+      }
       val components: immutable.Iterable[VdomElement] = for ((idx,routeView) <- state.history)
         yield {
           val show = idx==state.current
@@ -104,6 +122,9 @@ object AppMain {
     def apply(code: Code): ItemCreate = ItemCreate(Some(code))
   }
 
+  /* The type [[Boolean]] of the router props is to contain a prop that is passed to the contained pages
+  * (in a call to `res.renderP`) whether the page is visible or not. It is not used by the router itself, and the
+  * prop passed to the router upon construction is ignored. */
   val routerConfig: RouterWithPropsConfig[Page, Boolean] = RouterWithPropsConfigDsl[Page, Boolean].buildConfig { dsl =>
     import dsl._
 
@@ -135,8 +156,9 @@ object AppMain {
       .notFound(redirectToPage(Search)(HistoryReplace))
   }
 //    .logToConsole
-    .renderWith((ctl, res) => StatePreservingRouter.routerRender(res.page,
-      CallbackTo { res.renderP(true) }, CallbackTo { res.renderP(false) }))
+    .renderWith { (ctl, res) =>
+      StatePreservingRouter.routerRender(res.page,
+        CallbackTo { res.renderP(true) }, CallbackTo { res.renderP(false) }) }
 
   @JSExportTopLevel("appMain")
   def appMain(): Unit = {

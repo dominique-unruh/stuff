@@ -21,7 +21,7 @@ object ExtendedURL {
       url.toString
   }
 
-  def forFile(id: Item.Id, filename: String) = {
+  def forFile(id: Item.Id, filename: String): URI = {
     assert(fileRegex.matches(filename))
     new URI("localstuff", s"$id/$filename", null)
   }

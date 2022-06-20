@@ -25,6 +25,7 @@ import scala.collection.immutable
 import scala.scalajs.js
 import scala.scalajs.js.{Date, UndefOr}
 import scala.scalajs.js.annotation.JSExportTopLevel
+import scala.util.Random
 
 object StatePreservingRouter {
   /** How many pages to hold in memory */
@@ -130,9 +131,20 @@ object AppMain {
   sealed trait Page
   case object Search extends Page
   case class ItemView(id: Item.Id) extends Page
-  case class ItemCreate(code: Option[Code] = None) extends Page
+  /** Every [[ItemCreate]] instance must have a `code` or a `uniqueId` (not both).
+   * `uniqueId` is used to avoid that a (partially filled) page currently in the history is reopened
+   * when a new item is to be created.
+   **/
+  case class ItemCreate private (code: Option[Code] = None, uniqueId: Option[Int] = None) extends Page {
+    assert(code.nonEmpty || uniqueId.nonEmpty)
+    assert(code.isEmpty || uniqueId.isEmpty)
+  }
   object ItemCreate {
-    def apply(code: Code): ItemCreate = ItemCreate(Some(code))
+    def makeUnique(): ItemCreate = ItemCreate(Random.nextInt(Int.MaxValue))
+    private def apply(code: Option[Code] = None, uniqueId: Option[Int] = None) : ItemCreate =
+      throw new UnsupportedOperationException
+    def apply(code: Code): ItemCreate = new ItemCreate(code = Some(code))
+    def apply(uniqueId: Int): ItemCreate = new ItemCreate(uniqueId = Some(uniqueId))
   }
 
   /* The type [[Boolean]] of the router props is to contain a prop that is passed to the contained pages
@@ -146,7 +158,7 @@ object AppMain {
     val search = staticRoute("#search", Search) ~> renderRP((ctl,visible) => ItemSearch(
       onSelectItem = { item => ctl.set(ItemView(item)) },
       onCreate = Some {
-        case None => ctl.set(ItemCreate())
+        case None => ctl.set(ItemCreate.makeUnique())
         case Some(code) => ctl.set(ItemCreate(code)) },
       visible = visible))
 
@@ -160,12 +172,16 @@ object AppMain {
 
     val remainingPathCode = remainingPath.pmap { str:String => Some(ItemCreate(Code(str))) }
                                                { page => page.code.get.toString }
+    val intCreateId = int.pmap { int:Int => Some(ItemCreate(int)) }
+                               { page => page.uniqueId.get }
 
-    val create = staticRoute("#create", ItemCreate()) ~> renderCreate(ItemCreate())
-    val createCode = dynamicRoute[ItemCreate]("#create" / remainingPathCode)
-      { case ItemCreate(code : Some[Code]) => ItemCreate(code) } ~> renderCreate
+    val createEmpty = staticRedirect("#create") ~> redirectToPage(ItemCreate.makeUnique())(HistoryReplace)
+    val create = dynamicRoute[ItemCreate]("#create" / intCreateId)
+      { case ItemCreate(None, Some(id)) => ItemCreate(id) } ~> renderCreate
+    val createCode = dynamicRoute[ItemCreate]("#createcode" / remainingPathCode)
+      { case ItemCreate(Some(code), None) => ItemCreate(code) } ~> renderCreate
 
-    ( redirectRoot | search | item | create | createCode )
+    ( redirectRoot | search | item | createEmpty | create | createCode )
       .notFound(redirectToPage(Search)(HistoryReplace))
   }
 //    .logToConsole

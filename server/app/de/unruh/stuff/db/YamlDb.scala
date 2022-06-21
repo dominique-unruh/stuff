@@ -39,7 +39,6 @@ object YamlDb {
     val item2 = item.copy(id = Random.nextInt(Int.MaxValue))
     assert(!itemExists(item2.id))
     updateItemMaybeNonExisting(path, item2)
-    item2
   }
 
   def updateItem(path: Path, item: Item): Item = {

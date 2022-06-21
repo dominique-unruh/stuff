@@ -35,23 +35,24 @@ object YamlDb {
   def itemExists(id: Item.Id): Boolean =
     Files.exists(Paths.itemsPath(id))
 
-  def createItem(path: Path, item: Item): Item.Id = {
+  def createItem(path: Path, item: Item): Item = {
     val item2 = item.copy(id = Random.nextInt(Int.MaxValue))
     assert(!itemExists(item2.id))
     updateItemMaybeNonExisting(path, item2)
-    item2.id
+    item2
   }
 
-  def updateItem(path: Path, item: Item): Unit = {
+  def updateItem(path: Path, item: Item): Item = {
     assert(itemExists(item.id))
     updateItemMaybeNonExisting(path, item)
   }
 
-  private def updateItemMaybeNonExisting(path: Path, item: Item): Unit = {
+  private def updateItemMaybeNonExisting(path: Path, item: Item): Item = {
     val item2 = ProcessItems.processItem(item)
     assert(item2.id != Item.INVALID_ID && item2.id >= 0)
     val itemPath = Paths.itemsPath(path, item2.id)
     val yaml = item2.toYaml.prettyPrint
     Files.writeString(itemPath, yaml)
+    item2
   }
 }

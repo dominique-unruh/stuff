@@ -7,12 +7,33 @@ import Paths.dbPath
 import de.unruh.stuff.db.YamlDb
 import ujson.play.PlayJson
 
+import java.util.concurrent.atomic.AtomicReference
+import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object AjaxApiImpl extends AjaxApi {
+  type Db = Map[Item.Id, Item]
+  private var _db : Db = _
+
+  private def getDb: Db =
+    if (_db != null)
+      _db
+    else synchronized {
+      if (_db != null)
+        _db
+      else {
+        _db = YamlDb.loadDb(dbPath)
+        _db
+      }
+    }
+
+  /** Only use in a synchronized block with `db` fetched within that block. */
+  private def setDb(db: Db): Unit = {
+    _db = db
+  }
+
   override def search(searchString: String, numResults: Int): Seq[Item.Id] = {
-    // TODO don't reload DB each time
-    val db = YamlDb.loadDb(dbPath)
+    val db = getDb
     val results = Search.search(db, searchString)
     results
       .sortBy(-_.lastModified)
@@ -21,17 +42,21 @@ object AjaxApiImpl extends AjaxApi {
   }
 
   override def getItem(id: Id): Item = {
-    // TODO don't reload DB each time
-    val db = YamlDb.loadDb(dbPath)
+    val db = getDb
     db.getOrElse(id, throw new IllegalArgumentException(s"Unknown item id $id"))
   }
 
-  override def updateItem(item: Item): Unit = {
-    YamlDb.updateItem(dbPath, item)
+  override def updateItem(item: Item): Unit = synchronized {
+    val db = getDb
+    val item2 = YamlDb.updateItem(dbPath, item)
+    setDb(db.updated(item2.id, item2))
   }
 
-  override def createItem(item: Item): Item.Id = {
-    YamlDb.createItem(dbPath, item)
+  override def createItem(item: Item): Item.Id = synchronized {
+    val db = getDb
+    val item2 = YamlDb.createItem(dbPath, item)
+    setDb(db.updated(item2.id, item2))
+    item2.id
   }
 }
 

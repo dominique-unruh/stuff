@@ -50,6 +50,18 @@ object DbCache {
   def updateOrCreateItemReact(item: Item) : AsyncCallback[Item.Id] =
     AsyncCallback.fromFuture(updateOrCreateItem(item))
 
+  /** Updates the `lastModified` field of the selected item (also on the server) but does not make this change persistent.
+   * Operates in the background.
+   *
+   * (The rationale is that this affects the sorting order of recently search results within a session.
+   * It is currently used to "touch" items if they are used as a location in a "put" operation.)
+   * */
+  def touchLastModified(id: Item.Id): Unit = {
+    for (item <- cache.get(id))
+      cache.update(id, item.updateLastModified)
+    AjaxApiClient[AjaxApi].touchLastModified(id).call()
+  }
+
   private val cache = mutable.HashMap[Item.Id, Item]()
   /** Increase this when updating the DB so that pending Ajax calls will be ignored. */
   private var updateCounter = 0

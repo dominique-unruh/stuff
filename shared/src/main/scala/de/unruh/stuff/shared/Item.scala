@@ -83,19 +83,22 @@ object Code {
                  photos: Seq[URI] = Nil,
                  /** QR / barcodes */
                  codes: Seq[Code] = Nil,
-                 /** Last access */
+                 /** Last (write) access.
+                  * We also update this non-persistently on certain operations such as putting stuff into the item to affect the search result ordering. */
                  lastModified: Long,
                  /** Location of the item */
                  location: Option[Item.Id] = None,
                  /** Previous location of the item */
                  previousLocation: Option[Item.Id] = None,
                ) {
-
   /** Sets the location (and stores the previous location, if set, in [[previousLocation]]) */
   def setLocation(location: Option[Item.Id]): Item = copy(location = location,
     previousLocation = this.location match { case None => previousLocation; case Some(loc) => Some(loc) })
   def setLocation(location: Item.Id): Item = setLocation(Some(location))
   def clearLocation(): Item = setLocation(None)
+  /** Sets [[lastModified]] to current time. */
+  //noinspection MutatorLikeMethodIsParameterless
+  def updateLastModified: Item = copy(lastModified = System.currentTimeMillis() / 1000)
 }
 
 object Item {

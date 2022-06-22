@@ -10,5 +10,7 @@ trait AjaxApi {
   /** Adds this item to the database. `item.id` must be [[Item.INVALID_ID]].
    * The id will be chosen by the server. */
   def createItem(item: Item) : Item.Id
+  /** Sets the last modified time of the item (not made persistent) */
+  def touchLastModified(id: Item.Id) : Unit
 }
 

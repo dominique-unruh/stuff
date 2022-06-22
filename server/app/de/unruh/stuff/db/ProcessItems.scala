@@ -47,7 +47,7 @@ object ProcessItems {
   }
 
   def processItem(item: Item): Item = {
-    item.copy(photos = item.photos.map(dataToLocalUrl("photo-", item.id, _)),
-      lastModified = Instant.now().getEpochSecond)
+    item.copy(photos = item.photos.map(dataToLocalUrl("photo-", item.id, _)))
+      .updateLastModified
   }
 }

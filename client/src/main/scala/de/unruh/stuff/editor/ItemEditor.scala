@@ -65,7 +65,9 @@ object ItemEditor {
 
   /** Sets a new location and hides the search dialog */
   private def setLocation(id: Item.Id)(implicit $: RS): Callback =
-    $.modState(state => state.copy(editedItem = state.editedItem.setLocation(id)))
+    for (_ <- $.modState(state => state.copy(editedItem = state.editedItem.setLocation(id)));
+         _ = DbCache.touchLastModified(id))
+      yield {}
 
   private def remove(implicit $: RS): Callback =
     $.modState(state => state.copy(state.editedItem.clearLocation()))

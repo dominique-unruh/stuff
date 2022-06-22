@@ -59,6 +59,13 @@ object AjaxApiImpl extends AjaxApi {
     setDb(db.updated(item2.id, item2))
     item2.id
   }
+
+  /** Sets the last modified time of the item (not made persistent) */
+  override def touchLastModified(id: Id): Unit = synchronized {
+    val db = getDb
+    val item = db.getOrElse(id, throw new IllegalArgumentException(s"Unknown item id $id"))
+    setDb(db.updated(id, item.updateLastModified))
+  }
 }
 
 object AjaxApiServer extends autowire.Server[JsValue, upickle.default.Reader, upickle.default.Writer] {

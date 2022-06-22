@@ -99,6 +99,8 @@ object Code {
   /** Sets [[lastModified]] to current time. */
   //noinspection MutatorLikeMethodIsParameterless
   def updateLastModified: Item = copy(lastModified = System.currentTimeMillis() / 1000)
+
+  def idAndTime: (Id, Id) = (id, lastModified)
 }
 
 object Item {

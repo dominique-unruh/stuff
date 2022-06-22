@@ -11,7 +11,10 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import japgolly.scalajs.react.vdom.Implicits._
 
 object ItemListItem {
-  case class Props(itemId: Item.Id, onClick: Item.Id => Callback)
+  case class Props(itemId: Item.Id,
+                   /** Requires that data at least as new as `modificationTime` is loaded from server. */
+                   modificationTime: Long,
+                   onClick: Item.Id => Callback)
 
   //noinspection TypeAnnotation
   val Component = ScalaComponent.builder[Props]
@@ -19,7 +22,8 @@ object ItemListItem {
     .build
 
   def apply(props: Props): Unmounted[Props, Unit, Unit] = Component(props)
-  def apply(itemId: Item.Id, onClick: Item.Id => Callback): Unmounted[Props, Unit, Unit] = apply(Props(itemId=itemId, onClick=onClick))
+  def apply(itemId: Item.Id, modificationTime: Long, onClick: Item.Id => Callback): Unmounted[Props, Unit, Unit] =
+    apply(Props(itemId=itemId, modificationTime=modificationTime, onClick=onClick))
 
   private def renderBody(item: Item)(implicit props: Props): VdomElement = {
     div(onClick --> props.onClick(props.itemId), className := "item-list-item")(
@@ -42,7 +46,7 @@ object ItemListItem {
   }
 
   def loadAndRender(implicit props: Props): AsyncCallback[VdomElement] = {
-    for (item <- AsyncCallback.fromFuture(DbCache.getItem(props.itemId)))
+    for (item <- AsyncCallback.fromFuture(DbCache.getItem(props.itemId, props.modificationTime)))
       yield renderBody(item)
   }
 
@@ -61,14 +65,14 @@ object ItemListItem {
 }
 
 object ItemList {
-  case class Props(items: Seq[Item.Id], onClick: Item.Id => Callback)
+  case class Props(items: Seq[(Item.Id, Long)], onClick: Item.Id => Callback)
 
-  def apply(items: Seq[Item.Id], onClick: Item.Id => Callback): Unmounted[Props, Unit, Unit] =
+  def apply(items: Seq[(Item.Id, Long)], onClick: Item.Id => Callback): Unmounted[Props, Unit, Unit] =
     apply(Props(items=items, onClick=onClick))
   def apply(props: Props): Unmounted[Props, Unit, Unit] = Component(props)
 
   def render(props: Props) : VdomNode = {
-    val listItems: Seq[VdomNode] = props.items.map(ItemListItem(_, props.onClick))
+    val listItems: Seq[VdomNode] = props.items.map { case (id,time) => ItemListItem(id, time, props.onClick) }
     all.div(all.className := "item-list")(listItems :_*)
   }
 

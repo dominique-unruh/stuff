@@ -49,8 +49,8 @@ object ItemEditor {
     val props = $.props
     for (result <- DbCache.updateOrCreateItemReact(state.editedItem).attemptTry;
          _ <- result match {
-           case Success(id) =>
-             for (item <- AsyncCallback.fromFuture(DbCache.getItem(id)); // Important to use the id returned from server. It might be fresh if we edited a new item
+           case Success((id, time)) =>
+             for (item <- AsyncCallback.fromFuture(DbCache.getItem(id, time)); // Important to use the id returned from server. It might be fresh if we edited a new item
                   // This reloads the item. Important because the server processes the item in .updateItems
                   _ <- $.modState(state => state.copy(editedItem = item)).asAsyncCallback;
                   _ <- AppMain.successMessage("Saved").asAsyncCallback;
@@ -101,7 +101,7 @@ object ItemEditor {
       item.location match {
         case Some(location) =>
           div("Location:", putLocationElement, button("Remove", onClick --> remove),
-            ItemListItem(location, onClick = { _ => Callback.empty }))
+            ItemListItem(location, modificationTime = 0, onClick = { _ => Callback.empty }))
         case None =>
           div("Location:", putLocationElement)
       },

@@ -21,7 +21,10 @@ object ItemViewer {
   case class Props(itemId: Item.Id,
                    /** When the user click on a link to another item */
                    onSelectItem: Item.Id => Callback)
-  @Lenses case class State(editing: Boolean = false)
+  @Lenses case class State(editing: Boolean = false,
+                           /** To enforce updates if needed */
+                           modificationTime: Long = 0,
+                          )
 
   def apply(props: Props): Unmounted[Props, State, Unit] = Component(props)
   def apply(itemId: Item.Id, onSelectItem: Item.Id => Callback): Unmounted[Props, State, Unit] =
@@ -45,7 +48,7 @@ object ItemViewer {
       // TODO: Add put and remove buttons
       item.location match {
         case Some(location) =>
-          div(ItemListItem(location, onClick = $.props.onSelectItem))
+          div(ItemListItem(location, modificationTime = 0, onClick = $.props.onSelectItem))
         case None => TagMod.empty
       },
 
@@ -66,7 +69,7 @@ object ItemViewer {
   }
 
   def loadAndRender(implicit $: RS): AsyncCallback[VdomElement] = {
-    for (item <- AsyncCallback.fromFuture(DbCache.getItem($.props.itemId)))
+    for (item <- AsyncCallback.fromFuture(DbCache.getItem($.props.itemId, $.state.modificationTime)))
       yield if ($.state.editing)
         ItemEditor(item,
           onSave = { _ => $.modState(State.editing.replace(false)) },

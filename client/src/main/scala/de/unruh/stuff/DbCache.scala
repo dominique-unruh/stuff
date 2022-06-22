@@ -10,14 +10,17 @@ import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 object DbCache {
-  def getItem(id: Id): Future[Item] = {
+  /** Retrieves item `id` from the server or the cache.
+   * If `modificationTime` is newer than the cached copy, reload from server. */
+  def getItem(id: Id, modificationTime: Long): Future[Item] = {
     val counter = updateCounter
     cache.get(id) match {
-      case Some(item) => Future.successful(item)
-      case None =>
+      case Some(item) if item.lastModified >= modificationTime =>
+        Future.successful(item)
+      case _ =>
         for (item <- AjaxApiClient[AjaxApi].getItem(id).call();
              _ = if (updateCounter == counter) cache.put(id, item);
-             item2 <- getItem(id))
+             item2 <- getItem(id, modificationTime))
           yield item2
     }
   }
@@ -26,28 +29,28 @@ object DbCache {
     def finalmente(code: => Unit): Future[A] = future.transform { result => code; result }
   }
 
-  def updateOrCreateItem(item: Item) : Future[Item.Id] =
+  def updateOrCreateItem(item: Item) : Future[(Item.Id, Long)] =
     if (item.id == INVALID_ID)
       createItem(item)
     else
-      for (_ <- updateItem(item))
-        yield item.id
+      for (time <- updateItem(item))
+        yield (item.id, time)
 
-  def updateItem(item: Item) : Future[Unit] = {
+  def updateItem(item: Item) : Future[Long] = {
     assert(item.id != INVALID_ID)
-    for (_ <- AjaxApiClient[AjaxApi].updateItem(item).call()
+    for (time <- AjaxApiClient[AjaxApi].updateItem(item).call()
                   .finalmente { updateCounter += 1; cache.remove(item.id) };
          // Removing the item from the cache because the server may process it in .updateItem
          _ = cache.remove(item.id))
-      yield ()
+      yield time
   }
 
-  def createItem(item: Item) : Future[Item.Id] = {
+  def createItem(item: Item) : Future[(Item.Id, Long)] = {
     assert(item.id == INVALID_ID)
     AjaxApiClient[AjaxApi].createItem(item).call()
   }
 
-  def updateOrCreateItemReact(item: Item) : AsyncCallback[Item.Id] =
+  def updateOrCreateItemReact(item: Item) : AsyncCallback[(Item.Id, Long)] =
     AsyncCallback.fromFuture(updateOrCreateItem(item))
 
   /** Updates the `lastModified` field of the selected item (also on the server) but does not make this change persistent.

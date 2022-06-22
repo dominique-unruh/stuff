@@ -32,13 +32,13 @@ object AjaxApiImpl extends AjaxApi {
     _db = db
   }
 
-  override def search(searchString: String, numResults: Int): Seq[Item.Id] = {
+  override def search(searchString: String, numResults: Int): Seq[(Item.Id, Long)] = {
     val db = getDb
     val results = Search.search(db, searchString)
     results
       .sortBy(-_.lastModified)
       .take(numResults)
-      .map(_.id)
+      .map(_.idAndTime)
     // TODO return id,lastModified pairs -> client knows which to invalidate
   }
 
@@ -47,17 +47,18 @@ object AjaxApiImpl extends AjaxApi {
     db.getOrElse(id, throw new IllegalArgumentException(s"Unknown item id $id"))
   }
 
-  override def updateItem(item: Item): Unit = synchronized {
+  override def updateItem(item: Item): Long = synchronized {
     val db = getDb
     val item2 = YamlDb.updateItem(dbPath, item)
     setDb(db.updated(item2.id, item2))
+    item2.lastModified
   }
 
-  override def createItem(item: Item): Item.Id = synchronized {
+  override def createItem(item: Item): (Item.Id, Long) = synchronized {
     val db = getDb
     val item2 = YamlDb.createItem(dbPath, item)
     setDb(db.updated(item2.id, item2))
-    item2.id
+    item2.idAndTime
   }
 
   /** Sets the last modified time of the item (not made persistent) */

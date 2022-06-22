@@ -54,7 +54,7 @@ object ItemSearch {
       yield
         renderResults(results)
 
-  def renderResults(results : Seq[Item.Id])(implicit $: Lifecycle.RenderScope[ResultProps, Unit, Unit]) : VdomElement = {
+  def renderResults(results : Seq[(Item.Id, Long)])(implicit $: Lifecycle.RenderScope[ResultProps, Unit, Unit]) : VdomElement = {
     if (results.isEmpty) {
       div(
         // TODO Nicer formatting (https://mui.com/material-ui/react-alert/ ?)

@@ -65,6 +65,26 @@ object DbCache {
     AjaxApiClient[AjaxApi].touchLastModified(id).call()
   }
 
+  /** Sets the location of `itemId` to `locationId`.
+   * @return the new `lastModification` time */
+  def setLocation(itemId: Item.Id, locationId: Item.Id): Future[Long] = {
+    cache.remove(itemId)
+    AjaxApiClient[AjaxApi].setLocation(itemId, locationId).call()
+  }
+
+  def setLocationReact(itemId: Item.Id, locationId: Item.Id): AsyncCallback[Long] =
+    AsyncCallback.fromFuture(setLocation(itemId, locationId))
+
+  /** Clears the location of `itemId`
+   * @return the new `lastModification` time */
+  def clearLocation(itemId: Item.Id): Future[Long] = {
+    cache.remove(itemId)
+    AjaxApiClient[AjaxApi].clearLocation(itemId).call()
+  }
+
+  def clearLocationReact(itemId: Item.Id): AsyncCallback[Long] =
+    AsyncCallback.fromFuture(clearLocation(itemId))
+
   private val cache = mutable.HashMap[Item.Id, Item]()
   /** Increase this when updating the DB so that pending Ajax calls will be ignored. */
   private var updateCounter = 0

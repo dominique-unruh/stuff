@@ -14,6 +14,8 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import japgolly.scalajs.react.vdom.Implicits._
 import monocle.macros.Lenses
 
+import scala.util.{Failure, Success}
+
 
 
 object ItemViewer {
@@ -22,15 +24,52 @@ object ItemViewer {
                    /** When the user click on a link to another item */
                    onSelectItem: Item.Id => Callback)
   @Lenses case class State(editing: Boolean = false,
-                           /** To enforce updates if needed */
-                           modificationTime: Long = 0,
-                          )
+                           /** To force reloads */
+                           modificationTime: Long = 0)
 
   def apply(props: Props): Unmounted[Props, State, Unit] = Component(props)
   def apply(itemId: Item.Id, onSelectItem: Item.Id => Callback): Unmounted[Props, State, Unit] =
     apply(Props(itemId=itemId, onSelectItem=onSelectItem))
 
   private def url(url: URI) = ExtendedURL.resolve(JSVariables.username, url)
+
+  /** Sets a new location */
+  private def setLocation(id: Item.Id)(implicit $: RS): AsyncCallback[Unit] =
+    for (result <- DbCache.setLocationReact($.props.itemId, id).attemptTry;
+         _ <- result match {
+           case Success(time) =>
+             for (_ <- $.modState(_.copy(modificationTime = time)).asAsyncCallback;
+                  _ = DbCache.touchLastModified(id);
+                  _ <- AppMain.successMessage("Updated location").asAsyncCallback)
+             yield {}
+           case Failure(exception) =>
+             AppMain.errorMessage("Failed to update location", exception).asAsyncCallback
+         })
+    yield {}
+
+  private def remove(implicit $: RS): AsyncCallback[Unit] =
+    for (result <- DbCache.clearLocationReact($.props.itemId).attemptTry;
+         _ <- result match {
+           case Success(time) =>
+             for (_ <- $.modState(_.copy(modificationTime = time)).asAsyncCallback;
+                  _ <- AppMain.successMessage("Cleared location").asAsyncCallback)
+             yield {}
+           case Failure(exception) =>
+             AppMain.errorMessage("Failed to update location", exception).asAsyncCallback
+         })
+    yield {}
+
+  private def putLocationElement(implicit $: RS): VdomElement = ModalAction[Item.Id](
+    onAction = setLocation _,
+    button = { (put: Callback) => button("Put", onClick --> put): VdomElement },
+    modal = { (action: Item.Id => AsyncCallback[Unit]) =>
+      // TODO: in search results, show prevLocation first
+      ItemSearch(visible = true,
+        onCreate = None,
+        onSelectItem = action,
+      ): VdomElement
+    })
+
 
   private def renderBodyView(item: Item)(implicit $: RS): VdomElement = {
     div(className := "item-editor",
@@ -48,8 +87,10 @@ object ItemViewer {
       // TODO: Add put and remove buttons
       item.location match {
         case Some(location) =>
-          div(ItemListItem(location, modificationTime = 0, onClick = $.props.onSelectItem))
-        case None => TagMod.empty
+          div(putLocationElement, button("Remove", onClick --> remove),
+            ItemListItem(location, modificationTime = 0, onClick = $.props.onSelectItem(_).asAsyncCallback))
+        case None =>
+          div("Location:", putLocationElement)
       },
 
       if (item.description.nonEmpty) {

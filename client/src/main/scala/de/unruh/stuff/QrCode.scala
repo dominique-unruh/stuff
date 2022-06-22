@@ -3,7 +3,7 @@ package de.unruh.stuff
 import japgolly.scalajs.react.component.Scala.Unmounted
 import japgolly.scalajs.react.vdom.{VdomElement, all}
 import japgolly.scalajs.react.vdom.all.{className, div, video}
-import japgolly.scalajs.react.{BackendScope, Callback, ScalaComponent}
+import japgolly.scalajs.react.{AsyncCallback, BackendScope, Callback, ScalaComponent}
 import org.scalajs.dom.{MediaStreamConstraints, MediaTrackConstraintSet, MediaTrackConstraints, console}
 
 import scala.scalajs.js
@@ -15,13 +15,13 @@ import org.log4s
 object QrCode {
   /** onDetect: (format, content) */
   // TODO class does not reinitialize when MediaTrackConstraints change. Should it?
-  case class Props(onDetect: (Option[String], String) => Callback, constraints: MediaTrackConstraints,
+  case class Props(onDetect: (Option[String], String) => AsyncCallback[Unit], constraints: MediaTrackConstraints,
                    flashLight: Boolean, active: Boolean)
   case class State(scanner: zxing.BrowserMultiFormatReader,
                    flashLightState: Boolean = false)
 
   def apply(props: Props): Unmounted[Props, State, Backend] = Component(props)
-  def apply(onDetect: (Option[String], String) => Callback, constraints: MediaTrackConstraints, flashLight: Boolean = false,
+  def apply(onDetect: (Option[String], String) => AsyncCallback[Unit], constraints: MediaTrackConstraints, flashLight: Boolean = false,
            active: Boolean): Unmounted[Props, State, Backend] =
     apply(Props(onDetect=onDetect, constraints=constraints, flashLight=flashLight, active=active))
 

@@ -63,19 +63,19 @@ object ItemEditor {
     yield {}
   }
 
-  /** Sets a new location and hides the search dialog */
+  /** Sets a new location */
   private def setLocation(id: Item.Id)(implicit $: RS): Callback =
-    for (_ <- $.modState(state => state.copy(editedItem = state.editedItem.setLocation(id)));
+      for (_ <- $.modState(state => state.copy(editedItem = state.editedItem.setLocation(id)));
          _ = DbCache.touchLastModified(id))
       yield {}
 
   private def remove(implicit $: RS): Callback =
-    $.modState(state => state.copy(state.editedItem.clearLocation()))
+    $.modState(state => state.copy(state.editedItem.clearLocation))
 
   private def putLocationElement(implicit $: RS): VdomElement = ModalAction[Item.Id](
-    onAction = setLocation _,
+    onAction = setLocation(_).asAsyncCallback,
     button = { (put: Callback) => button("Put", onClick --> put): VdomElement },
-    modal = { (action: Item.Id => Callback) =>
+    modal = { (action: Item.Id => AsyncCallback[Unit]) =>
       // TODO: in search results, show prevLocation first
       ItemSearch(visible = true,
         onCreate = None,
@@ -101,7 +101,7 @@ object ItemEditor {
       item.location match {
         case Some(location) =>
           div("Location:", putLocationElement, button("Remove", onClick --> remove),
-            ItemListItem(location, modificationTime = 0, onClick = { _ => Callback.empty }))
+            ItemListItem(location, modificationTime = 0, onClick = { _ => Callback.empty.asAsyncCallback }))
         case None =>
           div("Location:", putLocationElement)
       },

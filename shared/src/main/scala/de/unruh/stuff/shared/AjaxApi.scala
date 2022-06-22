@@ -15,5 +15,11 @@ trait AjaxApi {
   def createItem(item: Item) : (Item.Id, Long)
   /** Sets the last modified time of the item (not made persistent) */
   def touchLastModified(id: Item.Id) : Unit
+  /** Removed the location from the item.
+   * @return new `lastModified` */
+  def clearLocation(id: Item.Id): Long
+  /** Sets the location from the item.
+   * @return new `lastModified` */
+  def setLocation(id: Item.Id, locationId: Item.Id): Long
 }
 

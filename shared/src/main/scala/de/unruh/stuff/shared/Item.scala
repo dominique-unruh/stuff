@@ -95,7 +95,7 @@ object Code {
   def setLocation(location: Option[Item.Id]): Item = copy(location = location,
     previousLocation = this.location match { case None => previousLocation; case Some(loc) => Some(loc) })
   def setLocation(location: Item.Id): Item = setLocation(Some(location))
-  def clearLocation(): Item = setLocation(None)
+  def clearLocation: Item = setLocation(None)
   /** Sets [[lastModified]] to current time. */
   //noinspection MutatorLikeMethodIsParameterless
   def updateLastModified: Item = copy(lastModified = System.currentTimeMillis() / 1000)

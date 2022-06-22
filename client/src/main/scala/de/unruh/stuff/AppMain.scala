@@ -156,7 +156,7 @@ object AppMain {
     val redirectRoot = staticRedirect(root) ~> redirectToPage(Search)(HistoryReplace)
 
     val search = staticRoute("#search", Search) ~> renderRP((ctl,visible) => ItemSearch(
-      onSelectItem = { item => ctl.set(ItemView(item)) },
+      onSelectItem = { item => ctl.set(ItemView(item)).asAsyncCallback },
       onCreate = Some {
         case None => ctl.set(ItemCreate.makeUnique())
         case Some(code) => ctl.set(ItemCreate(code)) },

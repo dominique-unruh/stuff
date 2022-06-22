@@ -25,7 +25,7 @@ object ItemSearch {
   /** How many results to load */
   val numResults = 100
 
-  case class Props(onClick: Item.Id => Callback, onCreate: Option[Option[Code] => Callback], visible: Boolean)
+  case class Props(onSelectItem: Item.Id => AsyncCallback[Unit], onCreate: Option[Option[Code] => Callback], visible: Boolean)
   case class ResultProps(searchString: String = "", searchFromCode: Option[Code], parent: Props)
   object ResultProps {
     def apply(props: Props, state: State): ResultProps =
@@ -46,8 +46,8 @@ object ItemSearch {
   }
 
   def apply(props: Props): Unmounted[Props, State, Unit] = Component(props)
-  def apply(onSelectItem: Item.Id => Callback, onCreate: Option[Option[Code] => Callback], visible: Boolean): Unmounted[Props, State, Unit] =
-    Component(Props(onClick=onSelectItem, onCreate = onCreate, visible = visible))
+  def apply(onSelectItem: Item.Id => AsyncCallback[Unit], onCreate: Option[Option[Code] => Callback], visible: Boolean): Unmounted[Props, State, Unit] =
+    Component(Props(onSelectItem=onSelectItem, onCreate = onCreate, visible = visible))
 
   private def loadAndRenderResults(implicit $: Lifecycle.RenderScope[ResultProps, Unit, Unit]) : AsyncCallback[VdomElement] =
     for (results <- AsyncCallback.fromFuture(AjaxApiClient[AjaxApi].search($.props.searchString, numResults).call()))
@@ -66,7 +66,7 @@ object ItemSearch {
         })
     } else div(
       button("test", onClick --> Callback { console.log($.props.searchString) }),
-      ItemList(results, $.props.parent.onClick))
+      ItemList(results, $.props.parent.onSelectItem))
   }
 
   private def changed(event: ReactFormEventFromInput)(implicit $: RenderScope[Props, State, Unit]) =
@@ -98,7 +98,7 @@ object ItemSearch {
     implicit val state: State = $.state
     implicit val props: Props = $.props
     div (className := "item-search") (
-      QrCode(onDetect = qrcode, constraints = videoConstraints, flashLight = state.flashLight, active = props.visible)/*.withRef(qrCodeRef)*/,
+      QrCode(onDetect = qrcode(_,_).asAsyncCallback, constraints = videoConstraints, flashLight = state.flashLight, active = props.visible)/*.withRef(qrCodeRef)*/,
       div(
         button(onClick --> $.modState(_.copy(flashLight = true)), "Flashlight"),
         " ",

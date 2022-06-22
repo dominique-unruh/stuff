@@ -67,6 +67,24 @@ object AjaxApiImpl extends AjaxApi {
     val item = db.getOrElse(id, throw new IllegalArgumentException(s"Unknown item id $id"))
     setDb(db.updated(id, item.updateLastModified))
   }
+
+  override def clearLocation(id: Id): Id = synchronized {
+    val db = getDb
+    val item = db.getOrElse(id, throw new IllegalArgumentException(s"Unknown item id $id"))
+      .clearLocation
+      .updateLastModified
+    setDb(db.updated(id, item))
+    item.lastModified
+  }
+
+  override def setLocation(id: Id, locationId: Id): Id = synchronized {
+    val db = getDb
+    val item = db.getOrElse(id, throw new IllegalArgumentException(s"Unknown item id $id"))
+      .setLocation(locationId)
+      .updateLastModified
+    setDb(db.updated(id, item))
+    item.lastModified
+  }
 }
 
 object AjaxApiServer extends autowire.Server[JsValue, upickle.default.Reader, upickle.default.Writer] {

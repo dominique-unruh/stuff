@@ -2,6 +2,7 @@ package de.unruh.stuff.editor
 
 import de.unruh.stuff.{CodeButton, ItemSearch, ModalAction, QrCode}
 import de.unruh.stuff.shared.Code
+import japgolly.scalajs.react.callback.AsyncCallback
 import japgolly.scalajs.react.component.Scala.{Component, Unmounted}
 import japgolly.scalajs.react.extra.StateSnapshot
 import japgolly.scalajs.react.vdom.VdomElement
@@ -19,9 +20,9 @@ object CodesEditor {
     props.codes.modState(_.appended(code))
 
   private def addCodeElement(implicit props: Props): VdomElement = ModalAction[Code](
-    onAction = addCode _,
+    onAction = addCode(_).asAsyncCallback,
     button = { (put: Callback) => button("Add code", onClick --> put): VdomElement },
-    modal = { (action: Code => Callback) =>
+    modal = { (action: Code => AsyncCallback[Unit]) =>
       QrCode(
         onDetect = { (f, c) => action(Code(f, c)) },
         constraints = ItemSearch.videoConstraints,

@@ -14,7 +14,7 @@ object ItemListItem {
   case class Props(itemId: Item.Id,
                    /** Requires that data at least as new as `modificationTime` is loaded from server. */
                    modificationTime: Long,
-                   onClick: Item.Id => Callback)
+                   onClick: Item.Id => AsyncCallback[Unit])
 
   //noinspection TypeAnnotation
   val Component = ScalaComponent.builder[Props]
@@ -22,7 +22,7 @@ object ItemListItem {
     .build
 
   def apply(props: Props): Unmounted[Props, Unit, Unit] = Component(props)
-  def apply(itemId: Item.Id, modificationTime: Long, onClick: Item.Id => Callback): Unmounted[Props, Unit, Unit] =
+  def apply(itemId: Item.Id, modificationTime: Long, onClick: Item.Id => AsyncCallback[Unit]): Unmounted[Props, Unit, Unit] =
     apply(Props(itemId=itemId, modificationTime=modificationTime, onClick=onClick))
 
   private def renderBody(item: Item)(implicit props: Props): VdomElement = {
@@ -65,9 +65,9 @@ object ItemListItem {
 }
 
 object ItemList {
-  case class Props(items: Seq[(Item.Id, Long)], onClick: Item.Id => Callback)
+  case class Props(items: Seq[(Item.Id, Long)], onClick: Item.Id => AsyncCallback[Unit])
 
-  def apply(items: Seq[(Item.Id, Long)], onClick: Item.Id => Callback): Unmounted[Props, Unit, Unit] =
+  def apply(items: Seq[(Item.Id, Long)], onClick: Item.Id => AsyncCallback[Unit]): Unmounted[Props, Unit, Unit] =
     apply(Props(items=items, onClick=onClick))
   def apply(props: Props): Unmounted[Props, Unit, Unit] = Component(props)
 

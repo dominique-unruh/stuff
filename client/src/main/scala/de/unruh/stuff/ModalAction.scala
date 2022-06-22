@@ -1,21 +1,22 @@
 package de.unruh.stuff
 
 import io.kinoplan.scalajs.react.material.ui.core.{MuiDialog, ReactHandler2}
+import japgolly.scalajs.react.callback.AsyncCallback
 import japgolly.scalajs.react.{Callback, CtorType, ReactEvent, ScalaComponent}
 import japgolly.scalajs.react.component.Scala.{BackendScope, Component, Unmounted}
 import japgolly.scalajs.react.vdom.VdomElement
 import japgolly.scalajs.react.vdom.all.{button, div, onClick, span}
 
 object ModalAction {
-  case class Props[A](onAction: A => Callback,
+  case class Props[A](onAction: A => AsyncCallback[Unit],
                       button: Callback => VdomElement,
-                      modal: (A => Callback) => VdomElement)
+                      modal: (A => AsyncCallback[Unit]) => VdomElement)
   case class State(open: Boolean = false)
 
-  def apply[A](props: Props[A]): Unmounted[Props[_], State, Backend] = Component(props)
-  def apply[A](onAction: A => Callback,
+  private def apply[A](props: Props[A]): Unmounted[Props[_], State, Backend] = Component(props)
+  def apply[A](onAction: A => AsyncCallback[Unit],
                button: Callback => VdomElement,
-               modal: (A => Callback) => VdomElement): Unmounted[Props[_], State, Backend] =
+               modal: (A => AsyncCallback[Unit]) => VdomElement): Unmounted[Props[_], State, Backend] =
     apply[A](Props[A](onAction=onAction, button=button, modal=modal))
 
   class Backend(bs: BackendScope[Props[_], State]) {
@@ -25,10 +26,10 @@ object ModalAction {
     private val open : Callback =
       bs.modState(_.copy(open=true))
 
-    private def action[A](props: Props[A], value: A) : Callback =
-      for (_ <- close;
+    private def action[A](props: Props[A], value: A): AsyncCallback[Unit] =
+      for (_ <- close.asAsyncCallback;
            _ <- props.onAction(value))
-        yield {}
+      yield {}
 
     def render[A](props: Props[A], state: State): VdomElement =
         span (props.button (open),

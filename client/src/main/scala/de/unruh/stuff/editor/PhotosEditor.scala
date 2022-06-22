@@ -4,6 +4,7 @@ import de.unruh.stuff.editor.CodesEditor.Props
 import de.unruh.stuff.editor.ItemEditor.itemPhotos
 import de.unruh.stuff.{Camera, ExtendedURL, ItemSearch, JSVariables, ModalAction}
 import de.unruh.stuff.shared.Code
+import japgolly.scalajs.react.callback.AsyncCallback
 import japgolly.scalajs.react.component.Scala.{Component, Unmounted}
 import japgolly.scalajs.react.extra.StateSnapshotF.StateSnapshot
 import japgolly.scalajs.react.vdom.{TagMod, VdomElement}
@@ -44,8 +45,8 @@ object PhotosEditor {
 
         ModalAction[String](
           button = { (open: Callback) => div(button(onClick --> open)("Add photo")): VdomElement },
-          modal = { (onPhoto: String => Callback) => Camera(onPhoto = onPhoto): VdomElement },
-          onAction = addPhoto _
+          modal = { (onPhoto: String => AsyncCallback[Unit]) => Camera(onPhoto = onPhoto): VdomElement },
+          onAction = addPhoto(_).asAsyncCallback
         ),
       )
     }

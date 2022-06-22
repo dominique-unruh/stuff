@@ -112,8 +112,6 @@ object ItemEditor {
       (className := "item-description")),
 
       CodesEditor(zoomL(itemCodes) of $),
-
-      div(className := "item-id", item.id.toString),
     )
   }
 

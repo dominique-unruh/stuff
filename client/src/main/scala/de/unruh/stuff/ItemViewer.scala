@@ -104,8 +104,6 @@ object ItemViewer {
         div(className := "item-codes")(codes: _*)
       } else
         TagMod.empty,
-
-      div(className := "item-id", item.id.toString),
     )
   }
 

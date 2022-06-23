@@ -65,7 +65,7 @@ object ItemSearch {
           case _ => TagMod.empty
         })
     } else div(
-      button("test", onClick --> Callback { console.log($.props.searchString) }),
+//      button("test", onClick --> Callback { console.log($.props.searchString) }),
       ItemList(results, $.props.parent.onSelectItem))
   }
 

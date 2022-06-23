@@ -23,6 +23,7 @@ import org.scalajs.dom.html.Div
 
 import scala.collection.immutable
 import scala.scalajs.js
+import scala.scalajs.js.URIUtils.{decodeURIComponent, encodeURIComponent}
 import scala.scalajs.js.{Date, UndefOr}
 import scala.scalajs.js.annotation.JSExportTopLevel
 import scala.util.Random
@@ -170,8 +171,28 @@ object AppMain {
       onCancel = ctl.set(Search, HistoryPush) , // go back
     ))
 
-    val remainingPathCode = remainingPath.pmap { str:String => Some(ItemCreate(Code(str))) }
-                                               { page => page.code.get.toString }
+    /** Taken from [[RouterConfigDsl.queryToSeq]]. */
+    def decode(str: String): String =
+      decodeURIComponent(str.replace('+', ' '))
+
+    /** Modified from [[RouterConfigDsl.queryToSeq]]. */
+    val needingEncoding = """%[0-9A-F][0-9A-F]""".r
+
+    /** Modified from [[RouterConfigDsl.queryToSeq]]. */
+    def encode(str: String): String =
+      needingEncoding.replaceAllIn(encodeURIComponent(str), m =>
+        m.group(0) match {
+          case "%20" => "+"
+          case "%00" => (0: Char).toString
+          case "%3A" => ":"
+          case s => s
+        }
+      )
+
+    val remainingPathEncoded = remainingPath.xmap(decode)(encode)
+
+    val remainingPathCode = remainingPathEncoded.pmap { str:String => Some(ItemCreate(Code(str))) }
+                                                      { page => page.code.get.toString }
     val intCreateId = int.pmap { int:Int => Some(ItemCreate(int)) }
                                { page => page.uniqueId.get }
 

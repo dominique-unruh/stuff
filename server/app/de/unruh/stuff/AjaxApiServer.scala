@@ -39,7 +39,6 @@ object AjaxApiImpl extends AjaxApi {
       .sortBy(-_.lastModified)
       .take(numResults)
       .map(_.idAndTime)
-    // TODO return id,lastModified pairs -> client knows which to invalidate
   }
 
   override def getItem(id: Id): Item = {

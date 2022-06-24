@@ -3,6 +3,8 @@ package de.unruh.stuff
 import de.unruh.stuff.Search.SearchSpecAnd
 import de.unruh.stuff.shared.{Code, Item}
 
+import java.net.{URI, URL, URLDecoder}
+import java.nio.charset.Charset
 import scala.util.matching.Regex
 
 object Search {
@@ -14,7 +16,7 @@ object Search {
 
   private def processSearchTerm(searchTerm: String, finished: Boolean): SearchSpec = {
     if (searchTerm.startsWith("code:"))
-      SearchSpecCode(Code(searchTerm.stripPrefix("code:")))
+      SearchSpecCode(Code(URLDecoder.decode(searchTerm.stripPrefix("code:"), "utf-8")))
     else
       SearchSpecWord(searchTerm, !finished)
   }

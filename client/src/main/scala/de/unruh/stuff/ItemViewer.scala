@@ -84,7 +84,6 @@ object ItemViewer {
       } else
         TagMod.empty,
 
-      // TODO: Add put and remove buttons
       item.location match {
         case Some(location) =>
           div(putLocationElement, button("Remove", onClick --> remove),

@@ -74,14 +74,12 @@ object ItemSearch {
 
   private def qrcode(format: Option[String], text: String)(implicit $: RenderScope[Props, State, Unit]) : Callback = {
     val state = $.state
-    logger.debug(s"qrcode: $text")
     val code = Code(format, text)
-    val codeStr = code.toString
-    val needToAdd = !state.searchString.endsWith(codeStr+" ")
+    val searchString = s"code:${js.URIUtils.encodeURIComponent(code.toString)} "
+    val needToAdd = state.searchString != searchString
     if (needToAdd) {
-      val newSearchString = s"${Utils.addSpaceIfNeeded(state.searchString)}code:$codeStr "
       $.modState(_.copy(
-        searchString = newSearchString,
+        searchString = searchString,
         searchFromCode = Some(code)))
     } else
       DefaultEffects.Sync.empty

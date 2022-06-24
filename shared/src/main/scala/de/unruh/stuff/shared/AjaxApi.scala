@@ -3,8 +3,10 @@ package de.unruh.stuff.shared
 trait AjaxApi {
   /** Returns the first `numResults` matches in the item database.
    * Most recently modified first.
+   * @param numResults show at most this many results
+   * @param showFirst show this item first in the search results (if it is part of the results)
    * @return pairs of id and the modification time */
-  def search(searchString: String, numResults: Int) : Seq[(Item.Id, Long)]
+  def search(searchString: String, numResults: Int, showFirst: Option[Item.Id]) : Seq[(Item.Id, Long)]
   def getItem(id: Item.Id) : Item
   /** Updates this item. `item.id` must refer to an already existing item.
    * @return new `lastModified` value. */

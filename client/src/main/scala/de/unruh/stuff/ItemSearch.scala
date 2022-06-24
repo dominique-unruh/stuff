@@ -25,7 +25,10 @@ object ItemSearch {
   /** How many results to load */
   val numResults = 100
 
-  case class Props(onSelectItem: Item.Id => AsyncCallback[Unit], onCreate: Option[Option[Code] => Callback], visible: Boolean)
+  case class Props(onSelectItem: Item.Id => AsyncCallback[Unit],
+                   onCreate: Option[Option[Code] => Callback],
+                   visible: Boolean,
+                   showFirst: Option[Item.Id])
   case class ResultProps(searchString: String = "", searchFromCode: Option[Code], parent: Props)
   object ResultProps {
     def apply(props: Props, state: State): ResultProps =
@@ -45,12 +48,16 @@ object ItemSearch {
     facingMode = "environment"
   }
 
-  def apply(props: Props): Unmounted[Props, State, Unit] = Component(props)
-  def apply(onSelectItem: Item.Id => AsyncCallback[Unit], onCreate: Option[Option[Code] => Callback], visible: Boolean): Unmounted[Props, State, Unit] =
-    Component(Props(onSelectItem=onSelectItem, onCreate = onCreate, visible = visible))
+  def apply(onSelectItem: Item.Id => AsyncCallback[Unit],
+            onCreate: Option[Option[Code] => Callback],
+            visible: Boolean,
+            /** Show this item first in the search results (if it is part of the results) */
+            showFirst: Option[Item.Id] = None,
+           ): Unmounted[Props, State, Unit] =
+    Component(Props(onSelectItem=onSelectItem, onCreate=onCreate, visible=visible, showFirst=showFirst))
 
   private def loadAndRenderResults(implicit $: Lifecycle.RenderScope[ResultProps, Unit, Unit]) : AsyncCallback[VdomElement] =
-    for (results <- AsyncCallback.fromFuture(AjaxApiClient[AjaxApi].search($.props.searchString, numResults).call()))
+    for (results <- AsyncCallback.fromFuture(AjaxApiClient[AjaxApi].search($.props.searchString, numResults, $.props.parent.showFirst).call()))
       yield
         renderResults(results)
 

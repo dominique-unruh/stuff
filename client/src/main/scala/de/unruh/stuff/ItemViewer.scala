@@ -59,7 +59,7 @@ object ItemViewer {
          })
     yield {}
 
-  private def putLocationElement(implicit $: RS): VdomElement = ModalAction[Item.Id](
+  private def putLocationElement(previousLocation: Option[Item.Id])(implicit $: RS): VdomElement = ModalAction[Item.Id](
     key = "set-location",
     onAction = setLocation _,
     button = { (put: Callback) => button("Put", onClick --> put): VdomElement },
@@ -68,6 +68,7 @@ object ItemViewer {
       ItemSearch(visible = true,
         onCreate = None,
         onSelectItem = action,
+        showFirst = previousLocation,
       ): VdomElement
     })
 
@@ -87,10 +88,10 @@ object ItemViewer {
 
       item.location match {
         case Some(location) =>
-          div(putLocationElement, button("Remove", onClick --> remove),
+          div(putLocationElement(item.previousLocation), button("Remove", onClick --> remove),
             ItemListItem(location, modificationTime = 0, onClick = $.props.onSelectItem(_).asAsyncCallback))
         case None =>
-          div("Location:", putLocationElement)
+          div("Location:", putLocationElement(item.previousLocation))
       },
 
       if (item.description.nonEmpty) {

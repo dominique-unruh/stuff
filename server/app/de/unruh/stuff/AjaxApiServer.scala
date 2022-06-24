@@ -32,11 +32,14 @@ object AjaxApiImpl extends AjaxApi {
     _db = db
   }
 
-  override def search(searchString: String, numResults: Int): Seq[(Item.Id, Long)] = {
+  override def search(searchString: String, numResults: Int, showFirst: Option[Item.Id]): Seq[(Item.Id, Long)] = {
     val db = getDb
+    def sortBy(item: Item) =
+      if (showFirst.contains(item.id)) Long.MinValue
+      else - item.lastModified
     val results = Search.search(db, searchString)
     results
-      .sortBy(-_.lastModified)
+      .sortBy(sortBy)
       .take(numResults)
       .map(_.idAndTime)
   }

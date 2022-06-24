@@ -15,10 +15,11 @@ import java.net.URI
 import japgolly.scalajs.react.vdom.Implicits._
 
 object PhotosEditor {
-  case class Props(photos: StateSnapshot[Seq[URI]])
+  case class Props(photos: StateSnapshot[Seq[URI]],
+                   initiallyOpen: Boolean)
 
-  def apply(photos: StateSnapshot[Seq[URI]]): Unmounted[Props, Unit, Unit] =
-    Component(Props(photos = photos))
+  def apply(photos: StateSnapshot[Seq[URI]], initiallyOpen: Boolean): Unmounted[Props, Unit, Unit] =
+    Component(Props(photos=photos, initiallyOpen=initiallyOpen))
 
   private def url(url: URI) = ExtendedURL.resolve(JSVariables.username, url)
 
@@ -44,9 +45,11 @@ object PhotosEditor {
           TagMod.empty,
 
         ModalAction[String](
+          key = "take-photo",
           button = { (open: Callback) => div(button(onClick --> open)("Add photo")): VdomElement },
           modal = { (onPhoto: String => AsyncCallback[Unit]) => Camera(onPhoto = onPhoto): VdomElement },
-          onAction = addPhoto(_).asAsyncCallback
+          onAction = addPhoto(_).asAsyncCallback,
+          initiallyOpen = props.initiallyOpen,
         ),
       )
     }

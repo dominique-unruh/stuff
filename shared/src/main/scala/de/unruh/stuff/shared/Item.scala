@@ -1,7 +1,7 @@
 package de.unruh.stuff.shared
 
 import de.unruh.stuff.shared.Code.urlRegex
-import de.unruh.stuff.shared.Item.{Id, newID}
+import de.unruh.stuff.shared.Item.{INVALID_ID, Id, newID}
 import monocle.macros.Lenses
 import org.apache.commons.text.StringEscapeUtils
 import org.log4s
@@ -101,6 +101,9 @@ object Code {
   def updateLastModified: Item = copy(lastModified = System.currentTimeMillis() / 1000)
 
   def idAndTime: (Id, Id) = (id, lastModified)
+
+  /** Returns whether the id is [[INVALID_ID]]. */
+  def hasInvalidId: Boolean = id == INVALID_ID
 }
 
 object Item {

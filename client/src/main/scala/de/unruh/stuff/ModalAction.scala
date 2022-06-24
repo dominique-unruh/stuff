@@ -10,14 +10,22 @@ import japgolly.scalajs.react.vdom.all.{button, div, onClick, span}
 object ModalAction {
   case class Props[A](onAction: A => AsyncCallback[Unit],
                       button: Callback => VdomElement,
-                      modal: (A => AsyncCallback[Unit]) => VdomElement)
-  case class State(open: Boolean = false)
+                      modal: (A => AsyncCallback[Unit]) => VdomElement,
+                      initiallyOpen: Boolean)
+  case class State(open: Boolean)
 
-  private def apply[A](props: Props[A]): Unmounted[Props[_], State, Backend] = Component(props)
-  def apply[A](onAction: A => AsyncCallback[Unit],
+  def apply[A](/** React key of this component */
+               key: String,
+               /** Callback to invoke when the modal takes an "action" */
+               onAction: A => AsyncCallback[Unit],
+               /** Element that shows the modal upon user action (e.g., a button).
+                * Gets a [[Callback]] that shows the modal.  */
                button: Callback => VdomElement,
-               modal: (A => AsyncCallback[Unit]) => VdomElement): Unmounted[Props[_], State, Backend] =
-    apply[A](Props[A](onAction=onAction, button=button, modal=modal))
+               /** Content of the modal. Gets a callback to perform the "action". */
+               modal: (A => AsyncCallback[Unit]) => VdomElement,
+               /** Show this modal upon first rendering */
+               initiallyOpen: Boolean = false): Unmounted[Props[_], State, Backend] =
+    Component.withKey(key)(Props[A](onAction=onAction, button=button, modal=modal, initiallyOpen=initiallyOpen))
 
   class Backend(bs: BackendScope[Props[_], State]) {
     private val close : Callback =
@@ -40,9 +48,10 @@ object ModalAction {
 
   }
 
-  val Component: Component[Props[_], State, Backend, CtorType.Props] = ScalaComponent.builder[Props[_]]
-    .initialState(State())
-    .renderBackend[Backend]
-    .build
+  val Component: Component[Props[_], State, Backend, CtorType.Props] =
+    ScalaComponent.builder[Props[_]]
+      .initialStateFromProps { props => State(open=props.initiallyOpen) }
+      .renderBackend[Backend]
+      .build
 }
 

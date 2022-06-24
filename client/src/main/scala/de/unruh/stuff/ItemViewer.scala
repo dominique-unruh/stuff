@@ -60,6 +60,7 @@ object ItemViewer {
     yield {}
 
   private def putLocationElement(implicit $: RS): VdomElement = ModalAction[Item.Id](
+    key = "set-location",
     onAction = setLocation _,
     button = { (put: Callback) => button("Put", onClick --> put): VdomElement },
     modal = { (action: Item.Id => AsyncCallback[Unit]) =>

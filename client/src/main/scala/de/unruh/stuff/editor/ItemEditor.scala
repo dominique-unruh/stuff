@@ -73,6 +73,7 @@ object ItemEditor {
     $.modState(state => state.copy(state.editedItem.clearLocation))
 
   private def putLocationElement(implicit $: RS): VdomElement = ModalAction[Item.Id](
+    key = "put-location",
     onAction = setLocation(_).asAsyncCallback,
     button = { (put: Callback) => button("Put", onClick --> put): VdomElement },
     modal = { (action: Item.Id => AsyncCallback[Unit]) =>
@@ -96,7 +97,7 @@ object ItemEditor {
         value := item.name
       ),
 
-      PhotosEditor(zoomL(itemPhotos) of $),
+      PhotosEditor(zoomL(itemPhotos) of $, initiallyOpen = $.props.initialItem.hasInvalidId),
 
       item.location match {
         case Some(location) =>

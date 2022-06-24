@@ -20,6 +20,7 @@ object CodesEditor {
     props.codes.modState(_.appended(code))
 
   private def addCodeElement(implicit props: Props): VdomElement = ModalAction[Code](
+    key = "add-code",
     onAction = addCode(_).asAsyncCallback,
     button = { (put: Callback) => button("Add code", onClick --> put): VdomElement },
     modal = { (action: Code => AsyncCallback[Unit]) =>

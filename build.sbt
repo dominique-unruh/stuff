@@ -24,6 +24,7 @@ lazy val server = project
     libraryDependencies += "com.google.zxing" % "javase" % "3.5.0",
     libraryDependencies += "io.lemonlabs" %% "scala-uri" % "4.0.2",
     libraryDependencies += "org.apache.tika" % "tika-core" % "2.4.0",
+    libraryDependencies += "com.google.api-client" % "google-api-client" % "1.32.1",
   )
   .enablePlugins(PlayScala, WebScalaJSBundlerPlugin)
   .dependsOn(shared.jvm)

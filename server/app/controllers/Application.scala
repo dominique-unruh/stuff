@@ -4,7 +4,7 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.client.j2se.MatrixToImageWriter
 import com.google.zxing.qrcode.QRCodeWriter
 import controllers.Application.qrSheetOptionsForm
-import controllers.AuthenticationController.{Login, loginForm}
+import controllers.AuthenticationController.{GoogleCredentials, credentialForm}
 import de.unruh.stuff.{AjaxApiServer, ExtendedURL, Paths, QrSheet}
 
 import javax.inject._

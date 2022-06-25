@@ -7,12 +7,11 @@ import de.unruh.stuff.Config.User
 
 import java.nio.file.{Files, Path}
 
-case class Config(users: Map[String, User])
+case class Config(users: Map[String, User], googleClientId: String)
 
 object Config {
   case class User(
-                 /** Password of the user (clear text) */
-                 // TODO: hash!
+                 /** Password of the user (ignored) */
                    password: String
                  )
 

@@ -95,7 +95,7 @@ object YamlRW {
 
   //noinspection TypeAnnotation
   object ConfigFields extends Enumeration {
-    val users = Value
+    val users, google_client_id = Value
   }
 
   //noinspection TypeAnnotation
@@ -110,6 +110,7 @@ object YamlRW {
     override def read(yaml: YamlValue): Config = {
       assertCorrectFields(yaml, ConfigFields)
       Config(users = readField[Map[String, Config.User]](yaml, ConfigFields.users),
+        googleClientId = readField[String](yaml, ConfigFields.google_client_id)
       )
     }
   }

@@ -1,6 +1,10 @@
 package controllers
 
-import AuthenticationController.loginForm
+import AuthenticationController.{HTTP_TRANSPORT, JSON_FACTORY, credentialForm}
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier
+import com.google.api.client.http.HttpTransport
+import com.google.api.client.json.JsonFactory
+import com.google.api.client.json.gson.GsonFactory
 import controllers.AssetsFinder
 import de.unruh.stuff.Config
 import play.api.data.Form
@@ -9,12 +13,13 @@ import play.api.mvc.Security.Authenticated
 import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents, EssentialAction, Request, RequestHeader, Result, Results}
 
 import javax.inject._
+import scala.jdk.CollectionConverters.{CollectionHasAsScala, SeqHasAsJava}
 
 @Singleton
 class AuthenticationController @Inject()(val controllerComponents: ControllerComponents,
                                          implicit val assetsFinder: AssetsFinder) extends BaseController {
   def login(): Action[AnyContent] = Action { implicit request =>
-    Ok(views.html.login(loginForm))
+    Ok(views.html.login(credentialForm))
   }
 
   def logout(): Action[AnyContent] = Action {
@@ -22,23 +27,40 @@ class AuthenticationController @Inject()(val controllerComponents: ControllerCom
   }
 
   def authenticate(): Action[AnyContent] = Action { implicit request =>
-    val form = loginForm.bindFromRequest()
+    val form = credentialForm.bindFromRequest()
     assert(!form.hasErrors)
-    val login = form.value.get
-    Config.config.users.get(login.user) match {
-      case None => Unauthorized(s"Unknown user ${login.user}")
-      case Some(user) =>
-        if (login.password != user.password)
-          Unauthorized(s"Invalid password")
-        else
-          Redirect(routes.Application.app).withSession("user" -> login.user)
+    val formData = form.value.get
+
+
+    val verifier = new GoogleIdTokenVerifier.Builder(HTTP_TRANSPORT, JSON_FACTORY)
+      .setAudience(Seq(Config.config.googleClientId).asJava)
+      .build();
+
+    verifier.verify(formData.credential) match {
+      case null => Unauthorized("Invalid ID token (authentication failed).")
+      case idToken =>
+        val payload = idToken.getPayload
+        val user = payload.getEmail
+        assert(user != null)
+
+        Config.config.users.get(user) match {
+          case None => Unauthorized(s"Unknown user $user")
+          case Some(_) => Redirect(routes.Application.app).withSession("user" -> user)
+        }
     }
   }
 }
 
 object AuthenticationController {
-  case class Login(user: String, password: String)
-  val loginForm: Form[Login] = Form(mapping("user" -> text, "password" -> text)(Login.apply)(Login.unapply))
+
+  import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
+  import com.google.api.client.http.HttpTransport
+
+  val JSON_FACTORY: JsonFactory = GsonFactory.getDefaultInstance
+  var HTTP_TRANSPORT: HttpTransport = GoogleNetHttpTransport.newTrustedTransport
+
+  case class GoogleCredentials(clientId: String, credential: String)
+  val credentialForm: Form[GoogleCredentials] = Form(mapping("clientId" -> text, "credential" -> text)(GoogleCredentials.apply)(GoogleCredentials.unapply))
 }
 
 /** Provides authentication related functions to controllers that inherit from this trait. */

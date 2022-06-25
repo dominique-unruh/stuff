@@ -1,12 +1,44 @@
 @import views.html.helper.CSRF
-@(form: Form[AuthenticationController.Login])(implicit assetsFinder: AssetsFinder, requestHeader: RequestHeader)
+@import de.unruh.stuff.Config
+@(form: Form[AuthenticationController.GoogleCredentials])(implicit assetsFinder: AssetsFinder, requestHeader: RequestHeader)
 
-@main(title="Log in"){
+
+@header = {
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script>
+        function google_login_callback(response) {
+            console.log("login callback", response);
+            var form = document.getElementById("credential-form");
+            form.elements["clientId"].value = response.clientId;
+            form.elements["credential"].value = response.credential;
+            form.submit();
+        }
+    </script>
+}
+
+@main(title="Log in", header = header){
     <h1>Sign in</h1>
-    @helper.form(routes.AuthenticationController.authenticate()) {
+
+    <div id="g_id_onload"
+         data-client_id="@Config.config.googleClientId"
+         data-context="signin"
+         data-ux_mode="popup"
+         data-callback="google_login_callback"
+         data-auto_prompt="false">
+    </div>
+
+    <div class="g_id_signin"
+         data-type="standard"
+         data-shape="pill"
+         data-theme="outline"
+         data-text="signin_with"
+         data-size="large"
+         data-logo_alignment="left">
+    </div>
+
+    @helper.form(routes.AuthenticationController.authenticate(), Symbol("id") -> "credential-form") {
         @CSRF.formField
-        <p><input type="text" name="user" placeholder="Username" value="@form("user").value"></p>
-        <p><input type="password" name="password" placeholder="Password"></p>
-        <p><button type="submit">Login</button></p>
+        <input type="hidden" name="clientId"/>
+        <input type="hidden" name="credential"/>
     }
 }

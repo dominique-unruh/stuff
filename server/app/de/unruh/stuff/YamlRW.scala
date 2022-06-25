@@ -92,38 +92,4 @@ object YamlRW {
       fields.withName(key.asInstanceOf[YamlString].value) // Throws exception if key is not a known key
     }
   }
-
-  //noinspection TypeAnnotation
-  object ConfigFields extends Enumeration {
-    val users, google_client_id = Value
-  }
-
-  //noinspection TypeAnnotation
-  object ConfigUserFields extends Enumeration {
-    val password = Value
-  }
-
-  implicit object configFormat extends YamlFormat[Config] {
-    override def write(config: Config): YamlObject =
-      throw new UnsupportedOperationException("writing config files")
-
-    override def read(yaml: YamlValue): Config = {
-      assertCorrectFields(yaml, ConfigFields)
-      Config(users = readField[Map[String, Config.User]](yaml, ConfigFields.users),
-        googleClientId = readField[String](yaml, ConfigFields.google_client_id)
-      )
-    }
-  }
-
-  implicit object configUserFormat extends YamlFormat[Config.User] {
-    override def write(user: Config.User): YamlObject =
-      throw new UnsupportedOperationException("writing config files")
-
-    override def read(yaml: YamlValue): Config.User = {
-      assertCorrectFields(yaml, ConfigUserFields)
-      Config.User(password = readField[String](yaml, ConfigUserFields.password),
-      )
-    }
-  }
-
 }

@@ -1,24 +1,17 @@
 package de.unruh.stuff
 
-import de.unruh.stuff.shared.Item
-import net.jcazevedo.moultingyaml.{DefaultYamlProtocol, PimpedAny, PimpedString, YamlFormat, YamlObject, YamlReader, YamlString, YamlValue, YamlWriter}
-import YamlRW._
-import de.unruh.stuff.Config.User
-
-import java.nio.file.{Files, Path}
-
-case class Config(users: Map[String, User], googleClientId: String)
+import play.api.{ConfigLoader, Configuration}
 
 object Config {
-  case class User(
-                 /** Password of the user (ignored) */
-                   password: String
-                 )
-
-  lazy val config: Config = loadConfig(Paths.configPath)
-
-  private def loadConfig(path: Path) = {
-    assert(Files.exists(path), "Config file not found")
-    Files.readString(path).parseYaml.convertTo[Config]
+  private def get[A: ConfigLoader](name: String)(implicit configuration: Configuration): A = {
+    val value = configuration.get[A](name)
+    if (value == null)
+      throw new RuntimeException(s"Server configuration lacks key $name")
+    value
   }
+
+  def users(implicit configuration: Configuration) : Seq[String] =
+    get[Seq[String]]("stuff.users")
+  def googleClientId(implicit configuration: Configuration) : String =
+    get[String]("stuff.google_client_id")
 }

@@ -7,6 +7,7 @@ import com.google.api.client.json.JsonFactory
 import com.google.api.client.json.gson.GsonFactory
 import controllers.AssetsFinder
 import de.unruh.stuff.Config
+import de.unruh.stuff.shared.Utils
 import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms.{mapping, text}
@@ -19,7 +20,7 @@ import scala.jdk.CollectionConverters.{CollectionHasAsScala, SeqHasAsJava}
 @Singleton
 class AuthenticationController @Inject()(val controllerComponents: ControllerComponents,
                                          implicit val assetsFinder: AssetsFinder,
-                                         implicit val config: Configuration) extends BaseController {
+                                         implicit val config: Config) extends BaseController {
   def login(): Action[AnyContent] = Action { implicit request =>
     Ok(views.html.login(credentialForm))
   }
@@ -35,7 +36,7 @@ class AuthenticationController @Inject()(val controllerComponents: ControllerCom
 
 
     val verifier = new GoogleIdTokenVerifier.Builder(HTTP_TRANSPORT, JSON_FACTORY)
-      .setAudience(Seq(Config.googleClientId).asJava)
+      .setAudience(Seq(config.googleClientId).asJava)
       .build();
 
     verifier.verify(formData.credential) match {
@@ -45,7 +46,7 @@ class AuthenticationController @Inject()(val controllerComponents: ControllerCom
         val user = payload.getEmail
         assert(user != null)
 
-        if (Config.users.contains(user))
+        if (config.users.contains(user))
           Redirect(routes.Application.app).withSession("user" -> user)
         else
           Unauthorized(s"Unknown user $user")

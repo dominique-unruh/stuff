@@ -7,11 +7,9 @@ import Paths.dbPath
 import de.unruh.stuff.db.YamlDb
 import ujson.play.PlayJson
 
-import java.util.concurrent.atomic.AtomicReference
-import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object AjaxApiImpl extends AjaxApi {
+class AjaxApiImpl(user: String)(implicit config: Config) extends AjaxApi {
   type Db = Map[Item.Id, Item]
   private var _db : Db = _
 
@@ -22,7 +20,7 @@ object AjaxApiImpl extends AjaxApi {
       if (_db != null)
         _db
       else {
-        _db = YamlDb.loadDb(dbPath)
+        _db = YamlDb.loadDb(user)
         _db
       }
     }
@@ -51,14 +49,14 @@ object AjaxApiImpl extends AjaxApi {
 
   override def updateItem(item: Item): Long = synchronized {
     val db = getDb
-    val item2 = YamlDb.updateItem(dbPath, item)
+    val item2 = YamlDb.updateItem(user, item)
     setDb(db.updated(item2.id, item2))
     item2.lastModified
   }
 
   override def createItem(item: Item): (Item.Id, Long) = synchronized {
     val db = getDb
-    val item2 = YamlDb.createItem(dbPath, item)
+    val item2 = YamlDb.createItem(user, item)
     setDb(db.updated(item2.id, item2))
     item2.idAndTime
   }
@@ -92,6 +90,21 @@ object AjaxApiImpl extends AjaxApi {
 object AjaxApiServer extends autowire.Server[JsValue, upickle.default.Reader, upickle.default.Writer] {
   def write[Result: upickle.default.Writer](r: Result): JsValue = upickle.default.transform(r).to(PlayJson)
   def read[Result: upickle.default.Reader](p: JsValue): Result = PlayJson.transform(p, upickle.default.reader[Result])
-  val routes: AjaxApiServer.Router = AjaxApiServer.route[AjaxApi](AjaxApiImpl)
+  private var impls : Map[String, AjaxApiImpl] = Map()
+  private def getImpl(user: String)(implicit config: Config) : AjaxApiImpl =
+    impls.get(user) match {
+      case Some(impl) => impl
+      case None => synchronized {
+        impls.get(user) match {
+          case Some(impl) => impl
+          case None =>
+            val impl = new AjaxApiImpl(user)
+            impls = impls.updated(user, impl)
+            impl
+        }
+      }
+    }
+
+  def routes(user: String)(implicit config: Config): AjaxApiServer.Router = AjaxApiServer.route[AjaxApi](getImpl(user))
 }
 

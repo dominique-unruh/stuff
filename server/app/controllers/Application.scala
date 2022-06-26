@@ -1,29 +1,21 @@
 package controllers
 
-import com.google.zxing.BarcodeFormat
-import com.google.zxing.client.j2se.MatrixToImageWriter
-import com.google.zxing.qrcode.QRCodeWriter
 import controllers.Application.qrSheetOptionsForm
-import controllers.AuthenticationController.{GoogleCredentials, credentialForm}
-import de.unruh.stuff.{AjaxApiServer, ExtendedURL, Paths, QrSheet}
+import de.unruh.stuff.{AjaxApiServer, Config, ExtendedURL, Paths, QrSheet}
 
 import javax.inject._
-import de.unruh.stuff.shared.SharedMessages
 import play.api.data.Form
 import play.api.data.Forms.{mapping, number, optional, text}
 import play.api.http.MimeTypes
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc._
-import play.filters.csrf.AddCSRFToken
 
-import java.io.ByteArrayOutputStream
 import java.nio.file.Files
-import javax.imageio.ImageIO
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 @Singleton
-class Application @Inject()(cc: ControllerComponents) extends AbstractController(cc) with Authenticated {
+class Application @Inject()(cc: ControllerComponents, implicit val config: Config) extends AbstractController(cc) with Authenticated {
   def app: Handler = isAuthenticated { implicit request =>
     Ok(views.html.app(username))
       .withHeaders("Cache-Control" -> "no-cache")
@@ -43,7 +35,7 @@ class Application @Inject()(cc: ControllerComponents) extends AbstractController
       request.body
         .asInstanceOf[JsObject].value.toMap.map{case (k,v) => (k, v)}
     )
-    val resultFuture = AjaxApiServer.routes.apply(apiRequest)
+    val resultFuture = AjaxApiServer.routes(username).apply(apiRequest)
     val resultJson = Await.result(resultFuture, Duration.Inf)
     val resultString = Json.stringify(resultJson)
     Ok(resultString).as(MimeTypes.JSON)
@@ -52,7 +44,7 @@ class Application @Inject()(cc: ControllerComponents) extends AbstractController
   def file(user: String, id: Long, filename: String): Handler = isAuthenticated { implicit request =>
     assert(user == username)
     assert(ExtendedURL.fileRegex.matches(filename))
-    val path = Paths.filesPath.resolve(id.toString).resolve(filename)
+    val path = Paths.filePath(user,id,filename)
     assert(Files.isRegularFile(path))
     Ok(Files.readAllBytes(path)).withHeaders("Cache-Control" -> "max-age=604800, immutable")
   }

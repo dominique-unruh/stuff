@@ -1,6 +1,6 @@
 package de.unruh.stuff.db
 
-import de.unruh.stuff.{ExtendedURL, Paths}
+import de.unruh.stuff.{Config, ExtendedURL, Paths}
 import de.unruh.stuff.shared.Item
 import io.lemonlabs.uri.DataUrl
 import org.apache.tika.mime.{MimeTypeException, MimeTypes}
@@ -30,24 +30,23 @@ object ProcessItems {
   private val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
   private val dateFormat = new SimpleDateFormat("yyyymmdd_hhmmss")
   private val counter = new AtomicInteger()
-  def dataToLocalUrl(prefix: String = "", itemId: Item.Id, url: URI): URI = url.getScheme match {
+  def dataToLocalUrl(username: String, prefix: String = "", itemId: Item.Id, url: URI)(implicit config: Config): URI = url.getScheme match {
     case "data" =>
       val dataUrl = DataUrl.parse(url.toString)
       val extension = extensionForMimetype(dataUrl.mediaType.value)
       val filename = s"$prefix${dateFormat.format(calendar.getTime)}_${counter.incrementAndGet}$extension"
-      val dir = Paths.filesPath.resolve(itemId.toString)
-      val path = dir.resolve(filename)
+      val path = Paths.filePath(username, itemId, filename)
       assert(!Files.exists(path))
       val localUrl = ExtendedURL.forFile(itemId, filename)
-      try Files.createDirectory(dir)
+      try Files.createDirectory(path.getParent)
       catch { case _ : FileAlreadyExistsException => }
       Files.write(path, dataUrl.data, StandardOpenOption.CREATE_NEW)
       localUrl
     case _ => url
   }
 
-  def processItem(item: Item): Item = {
-    item.copy(photos = item.photos.map(dataToLocalUrl("photo-", item.id, _)))
+  def processItem(username: String, item: Item)(implicit config: Config): Item = {
+    item.copy(photos = item.photos.map(dataToLocalUrl(username, "photo-", item.id, _)))
       .updateLastModified
   }
 }

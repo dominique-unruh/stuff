@@ -1,0 +1,17 @@
+@()
+
+@main() {
+    <h1>Invalid CSRF token</h1>
+
+    <p>This is probably cause by use of the back button in the browser at the wrong moment.
+    It is nothing to worry about.</p>
+
+    <p>CSRF tokens are used to prevent certain kind of attacks
+        (<a href="https://en.wikipedia.org/wiki/Cross-site_request_forgery">cross-site request forgeries</a>).</p>
+
+    <p>If another site sent you directly to this page, it might mean that they tried to attack you (but failed).</p>
+
+    <p><b><a href="@routes.Application.app">Back to the app.</a></b></p>
+
+    <p>(If this link gets you back to this page, maybe removing cookies, restarting the browser, or similar actions might help.)</p>
+}

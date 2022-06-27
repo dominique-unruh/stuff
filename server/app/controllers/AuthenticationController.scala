@@ -16,6 +16,7 @@ import play.api.mvc.Security.Authenticated
 import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents, EssentialAction, Request, RequestHeader, Result, Results}
 
 import javax.inject._
+import scala.concurrent.Await
 import scala.jdk.CollectionConverters.{CollectionHasAsScala, SeqHasAsJava}
 
 @Singleton
@@ -49,8 +50,30 @@ class AuthenticationController @Inject()(val controllerComponents: ControllerCom
         if (YamlDb.userExists(user))
           Redirect(routes.Application.app).withSession("user" -> user)
         else {
-          // TODO: Allow user creation
-          Unauthorized(s"Unknown user $user")
+          Redirect(routes.AuthenticationController.registerConsent())
+            .addingToSession("register-user" -> user)
+        }
+    }
+  }
+
+  def registerConsent(): Action[AnyContent] = Action { implicit request =>
+    request.session.get("register-user") match {
+      case None => Unauthorized("This page must only be reached through the login page!")
+      case Some(user) =>
+        Ok(views.html.register(user))
+    }
+  }
+
+  def register(): Action[AnyContent] = Action { implicit request =>
+    request.session.get("register-user") match {
+      case None => Unauthorized("This page must only be reached through the login page!")
+      case Some(user) =>
+        if (!request.body.asFormUrlEncoded.get.get("agree").exists(_.contains("yes")))
+          Unauthorized("""You need to select "I agree".""")
+        else {
+          YamlDb.createUser(user)
+          Redirect(routes.Application.app)
+            .withSession("user" -> user)
         }
     }
   }

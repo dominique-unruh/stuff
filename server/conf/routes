@@ -25,3 +25,5 @@ GET        /versionedAssets/*file        controllers.Assets.versioned(path="/pub
 GET     /login                      controllers.AuthenticationController.login()
 GET     /logout                     controllers.AuthenticationController.logout()
 POST    /login                      controllers.AuthenticationController.authenticate()
+POST    /register                   controllers.AuthenticationController.register()
+GET     /register                   controllers.AuthenticationController.registerConsent()

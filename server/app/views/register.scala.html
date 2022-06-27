@@ -1,0 +1,23 @@
+@import views.html.helper.CSRF
+@(user: String)(implicit requestHeader: RequestHeader)
+
+@main() {
+    <h1>Register account</h1>
+
+    Your account (@user) does not exist yet on our system.
+
+    By registering your account, you agree to the following:
+    <ul>
+        <li>Cookies will be stored on your system to maintain basic app functionality. (E.g., login-state.)</li>
+        <li>This app is maintained in my free-time on a best effort basis. No guarantees are made as to the security of your data, and as to the availability of this service.</li>
+        <li>We do not directly share your data (email address, name, items registered in the database) with third parties, but we may store the database on third party cloud services and we have no control over their data handling.</li>
+    </ul>
+
+    @helper.form(routes.AuthenticationController.register()) {
+        @CSRF.formField
+        <p><label>
+            <input name="agree" value="yes" type="checkbox"> I agree.
+        </label></p>
+        <p><button type="submit">Create my account</button></p>
+    }
+}

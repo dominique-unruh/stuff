@@ -13,6 +13,12 @@ import scala.jdk.CollectionConverters.IteratorHasAsScala
 
 /** Manipulating Yamls files in the DB */
 object YamlDb {
+  def createUser(user: String)(implicit config: Config): Unit = {
+    Files.createDirectory(Paths.dbPath(user))
+    Files.createDirectory(Paths.itemsPath(user))
+    Files.createDirectory(Paths.filesPath(user))
+  }
+
   def userExists(user: String)(implicit config: Config): Boolean =
     Files.exists(Paths.itemsPath(user)) &&
       Files.exists(Paths.filesPath(user))

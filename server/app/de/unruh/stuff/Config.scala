@@ -16,8 +16,7 @@ class Config @Inject() (configuration: Configuration) {
 
   implicit private val configLoaderPath : ConfigLoader[Path] = implicitly[ConfigLoader[String]].map(Path.of(_))
 
-  lazy val users : Seq[String] =
-    get[Seq[String]]("stuff.users")
+//  lazy val users : Seq[String] = get[Seq[String]]("stuff.users")
   lazy val googleClientId : String =
     get[String]("stuff.google_client_id")
   lazy val dbRoot : Path =

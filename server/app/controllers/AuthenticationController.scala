@@ -7,6 +7,7 @@ import com.google.api.client.json.JsonFactory
 import com.google.api.client.json.gson.GsonFactory
 import controllers.AssetsFinder
 import de.unruh.stuff.Config
+import de.unruh.stuff.db.YamlDb
 import de.unruh.stuff.shared.Utils
 import play.api.Configuration
 import play.api.data.Form
@@ -34,7 +35,6 @@ class AuthenticationController @Inject()(val controllerComponents: ControllerCom
     assert(!form.hasErrors)
     val formData = form.value.get
 
-
     val verifier = new GoogleIdTokenVerifier.Builder(HTTP_TRANSPORT, JSON_FACTORY)
       .setAudience(Seq(config.googleClientId).asJava)
       .build();
@@ -46,10 +46,12 @@ class AuthenticationController @Inject()(val controllerComponents: ControllerCom
         val user = payload.getEmail
         assert(user != null)
 
-        if (config.users.contains(user))
+        if (YamlDb.userExists(user))
           Redirect(routes.Application.app).withSession("user" -> user)
-        else
+        else {
+          // TODO: Allow user creation
           Unauthorized(s"Unknown user $user")
+        }
     }
   }
 }

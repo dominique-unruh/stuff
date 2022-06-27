@@ -11,6 +11,8 @@ lazy val root = (project in file("."))
 
 lazy val server = project
   .settings(
+    // To make Intelli/J happy (otherwise compiling classes from client project mayfail)
+    scalacOptions += "-Ymacro-annotations",
     scalaJSProjects := Seq(client),
     Assets / pipelineStages  := Seq(scalaJSPipeline),
     pipelineStages := Seq(digest, gzip),
@@ -25,6 +27,8 @@ lazy val server = project
     libraryDependencies += "io.lemonlabs" %% "scala-uri" % "4.0.2",
     libraryDependencies += "org.apache.tika" % "tika-core" % "2.4.0",
     libraryDependencies += "com.google.api-client" % "google-api-client" % "1.32.1",
+    // To make Intelli/J happy (otherwise compiling classes from client project mayfail)
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.12" % "test",
   )
   .enablePlugins(PlayScala, WebScalaJSBundlerPlugin)
   .dependsOn(shared.jvm)

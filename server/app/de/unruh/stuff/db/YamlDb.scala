@@ -13,6 +13,10 @@ import scala.jdk.CollectionConverters.IteratorHasAsScala
 
 /** Manipulating Yamls files in the DB */
 object YamlDb {
+  def userExists(user: String)(implicit config: Config): Boolean =
+    Files.exists(Paths.itemsPath(user)) &&
+      Files.exists(Paths.filesPath(user))
+
   def parse(yaml: String): Item = yaml.parseYaml.convertTo[Item]
 
   def parse(path: Path): Item = parse(Files.readString(path))

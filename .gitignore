@@ -32,3 +32,6 @@ shared/.jvm
 bin/
 /.bsp/sbt.json
 /dumps
+
+!shared/.js
+!shared/.jvm

@@ -1,6 +1,6 @@
 package de.unruh.stuff
 
-import de.unruh.stuff.shared.Item
+import de.unruh.stuff.shared.{Item, Utils}
 
 import java.net.URI
 import scala.util.matching.Regex
@@ -13,8 +13,7 @@ object ExtendedURL {
   def resolve(username: String, url: URI): String = {
     if (url.getScheme == "localstuff") {
       url.getRawSchemeSpecificPart match {
-        // TODO Url-encode username (including /'s)
-        case schemaSpecificRegex(id, file) => s"/files/$username/${id}/${file}"
+        case schemaSpecificRegex(id, file) => s"/files/${Utils.encodeURIComponent(username)}/${id}/${file}"
         case _ => throw new AssertionError(url.toString)
       }
     } else

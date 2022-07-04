@@ -9,6 +9,7 @@ import javax.imageio.ImageIO
 import scala.util.Random
 
 object QrSheet {
+  // TODO: Add a validation function for size <= maxSize, count <= maxCount
   case class SheetOptions(template: Option[String] = None, count: Option[Int] = None, size: Option[Int] = None) {
     def templateDefault: String = template.getOrElse("XXX")
     def sizeDefault: Int = size.getOrElse(150)
@@ -25,6 +26,7 @@ object QrSheet {
   }
 
   def createQrCode(content: String, size: Int): Array[Byte] = {
+    assert(size <= QrSheet.maxSize)
     val barcodeWriter = new QRCodeWriter()
     val bitMatrix = barcodeWriter.encode(content, BarcodeFormat.QR_CODE, size, size)
     val image = MatrixToImageWriter.toBufferedImage(bitMatrix)
@@ -32,4 +34,7 @@ object QrSheet {
     ImageIO.write(image, "png", stream)
     stream.toByteArray
   }
+
+  val maxSize = 1000
+  val maxCount = 1000
 }

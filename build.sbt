@@ -7,11 +7,14 @@ ThisBuild / version      := "0.1.0-SNAPSHOT"
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 lazy val root = (project in file("."))
+  .settings(
+    name := "stuff"
+  )
   .aggregate(server, client, shared.jvm, shared.js)
 
 lazy val server = project
   .settings(
-    // To make Intelli/J happy (otherwise compiling classes from client project mayfail)
+    // To make Intelli/J happy (otherwise compiling classes from client project may fail)
     scalacOptions += "-Ymacro-annotations",
     scalaJSProjects := Seq(client),
     Assets / pipelineStages  := Seq(scalaJSPipeline),
@@ -27,8 +30,9 @@ lazy val server = project
     libraryDependencies += "io.lemonlabs" %% "scala-uri" % "4.0.2",
     libraryDependencies += "org.apache.tika" % "tika-core" % "2.4.0",
     libraryDependencies += "com.google.api-client" % "google-api-client" % "1.32.1",
-    // To make Intelli/J happy (otherwise compiling classes from client project mayfail)
+    // To make Intelli/J happy (otherwise compiling classes from client project may fail)
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.12" % "test",
+    maintainer := "dominique@unruh.de",
   )
   .enablePlugins(PlayScala, WebScalaJSBundlerPlugin)
   .dependsOn(shared.jvm)

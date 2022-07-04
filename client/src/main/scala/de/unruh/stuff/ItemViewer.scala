@@ -31,7 +31,7 @@ object ItemViewer {
   def apply(itemId: Item.Id, onSelectItem: Item.Id => Callback): Unmounted[Props, State, Unit] =
     apply(Props(itemId=itemId, onSelectItem=onSelectItem))
 
-  private def url(url: URI) = ExtendedURL.resolve(JSVariables.username, url)
+  private def url(url: URI) = ExtendedURLClient.resolve(JSVariables.username, url)
 
   /** Sets a new location */
   private def setLocation(id: Item.Id)(implicit $: RS): AsyncCallback[Unit] =
@@ -81,7 +81,7 @@ object ItemViewer {
 
       if (item.photos.nonEmpty) {
         val images = for ((photo, i) <- item.photos.zipWithIndex)
-          yield span(img(src := url(photo)))
+          yield span(img(src := url(photo).toString))
         div(className := "item-photos")(images: _*)
       } else
         TagMod.empty,
@@ -96,7 +96,7 @@ object ItemViewer {
 
       if (item.description.nonEmpty) {
         // TODO: sanitize!?
-        div(dangerouslySetInnerHtml := item.description.asHtml, className := "item-description")
+        div(dangerouslySetInnerHtml := ProcessHtml.mapUrls(item.description.asHtml, url), className := "item-description")
       } else
         TagMod.empty,
 

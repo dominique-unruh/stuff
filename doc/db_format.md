@@ -65,6 +65,10 @@ interpretation will be left to the browser), or a *local URL*.
 
 A *local URL* references a file in the `files` directory.
 It is of the form `localstuff:id/file`.
-Here `id` is the id of an item (and an item must only reference local URLs with its own ID).
+Here `id` is the id of an item (and an item must only reference local file URLs with its own ID).
 And `file` is the name of a file in the directory `files/id`.
 
+A *local URL* can also reference an item itself.
+Then it is of the fom `localstuff:id`.
+Here `id` is the id of an item.
+Items are allowed to reference other items via local item URLs.

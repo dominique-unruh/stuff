@@ -2,7 +2,7 @@ package de.unruh.stuff.editor
 
 import de.unruh.stuff.editor.CodesEditor.Props
 import de.unruh.stuff.editor.ItemEditor.itemPhotos
-import de.unruh.stuff.{Camera, ExtendedURL, ItemSearch, JSVariables, ModalAction}
+import de.unruh.stuff.{Camera, ExtendedURL, ExtendedURLClient, ItemSearch, JSVariables, ModalAction}
 import de.unruh.stuff.shared.Code
 import japgolly.scalajs.react.callback.AsyncCallback
 import japgolly.scalajs.react.component.Scala.{Component, Unmounted}
@@ -21,7 +21,7 @@ object PhotosEditor {
   def apply(photos: StateSnapshot[Seq[URI]], initiallyOpen: Boolean): Unmounted[Props, Unit, Unit] =
     Component(Props(photos=photos, initiallyOpen=initiallyOpen))
 
-  private def url(url: URI) = ExtendedURL.resolve(JSVariables.username, url)
+  private def url(url: URI) = ExtendedURLClient.resolve(JSVariables.username, url)
 
   private def removePhoto(photo: URI)(implicit props: Props): Callback =
     props.photos.modState(_.filterNot(_ == photo))
@@ -38,7 +38,7 @@ object PhotosEditor {
       div(
         if (props.photos.value.nonEmpty) {
           val images = for (photo <- props.photos.value)
-            yield span(img(src := url(photo)),
+            yield span(img(src := url(photo).toString),
               button("X", onClick --> removePhoto(photo)))
           div(className := "item-photos")(images: _*)
         } else

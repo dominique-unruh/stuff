@@ -10,7 +10,7 @@ import japgolly.scalajs.react.callback.{Callback, CallbackTo}
 import japgolly.scalajs.react.component.Scala.{BackendScope, Component}
 import japgolly.scalajs.react.component.builder.Lifecycle.ShouldComponentUpdate
 import japgolly.scalajs.react.extra.router.SetRouteVia.{HistoryPush, HistoryReplace}
-import japgolly.scalajs.react.extra.router.{BaseUrl, ResolutionWithProps, Router, RouterConfigDsl, RouterWithProps, RouterWithPropsConfig, RouterWithPropsConfigDsl, SetRouteVia}
+import japgolly.scalajs.react.extra.router.{BaseUrl, Path, ResolutionWithProps, Router, RouterConfigDsl, RouterWithProps, RouterWithPropsConfig, RouterWithPropsConfigDsl, SetRouteVia}
 import japgolly.scalajs.react.vdom.Attr.ValueType
 import japgolly.scalajs.react.vdom.all.{button, div, h1, key, onClick, style, untypedRef}
 import org.scalajs.dom.{console, document, html, window}
@@ -21,6 +21,7 @@ import monocle.macros.Lenses
 import org.log4s
 import org.scalajs.dom.html.Div
 
+import java.net.URI
 import scala.collection.immutable
 import scala.scalajs.js
 import scala.scalajs.js.URIUtils.{decodeURIComponent, encodeURIComponent}
@@ -210,10 +211,11 @@ object AppMain {
       StatePreservingRouter.routerRender(res.page,
         CallbackTo { res.renderP(true) }, CallbackTo { res.renderP(false) }) }
 
+  private val baseUrl = BaseUrl.until_#
+
   @JSExportTopLevel("appMain")
   def appMain(): Unit = {
     val root = document.getElementById("react-root")
-    val baseUrl = BaseUrl.until_#
     val router = RouterWithProps(baseUrl, routerConfig).withProps(true)()
     val snackbarProvider = SnackbarProvider()(router, untypedRef := snackbarProviderRef.asInstanceOf[Ref.Simple[html.Element]])
     snackbarProvider.renderIntoDOM(root)
@@ -230,5 +232,20 @@ object AppMain {
     val root = document.getElementById("react-root")
     snackbarProvider.renderIntoDOM(root)
 //    HTMLViewer().renderIntoDOM(root)
+  }
+
+  def urlToPage(url: String): Option[Page] = {
+    if (!url.startsWith(baseUrl.value))
+      None
+    else {
+      val path = Path(url.stripPrefix(baseUrl.value))
+      val parsed = routerConfig.rules.parse(path).runNow()
+      parsed.map(Some(_)).getOrElse(None)
+    }
+  }
+
+  def pageToUrl(page: Page): URI = {
+    val path = routerConfig.rules.path(page)
+    new URI(path.abs(baseUrl).value)
   }
 }

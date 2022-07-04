@@ -34,6 +34,7 @@ object Utils extends UtilsJSJVMSpecific {
 //  private val jsjvmSpecific : UtilsJSJVMSpecific =
 //    getClass.getClassLoader.loadClass("de.unruh.stuff.shared.UtilsImpl").asInstanceOf[UtilsJSJVMSpecific]
 
+  @inline
   override def encodeURIComponent(str: String): String =
     UtilsJSJVMSpecificImpl.encodeURIComponent(str)
 }

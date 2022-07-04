@@ -29,7 +29,7 @@ object ItemListItem {
     div(onClick --> props.onClick(props.itemId), className := "item-list-item")(
       // Photo (if exists)
       if (item.photos.nonEmpty)
-        img(all.src := ExtendedURL.resolve(JSVariables.username, item.photos.head), className := "item-photo")
+        img(all.src := ExtendedURLClient.resolve(JSVariables.username, item.photos.head).toString, className := "item-photo")
       else
         div(className := "item-photo-none"),
 

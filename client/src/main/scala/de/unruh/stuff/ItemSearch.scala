@@ -10,7 +10,7 @@ import japgolly.scalajs.react.component.builder.Lifecycle
 import japgolly.scalajs.react.component.builder.Lifecycle.RenderScope
 import japgolly.scalajs.react.util.DefaultEffects
 import japgolly.scalajs.react.vdom.{TagMod, VdomElement, VdomNode, all}
-import japgolly.scalajs.react.vdom.all.{autoFocus, button, className, div, h1, onChange, onClick, placeholder, value}
+import japgolly.scalajs.react.vdom.all.{autoFocus, button, className, div, h1, onChange, onClick, p, placeholder, value}
 import japgolly.scalajs.react.vdom.Implicits._
 import japgolly.scalajs.react.{AsyncCallback, BackendScope, CtorType, React, ReactFormEventFromInput, ScalaComponent}
 import org.log4s

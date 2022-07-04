@@ -20,6 +20,7 @@ import java.net.URI
 import scala.util.{Failure, Success}
 import japgolly.scalajs.react.vdom.Implicits._
 import monocle.Lens
+import org.log4s
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
@@ -29,7 +30,10 @@ object ItemEditor {
   private type RS = Lifecycle.RenderScope[Props, State, Unit]
   case class Props(initialItem: Item, onSave: Item => Callback, onCancel: Callback)
 
-  @Lenses case class State(editedItem: Item)
+  @Lenses case class State(/** Contains the current editing status.
+                            The [[Item.description]] is processed to contain browser-understandable links
+                            instead of extended item URLs. */
+                            editedItem: Item)
 
   def apply(props: Props): Unmounted[Props, State, Unit] = Component(props)
 
@@ -45,8 +49,10 @@ object ItemEditor {
   private def zoomL[A](lens: Lens[State, A]) = StateSnapshot.zoom(lens.get)(lens.replace)
 
   /** Converts an URL into an extended URL */
-  private def url(url: URI) : URI =
+  private def extendedUrl(url: URI) : URI =
     ExtendedURLClient.externalize(JSVariables.username, url)
+  private def browserUrl(url: URI) : URI =
+    ExtendedURLClient.resolve(JSVariables.username, url)
 
   /** Saves the edited item, notifies the user, and calls `props.onSave`. */
   private def save(implicit $: RS): AsyncCallback[Unit] = {
@@ -54,7 +60,7 @@ object ItemEditor {
     val props = $.props
     val processedItem =
       Item.description.andThen(RichText.htmlLens)
-      .modify(html => ProcessHtml.mapUrls(html, url))
+      .modify(html => ProcessHtml.mapUrls(html, extendedUrl))
       .apply(state.editedItem)
     for (result <- DbCache.updateOrCreateItemReact(processedItem).attemptTry;
          _ <- result match {
@@ -125,9 +131,21 @@ object ItemEditor {
     )
   }
 
+  def initialState(props: Props): State = {
+    val processedItem =
+      Item.description.andThen(RichText.htmlLens)
+        .modify(html => ProcessHtml.mapUrls(html, browserUrl))
+        .apply(props.initialItem)
+    logger.debug(props.initialItem.description.asHtml)
+    logger.debug(processedItem.description.asHtml)
+    State(editedItem = processedItem)
+  }
+
+  private val logger = log4s.getLogger
+
   val Component: Component[Props, State, Unit, CtorType.Props] =
     ScalaComponent.builder[Props]
-      .initialStateFromProps(props => State(editedItem = props.initialItem))
+      .initialStateFromProps(initialState)
       .render(render(_))
       .build
 }

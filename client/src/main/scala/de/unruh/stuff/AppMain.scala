@@ -234,13 +234,18 @@ object AppMain {
 //    HTMLViewer().renderIntoDOM(root)
   }
 
+  private val logger = log4s.getLogger
+
   def urlToPage(url: String): Option[Page] = {
+    logger.debug(s"${baseUrl.value} $url")
     if (!url.startsWith(baseUrl.value))
       None
     else {
       val path = Path(url.stripPrefix(baseUrl.value))
       val parsed = routerConfig.rules.parse(path).runNow()
-      parsed.map(Some(_)).getOrElse(None)
+      val result = parsed.map(Some(_)).getOrElse(None)
+      logger.debug(s"Result: $result")
+      result
     }
   }
 

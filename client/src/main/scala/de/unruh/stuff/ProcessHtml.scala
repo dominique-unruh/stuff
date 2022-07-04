@@ -20,7 +20,6 @@ object ProcessHtml {
 
   /** Warning: modified the `element` tree in place */
   def mapUrlsDom(element: Element, f: URI => URI): Unit = {
-    console.log(s"Entering: $element")
     element match {
       case anchor: HTMLAnchorElement =>
         val href = anchor.href

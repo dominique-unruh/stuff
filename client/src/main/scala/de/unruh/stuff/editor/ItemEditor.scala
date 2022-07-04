@@ -40,14 +40,23 @@ object ItemEditor {
   private val itemCodes = State.editedItem.andThen(Item.codes)
   private val itemDescription = State.editedItem.andThen(Item.description)
   private val itemPhotos = State.editedItem.andThen(Item.photos)
+  private val itemDescriptionHtml = itemDescription.andThen(RichText.htmlLens)
 
   private def zoomL[A](lens: Lens[State, A]) = StateSnapshot.zoom(lens.get)(lens.replace)
+
+  /** Converts an URL into an extended URL */
+  private def url(url: URI) : URI =
+    ExtendedURLClient.externalize(JSVariables.username, url)
 
   /** Saves the edited item, notifies the user, and calls `props.onSave`. */
   private def save(implicit $: RS): AsyncCallback[Unit] = {
     val state = $.state
     val props = $.props
-    for (result <- DbCache.updateOrCreateItemReact(state.editedItem).attemptTry;
+    val processedItem =
+      Item.description.andThen(RichText.htmlLens)
+      .modify(html => ProcessHtml.mapUrls(html, url))
+      .apply(state.editedItem)
+    for (result <- DbCache.updateOrCreateItemReact(processedItem).attemptTry;
          _ <- result match {
            case Success((id, time)) =>
              for (item <- AsyncCallback.fromFuture(DbCache.getItem(id, time)); // Important to use the id returned from server. It might be fresh if we edited a new item

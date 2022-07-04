@@ -2,6 +2,7 @@ package de.unruh.stuff.shared
 
 import de.unruh.stuff.shared.Code.urlRegex
 import de.unruh.stuff.shared.Item.{INVALID_ID, Id, newID}
+import monocle.Lens
 import monocle.macros.Lenses
 import org.apache.commons.text.StringEscapeUtils
 import org.log4s
@@ -26,6 +27,7 @@ object RichText {
   def html(html: String): RichText = new RichText(html)
   implicit val rw: upickle.default.ReadWriter[RichText] =
     upickle.default.readwriter[String].bimap[RichText](_.asHtml, RichText.html)
+  val htmlLens : Lens[RichText, String] = Lens[RichText, String](_.asHtml)(html => _ => this.html(html))
 }
 
 case class Code(format: Option[String], content: String) {

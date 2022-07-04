@@ -34,7 +34,8 @@ Each item has a corresponding item file `id.yaml` in `items/` where `id` is the 
 The content of the file is YAML with the following supported tags:
 * `id` (integer, mandatory): The id of the item (`item.id`)
 * `name` (string, mandatory): The name of the item as plain text (`item.name`)
-* `description` (string, optional): The description of the item as HTML
+* `description` (string, optional): The description of the item as HTML.
+  The description can contain extended item URLs (see below) but not extended file URLs.
 * `photos` (list of URLs, optional): The photos of the item (first one is the main photo) (`item.photos`)
   * Each entry is an extended URL (see below).
   * If the URL is local (see below), it must reference to an existing file in the `files/` directory with the right id.

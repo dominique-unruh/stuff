@@ -12,6 +12,7 @@ import scala.util.Random
 import japgolly.scalajs.react.vdom.Implicits._
 import org.log4s
 
+// TODO: If opening camera fails, report to user
 object QrCode {
   /** onDetect: (format, content) */
   // TODO class does not reinitialize when MediaTrackConstraints change. Should it?

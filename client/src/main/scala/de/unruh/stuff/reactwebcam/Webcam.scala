@@ -1,10 +1,10 @@
 package de.unruh.stuff.reactwebcam
 
 import io.kinoplan.scalajs.react.bridge.{ReactBridgeComponent, WithPropsNoChildren}
-import org.scalajs.dom.MediaTrackConstraints
+import org.scalajs.dom.{DOMException, MediaTrackConstraints}
 
 import scala.scalajs.js
-import scala.scalajs.js.UndefOr
+import scala.scalajs.js.{UndefOr, |}
 import scala.scalajs.js.annotation.JSImport
 
 trait Webcam extends js.Object {
@@ -15,6 +15,7 @@ trait Webcam extends js.Object {
 object Webcam extends ReactBridgeComponent {
   def apply(audio: UndefOr[Boolean] = js.undefined,
             videoConstraints: UndefOr[MediaTrackConstraints] = js.undefined,
+            onUserMediaError: UndefOr[js.Function1[String | DOMException, Unit]],
             screenshotFormat: UndefOr[String] = js.undefined): WithPropsNoChildren = autoNoChildren
 
   @js.native

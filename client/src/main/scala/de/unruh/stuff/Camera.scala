@@ -9,16 +9,12 @@ import japgolly.scalajs.react.component.Scala.{Component, Unmounted}
 import japgolly.scalajs.react.vdom.all.{h1, onClick, untypedRef}
 import japgolly.scalajs.react.vdom.Implicits._
 import japgolly.scalajs.react.vdom.VdomElement
-import org.scalajs.dom.{MediaStreamConstraints, MediaTrackConstraints, console, html}
+import org.scalajs.dom.{DOMException, MediaStreamConstraints, MediaTrackConstraints, console, html}
 
 import scala.scalajs.js
 import scala.scalajs.js.{Thenable, UndefOr, |}
 import scala.scalajs.js.annotation.{JSGlobal, JSImport}
 
-
-
-
-// TODO: If opening camera fails, report to user
 object Camera {
   case class Props(onPhoto: String => AsyncCallback[Unit])
   type State = Unit
@@ -37,10 +33,17 @@ object Camera {
            _ <- props.onPhoto(image))
         yield ()
 
+    def error(error: String | DOMException): Unit = {
+      console.error("Failed to open camera", error)
+      AppMain.errorMessage(s"Could not open camera").runNow()
+    }
+
     def render(props: Props): VdomElement = (
       // https://mui.com/material-ui/react-dialog/
         Webcam(audio=false, screenshotFormat = "image/jpeg",
-          videoConstraints = new MediaTrackConstraints { facingMode = "environment"; aspectRatio = 1 })
+          videoConstraints = new MediaTrackConstraints { facingMode = "environment"; aspectRatio = 1 },
+          onUserMediaError = error _ : js.Function1[String | DOMException, Unit]
+        )
         (untypedRef := webcamRef.asInstanceOf[Ref.Simple[html.Element]], // Not sure how to do this without this untrue cast...
           onClick --> clickHandler)
       )

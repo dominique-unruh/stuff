@@ -64,7 +64,6 @@ object ItemViewer {
     onAction = setLocation _,
     button = { (put: Callback) => button("Put", onClick --> put): VdomElement },
     modal = { (action: Item.Id => AsyncCallback[Unit]) =>
-      // TODO: in search results, show prevLocation first
       ItemSearch(visible = true,
         onCreate = None,
         onSelectItem = action,

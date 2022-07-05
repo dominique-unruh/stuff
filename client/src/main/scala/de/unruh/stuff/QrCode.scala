@@ -7,12 +7,11 @@ import japgolly.scalajs.react.{AsyncCallback, BackendScope, Callback, ScalaCompo
 import org.scalajs.dom.{MediaStreamConstraints, MediaTrackConstraintSet, MediaTrackConstraints, console}
 
 import scala.scalajs.js
-import scala.scalajs.js.{UndefOr, |}
+import scala.scalajs.js.{Thenable, UndefOr, |}
 import scala.util.Random
 import japgolly.scalajs.react.vdom.Implicits._
 import org.log4s
 
-// TODO: If opening camera fails, report to user
 object QrCode {
   /** onDetect: (format, content) */
   // TODO class does not reinitialize when MediaTrackConstraints change. Should it?
@@ -67,15 +66,23 @@ object QrCode {
           ()
         }
 
-    private def decodingStarted(): Unit = {
+    private def decodingStarted(unit: Unit): Unit | scala.scalajs.js.Thenable[Unit] = {
       updateFlashLight.runNow()
     }
 
+    private def initializationFailed(error: Any): Unit | scala.scalajs.js.Thenable[Unit] = {
+      console.log("Failed to initialize QR code camera", error)
+      AppMain.errorMessage("Failed to initialize QR code camera").runNow()
+    }
+
     private def startScanning(props: Props, state: State) : Unit = {
-      state.scanner.decodeFromConstraints(
+      val promise = state.scanner.decodeFromConstraints(
         constraints = new MediaStreamConstraints { video = props.constraints },
         videoId, callback(props))
-        .`then`( { _:Unit => decodingStarted() : Unit | scala.scalajs.js.Thenable[Unit] }, js.undefined)
+
+      promise.`then`[Unit](
+        decodingStarted _ : js.Function1[Unit, Unit | Thenable[Unit]],
+        initializationFailed _ : js.Function1[Any, Unit | Thenable[Unit]])
     }
 
     private def stopScanning(props: Props, state: State) : Unit = {

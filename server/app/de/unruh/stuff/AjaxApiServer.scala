@@ -72,18 +72,18 @@ class AjaxApiImpl(user: String)(implicit config: Config) extends AjaxApi {
     val db = getDb
     val item = db.getOrElse(id, throw new IllegalArgumentException(s"Unknown item id $id"))
       .clearLocation
-      .updateLastModified
-    setDb(db.updated(id, item))
-    item.lastModified
+    val item2 = YamlDb.updateItem(user, item)
+    setDb(db.updated(id, item2))
+    item2.lastModified
   }
 
   override def setLocation(id: Id, locationId: Id): Id = synchronized {
     val db = getDb
     val item = db.getOrElse(id, throw new IllegalArgumentException(s"Unknown item id $id"))
       .setLocation(locationId)
-      .updateLastModified
-    setDb(db.updated(id, item))
-    item.lastModified
+    val item2 = YamlDb.updateItem(user, item)
+    setDb(db.updated(id, item2))
+    item2.lastModified
   }
 }
 

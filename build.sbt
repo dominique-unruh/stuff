@@ -1,5 +1,12 @@
 import sbt.Compile
 
+/* TODO: Try updating Play version (and other version).
+The following two issues are hopefully fixed then:
+https://github.com/sbt/sbt/issues/6997#issue-1332853454
+https://github.com/akka/akka/issues/29922
+*/
+
+
 ThisBuild / organization := "de.unruh"
 ThisBuild / scalaVersion := "2.13.8"
 ThisBuild / version      := "0.1.0-SNAPSHOT"

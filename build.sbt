@@ -6,6 +6,8 @@ https://github.com/sbt/sbt/issues/6997#issue-1332853454
 https://github.com/akka/akka/issues/29922
 */
 
+// Upon error involving 'ERR_OSSL_EVP_UNSUPPORTED' and webpage, run sbt via:
+// NODE_OPTIONS=--openssl-legacy-provider sbt test
 
 ThisBuild / organization := "de.unruh"
 ThisBuild / scalaVersion := "2.13.8"

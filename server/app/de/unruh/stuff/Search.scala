@@ -17,6 +17,8 @@ object Search {
   private def processSearchTerm(searchTerm: String, finished: Boolean): SearchSpec = {
     if (searchTerm.startsWith("code:"))
       SearchSpecCode(Code(URLDecoder.decode(searchTerm.stripPrefix("code:"), "utf-8")))
+    else if (searchTerm.startsWith("location:"))
+      SearchSpecLocation(searchTerm.stripPrefix("location:").toLong)
     else
       SearchSpecWord(searchTerm, !finished)
   }
@@ -51,5 +53,10 @@ object Search {
   case class SearchSpecCode(code: Code) extends SearchSpec {
     override def doesMatch(item: Item): Boolean =
       item.codes.exists(code.matches)
+  }
+
+  case class SearchSpecLocation(id: Item.Id) extends SearchSpec {
+    override def doesMatch(item: Item): Boolean =
+      item.location.contains(id)
   }
 }

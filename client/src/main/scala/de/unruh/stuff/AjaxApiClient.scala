@@ -21,7 +21,7 @@ object AjaxApiClient extends autowire.Client[ujson.Value, upickle.default.Reader
     val request = new RequestInit {
       method = HttpMethod.POST
       headers = header
-      body = ujson.Obj(mutable.LinkedHashMap.from(req.args)).render()
+      body = ujson.Obj(upickle.core.LinkedHashMap.apply(req.args)).render()
     }
     val url = "/api/" + req.path.mkString("/")
     for (response <- dom.fetch(url, request);

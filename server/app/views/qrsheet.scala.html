@@ -19,7 +19,7 @@
 
         @if(formData.template.nonEmpty) {
             @if(formData.template.get.contains("XXX")) {
-                assert(formData.countDefault <= QrSheet.maxCount)
+                @assert(formData.countDefault <= QrSheet.maxCount)
                 @for(i <- 1 to formData.countDefault) {
                     <img class="qrsheet-image"
                     src="@routes.Application.qrCode(QrSheet.instantiateTemplate(formData.templateDefault), formData.sizeDefault)"

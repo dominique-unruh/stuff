@@ -9,4 +9,6 @@ object JSVariables {
   val csrf_token : String = js.native
   @js.native @JSGlobal("stuff_username")
   val username : String = js.native
+  @js.native @JSGlobal("stuff_url_path_prefix")
+  val url_path_prefix: String = js.native
 }

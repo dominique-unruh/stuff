@@ -1,0 +1,116 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: personal-unruh-stuff
+spec:
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOncePod
+  storageClassName: local-storage
+  local:
+    path: /var/mnt/local-persistent/personal/unruh/stuff
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values: [centroid]
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: stuff
+  namespace: personal-unruh
+spec:
+  accessModes:
+    - ReadWriteOncePod
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: local-storage
+  volumeName: personal-unruh-stuff
+  
+---
+
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: stuff
+  namespace: personal-unruh
+  labels:
+    app: stuff
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stuff
+  template:
+    metadata:
+      labels:
+        app: stuff
+    spec:
+      runtimeClassName: kata
+      containers:
+      - name: stuff
+        image: registry.git.rwth-aachen.de/unruh/qis-server/unruh-stuff
+        envFrom:
+          - secretRef: {name: stuff-secrets}
+        volumeMounts:
+        - name: stuff
+          mountPath: /opt/stuff-db
+          readOnly: false
+      imagePullSecrets:
+        - name: credentials-registry-git-rwth-unruh-qis-server
+      volumes:
+      - name: stuff
+        persistentVolumeClaim: {claimName: stuff}
+        
+---
+
+Create secret stuff-secrets in namespace personal-unruh with APPLICATION_SECRET = random value
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: stuff
+  namespace: personal-unruh
+spec:
+  type: ClusterIP
+  selector:
+    app: stuff
+  ports:
+    - protocol: TCP
+      port: 9000
+      targetPort: 9000
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: stuff
+  namespace: personal-unruh
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /people/unruh/stuff/
+#    nginx.ingress.kubernetes.io/x-forwarded-prefix: "/people/unruh/stuff"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host:  "centroid.qis.rwth-aachen.de"
+      http:
+        paths:
+          - path: /people/unruh/stuff/  # Without the / the suffix is not passed on to the service
+            pathType: Prefix
+            backend:
+              service:
+                name: stuff
+                port:
+                  number: 9000

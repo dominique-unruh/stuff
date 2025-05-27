@@ -1,10 +1,13 @@
 @import views.html.helper.CSRF
 @import play.twirl.api.utils.StringEscapeUtils.escapeEcmaScript
-@(username: String)(implicit requestHeader: RequestHeader)
+@import de.unruh.stuff.Config
+@(username: String)(implicit requestHeader: RequestHeader, config: Config)
 
 @header = {
     <script>let stuff_csrf_token = "@CSRF.getToken.value";
-    let stuff_username = "@escapeEcmaScript(username)"</script>
+    let stuff_username = "@escapeEcmaScript(username)"
+    let stuff_url_path_prefix = "@escapeEcmaScript(config.applicationContext)"
+    </script>
 }
 
 @main(header = header,

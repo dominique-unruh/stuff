@@ -23,7 +23,7 @@ object AjaxApiClient extends autowire.Client[ujson.Value, upickle.default.Reader
       headers = header
       body = ujson.Obj(upickle.core.LinkedHashMap.apply(req.args)).render()
     }
-    val url = "/api/" + req.path.mkString("/")
+    val url = JSVariables.url_path_prefix + "/api/" + req.path.mkString("/")
     for (response <- dom.fetch(url, request);
          _ = if (!response.ok) throw new IOException(s"Ajax call failed ($url): ${response.statusText}");
          text <- response.text)

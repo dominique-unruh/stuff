@@ -20,3 +20,4 @@ docker_try : docker_build
 docker_deploy : docker_build
 	docker login registry.git.rwth-aachen.de
 	docker push "$(DOCKER_TAG)"
+	kubectl -n personal-unruh delete pod -l app=stuff

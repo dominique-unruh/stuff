@@ -104,7 +104,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host:  "centroid.qis.rwth-aachen.de"
+    - host:  "qis.rwth-aachen.de"
       http:
         paths:
           - path: /people/unruh/stuff/  # Without the / the suffix is not passed on to the service

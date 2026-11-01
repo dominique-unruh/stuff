@@ -30,7 +30,7 @@ object OptionsObject {
 }
 
 trait SnackbarProvider extends js.Object {
-  def handleEnqueueSnackbar(message: String, options: UndefOr[OptionsObject]): Unit
+  def enqueueSnackbar(message: String, options: UndefOr[OptionsObject]): Unit
 }
 
 object SnackbarProvider extends ReactBridgeComponent {
@@ -38,7 +38,7 @@ object SnackbarProvider extends ReactBridgeComponent {
 
 //  override protected lazy val componentNamespace: String = "notistack"
   @js.native
-  @JSImport("notistack")
+  @JSImport("notistack", "SnackbarProvider")
   private object SnackbarProvider extends js.Object
 
   override protected lazy val componentValue: js.Any = SnackbarProvider

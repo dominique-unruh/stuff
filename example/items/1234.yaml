@@ -4,4 +4,5 @@ description: A pair of roller skates from my <i>favorite</i> grandparent.
 photos:
   - localstuff:1234/test.jpg
   - https://p2.piqsels.com/preview/569/73/110/roller-skates-rollerblades-roll-skates-roller-skates.jpg
-codes: [419246128734234]
+codes: ["EAN_13:419246128734234"]
+lastmodified: 1700000000

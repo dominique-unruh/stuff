@@ -4,7 +4,7 @@ DOCKER_TAG = registry.git.rwth-aachen.de/unruh/qis-server/unruh-stuff
 
 docker_build : Dockerfile
 	rm -rf "server/target/universal/$(DIST_NAME).zip" tmp  # Removing the ZIP to ensure that we don't get a stale copy due to a wrong DIST_NAME
-	sbt --java-home /usr/lib/jvm/java-11-openjdk dist
+	sbt --java-home /usr/lib/jvm/java-21-openjdk dist
 	mkdir -p tmp/unzip
 	cd tmp/unzip && unzip "../../server/target/universal/$(DIST_NAME).zip"
 	mv "tmp/unzip/$(DIST_NAME)" tmp/server

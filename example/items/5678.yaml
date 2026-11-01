@@ -1,7 +1,6 @@
 id: 5678
-codes: [4029811454938] # A valid EAN
 name: Rubber duck (rainbow)
-photos:
-  - https://shop.ootb.de/images/large/__40564.png
-links:
-  - https://www.barcodelookup.com/4029811454938
+description: See <a href="https://www.barcodelookup.com/4029811454938">barcodelookup.com</a>.
+codes: ["EAN_13:4029811454938"] # A valid EAN
+lastmodified: 1700000001
+location: 1234

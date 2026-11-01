@@ -51,10 +51,12 @@ The content of the file is YAML with the following supported tags:
   Additional attached files (e.g., manuals).
   * Each string must be a local URL referencing an existing file in the `files/` directory with the right id.
 * `lastaccessed` (integer, optional, not implemented): Time of last access (last opened in full screen view), in seconds since epoch
-* `lastmodified` (integer, optional): Time of last modification, in seconds since epoch.
+* `lastmodified` (integer, mandatory): Time of last modification, in seconds since epoch.
   Does not include automatic modifications such as, e.g., setting `lastaccessed`.
-* `location` (integer, optional, not implemented): Id of an existing item that contains this item. 
-* `prevlocation` (integer, optional, not implemented): Previous value of `location` (for UI suggestions when setting `location`). 
+* `location` (integer, optional): Id of an existing item that contains this item. 
+* `prevlocation` (integer, optional): Previous value of `location` (for UI suggestions when setting `location`). 
+
+Any other field is rejected when loading.
 
 For all fields that are lists of something (e.g., `photos`, `links`), empty lists are disallowed.
 (But the whole field can be omitted if it is optional.)

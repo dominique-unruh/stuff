@@ -2,7 +2,7 @@ package de.unruh.stuff
 
 import org.scalajs.dom
 import org.scalajs.dom.{BodyInit, Headers, HttpMethod, RequestInit, Response, console, webcrypto}
-import ujson.{Js, Value}
+import ujson.Value
 
 import java.io.IOException
 import scala.collection.mutable

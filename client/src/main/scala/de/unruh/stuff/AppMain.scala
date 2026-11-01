@@ -118,17 +118,17 @@ object AppMain {
 
   def successMessage(message: String): Callback =
     for (snackbarProvider <- getSnackbarProvider)
-      yield snackbarProvider.handleEnqueueSnackbar(message, OptionsObject(variant=VariantType.success))
+      yield snackbarProvider.enqueueSnackbar(message, OptionsObject(variant=VariantType.success))
 
   def errorMessage(message: String, exception: Throwable): Callback =
     for (_ <- Callback { console.error(message, exception) };
          snackbarProvider <- getSnackbarProvider)
-      yield snackbarProvider.handleEnqueueSnackbar(message, OptionsObject(variant=VariantType.error))
+      yield snackbarProvider.enqueueSnackbar(message, OptionsObject(variant=VariantType.error))
 
   def errorMessage(message: String): Callback =
     for (_ <- Callback { console.error(message) };
          snackbarProvider <- getSnackbarProvider)
-    yield snackbarProvider.handleEnqueueSnackbar(message, OptionsObject(variant=VariantType.error))
+    yield snackbarProvider.enqueueSnackbar(message, OptionsObject(variant=VariantType.error))
 
   sealed trait Page
   case object Search extends Page
@@ -226,7 +226,7 @@ object AppMain {
     val snackbarProviderRef = Ref[SnackbarProvider]
     val app : VdomElement = button("Test", onClick --> Callback {
       val sp: SnackbarProvider = snackbarProviderRef.get.runNow().get
-      sp.handleEnqueueSnackbar("Hello", OptionsObject(variant = VariantType.error))
+      sp.enqueueSnackbar("Hello", OptionsObject(variant = VariantType.error))
     })
     val snackbarProvider = SnackbarProvider()(app, untypedRef := snackbarProviderRef.asInstanceOf[Ref.Simple[html.Element]])
     val root = document.getElementById("react-root")

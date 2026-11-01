@@ -4,7 +4,7 @@ import de.unruh.stuff.reactsimplewysiwyg.DefaultEditor
 import de.unruh.stuff.shared.{Code, Item, RichText}
 import de.unruh.stuff._
 import de.unruh.stuff.editor.ItemEditor.itemCodes
-import io.kinoplan.scalajs.react.material.ui.core.MuiInput
+import de.unruh.stuff.mui.MuiInput
 import japgolly.scalajs.react.callback.AsyncCallback
 import japgolly.scalajs.react.component.Scala.{Component, Unmounted}
 import japgolly.scalajs.react.component.builder.Lifecycle

@@ -3,7 +3,7 @@ package de.unruh.stuff
 import autowire.clientCallable
 import de.unruh.stuff.shared.Item.Id
 import de.unruh.stuff.shared.{AjaxApi, Code, Item, Utils}
-import io.kinoplan.scalajs.react.material.ui.core.MuiInput
+import de.unruh.stuff.mui.MuiInput
 import japgolly.scalajs.react.callback.Callback
 import japgolly.scalajs.react.component.Scala.{Component, Unmounted}
 import japgolly.scalajs.react.component.builder.Lifecycle

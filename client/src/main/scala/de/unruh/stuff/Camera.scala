@@ -2,7 +2,6 @@ package de.unruh.stuff
 
 import de.unruh.stuff.reactwebcam.Webcam
 import io.kinoplan.scalajs.react.bridge.{ReactBridgeComponent, WithProps, WithPropsNoChildren}
-import io.kinoplan.scalajs.react.material.ui.core.{Handler1, MuiDialog, ReactHandler1, ReactHandler2}
 import japgolly.scalajs.react.{BackendScope, CtorType, ReactEvent, Ref, ScalaComponent}
 import japgolly.scalajs.react.callback.{AsyncCallback, Callback}
 import japgolly.scalajs.react.component.Scala.{Component, Unmounted}

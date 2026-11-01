@@ -69,20 +69,20 @@ lazy val client = project
     libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.6.0",
     libraryDependencies += "com.github.japgolly.scalajs-react" %%% "core" % "2.1.1",
     libraryDependencies += "com.github.japgolly.scalajs-react" %%% "extra" % "2.1.1",
-    libraryDependencies += "io.kinoplan" %%% "scalajs-react-material-ui-core"  % "0.3.1",
+    // Only the bridge, the MUI facades are in de.unruh.stuff.mui
+    libraryDependencies += "io.kinoplan" %%% "scalajs-react-bridge"  % "0.3.1",
     scalacOptions += "-Ymacro-annotations",
     Compile / npmDependencies  ++= Seq(
       "react" -> "17.0.2",
       "react-dom" -> "17.0.2",
-      "@material-ui/core"  -> "4.12.4",
+      "@mui/material"  -> "9.5.0",
+      "@emotion/react"  -> "11.14.0",
+      "@emotion/styled"  -> "11.14.1",
       "@zxing/library" -> "0.20.0",
       "react-simple-wysiwyg" -> "2.2.5",
       "react-webcam" -> "7.1.1",
-      "notistack" -> "1.0.10",
+      "notistack" -> "3.0.2",
     ),
-    // scalajs-react-material-ui-core declares @material-ui/core 3.9.4 itself (vulnerable)
-    Compile / npmResolutions := Map("@material-ui/core" -> "4.12.4"),
-    Test / npmResolutions := (Compile / npmResolutions).value,
     Compile / npmExtraArgs += "--legacy-peer-deps",
     // scalajs-bundler defaults are old versions with known vulnerabilities (build-time only)
     webpack / version := "5.112.2",

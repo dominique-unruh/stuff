@@ -3,7 +3,6 @@ package de.unruh.stuff
 import de.unruh.stuff.editor.ItemEditor
 import de.unruh.stuff.notistack.{OptionsObject, SnackbarProvider, VariantType}
 import de.unruh.stuff.shared.{Code, Item, Utils}
-import io.kinoplan.scalajs.react.material.ui.core.MuiInput
 import japgolly.scalajs.react.Ref.Simple
 import japgolly.scalajs.react.{CtorType, Ref, ScalaComponent}
 import japgolly.scalajs.react.callback.{Callback, CallbackTo}
